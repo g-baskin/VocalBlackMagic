@@ -1,0 +1,1 @@
+"""TTB Studio application."""

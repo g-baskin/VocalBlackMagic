@@ -1,0 +1,24 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"/><meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>Vocal Fix | Vocal Black Magic</title>
+<style>
+:root{font-family:Inter,system-ui,-apple-system,sans-serif;background:#f5f3f0;color:#202221}*{box-sizing:border-box}body{margin:0}header{background:#151c1b;color:white;padding:24px max(5%,calc((100vw - 1100px)/2))}nav{display:flex;justify-content:space-between;gap:24px;align-items:center}a{color:inherit}.brand{letter-spacing:.15em;font-size:12px;font-weight:800;text-transform:uppercase}main{max-width:960px;margin:60px auto;padding:0 24px}h1{font-family:Georgia,serif;font-size:clamp(40px,6vw,68px);letter-spacing:-.045em;margin:15px 0}p{line-height:1.65;color:#555e5a}.eyebrow{color:#8c5134;text-transform:uppercase;font-size:12px;letter-spacing:.16em;font-weight:bold}.panel{background:white;padding:32px;border:1px solid #deddd8;border-radius:12px;margin:28px 0}.grid{display:grid;grid-template-columns:1fr 1fr;gap:24px}label{font-weight:650;font-size:14px;display:block;margin:15px 0 8px}input[type=text],input[type=file]{width:100%;padding:12px;border:1px solid #adb4ae;border-radius:7px;font:inherit}button{background:#233c32;color:white;padding:14px 24px;border:0;border-radius:7px;font-weight:700;cursor:pointer}button:disabled{opacity:.5;cursor:not-allowed}.note{font-size:13px;color:#766f65}.status{white-space:pre-wrap;background:#edf0ed;border-radius:8px;padding:16px;font-family:ui-monospace,monospace;font-size:13px}ul{line-height:2;color:#38443f}@media(max-width:680px){.grid{grid-template-columns:1fr}main{margin:28px auto}.panel{padding:20px}}
+</style></head><body>
+<header><nav><div class="brand">Vocal Black Magic / Vocal Fix</div><a href="http://localhost:8002">TTB Studio ↗</a></nav></header>
+<main><div class="eyebrow">Independent application 01 / Audio restoration</div>
+<h1>Find the voice.<br/>Keep the character.</h1><p>Collect five authorized recordings as the starting point for a curated Gold Vocal. Processing and voice analysis are scheduled for a later implementation phase; this starter safely accepts and groups the source files for local development.</p>
+<div class="panel">
+<form id="upload">
+<div class="grid"><div><label for="owner">Authorized performer name</label><input id="owner" name="voice_owner" type="text" maxlength="120" required placeholder="Performer or your own voice"/></div><div><label for="files">Five recordings (25 MiB each maximum)</label><input id="files" name="files" type="file" multiple required accept=".wav,.mp3,.flac,.m4a,audio/*"/></div></div>
+<label style="font-weight:normal"><input id="rights" type="checkbox" required/> I confirm the performer authorized this use and I have rights to process these recordings.</label>
+<button id="submit" type="submit">Create reference session</button>
+</form><p class="note">Local development only. This app is not yet secured for internet deployment. No vocal separation, Gold Vocal or cloning is currently performed.</p>
+<div id="result" class="status" role="status" aria-live="polite">Ready for five recordings.</div>
+</div>
+<div class="grid"><section><h2>Coming next</h2><ul><li>Vocal isolation and restoration</li><li>Quality ranking and five-track comparison</li><li>Curated Gold Vocal WAV</li><li>Editable voice-character prompt</li></ul></section><section><h2>Source-first workflow</h2><ul><li>Raw tracks are never overwritten</li><li>Privacy and permission by design</li><li>Auditable Gold Vocal segment provenance</li><li>Delete local session data on request</li></ul></section></div>
+</main><script>
+const form=document.getElementById("upload"),out=document.getElementById("result"),btn=document.getElementById("submit");
+form.addEventListener("submit",async e=>{e.preventDefault();const files=document.getElementById("files").files;if(files.length!==5){out.textContent="Select exactly five recordings.";return}btn.disabled=true;out.textContent="Uploading five recordings…";
+const fd=new FormData();for(const file of files)fd.append("files",file);fd.append("voice_owner",document.getElementById("owner").value);fd.append("acknowledged_rights",String(document.getElementById("rights").checked));
+try{const res=await fetch("/api/references",{method:"POST",body:fd});const body=await res.json();out.textContent=res.ok?"Session created: "+body.session_id+"\nStatus: "+body.status+"\nGold Vocal is not generated yet.":JSON.stringify(body,null,2)}catch(e){out.textContent="Upload error: "+e.message}finally{btn.disabled=false}});
+</script></body></html>

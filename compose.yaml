@@ -1,0 +1,17 @@
+services:
+  vocal-fix:
+    build: .
+    command: ["uvicorn","apps.vocal_fix.app:app","--host","0.0.0.0","--port","8001"]
+    environment:
+      VFM_DATA_DIR: /app/data/vocal-fix
+    volumes:
+      - vocal_fix_data:/app/data
+    ports:
+      - "127.0.0.1:8001:8001"
+  ttb-studio:
+    build: .
+    command: ["uvicorn","apps.ttb_studio.app:app","--host","0.0.0.0","--port","8002"]
+    ports:
+      - "127.0.0.1:8002:8002"
+volumes:
+  vocal_fix_data:
