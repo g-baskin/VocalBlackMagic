@@ -13,7 +13,6 @@ Read `README.md`, `docs/SAAS_STACK.md`, `docs/ROADMAP.md`, `docs/RIGHTS_AND_SAFE
 - Do not fake job completion or fabricated waveforms; explicit 503/501 is preferable to a false success.
 
 ## First tasks, in sequence
-1. Run `bun install && bun run check && bun test packages && bun run build`, plus `python -m pytest -q`; repair CI before feature work. Commit generated `bun.lock` after verified install, then use frozen installs.
 2. Build authenticated identity/organization/session layer with secure ownership checks and private object storage. Use contracts in `packages/auth`, `packages/database`, `packages/billing`, replacing stubs only when integrated.
 3. Extract Python APIs to a stable audio-worker job interface with asynchronous job status, cancellation, idempotency and GPU limits. Keep workers private.
 4. Implement FFmpeg media probe, true audio validation and Demucs vocal separation. Add quality gates and source preservation.
@@ -21,15 +20,22 @@ Read `README.md`, `docs/SAAS_STACK.md`, `docs/ROADMAP.md`, `docs/RIGHTS_AND_SAFE
 6. Add ACE-Step generation adapter and actual verified media output; build optional Premium Studio effects on derived copies.
 7. Add alternate models, verified external V2 integration, comparisons and arrangement editor.
 
-## Developer commands
-```bash
-bun install
-bun run dev:vocal          # localhost:5173
-bun run dev:ttb            # localhost:5174
-bun run check
-bun test packages
-bun run build
-python -m pytest -q
-```
-
 Production-ready means **all** of: licensed model, verified output, user auth, tenant scopes, private asset access, recording consent audit trail, provider billing protections, GPU cost controls, and passing CI.
+
+<!-- gg:init:start -->
+## Implemented state
+Vocal Black Magic currently stores authorized vocal references and offers a music-request editor; it does not process vocals or generate songs.
+
+- Hyphenated app directories are SvelteKit/Bun frontends; underscored Python directories own local filesystem intake and unconfigured generation endpoints. Docker Compose runs only the Python prototypes, not the frontends.
+- `packages/auth`, `database` and `billing` are contracts, not integrated services. `assertAuthenticated` checks a supplied object; it does not establish a verified session.
+
+## Integration traps
+- Non-development Svelte reference and generation routes intentionally return 403. Production systemd units trigger this guard; changing NODE_ENV to bypass it does not supply authentication.
+- Successful upload means extension/size validation, not decoded audio validation: manifests retain `integrity_verified: false`. Python tests use synthetic bytes, so they cannot establish media quality.
+- Python processing returns 501 and generation returns 503 even for valid requests. Health endpoints report process health, not model readiness.
+- Python and TypeScript independently define generation validation. Python supplies defaults, but the Svelte bridge requires explicit numeric controls, premium boolean and null-or-string lyrics. Direct Python endpoint tests do not exercise that bridge.
+- `VFM_DATA_DIR` defaults relative to the Python process working directory. Changing cwd without an explicit data path makes existing sessions appear missing.
+- Sister-app URLs use build-time `VITE_VOCAL_FIX_URL` / `VITE_TTB_STUDIO_URL`; Python backend URLs use runtime `VOCAL_FIX_API_URL` / `TTB_STUDIO_API_URL`. Changing runtime environment alone will not repair links in an existing frontend build.
+- Keep the SvelteKit 3 `$app/tsconfig` inheritance and adapter configuration in Vite; the earlier `.svelte-kit/tsconfig.json` template was corrected in commit `4f1d435`.
+- Python tests need their own environment (CI uses Python 3.11), independently of Bun dependencies. `pytest.ini` supplies root imports; run `python -m pytest -q` from the repository root. These are contract tests, not GPU or browser tests.
+<!-- gg:init:end -->

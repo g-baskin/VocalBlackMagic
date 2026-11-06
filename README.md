@@ -2,38 +2,43 @@
 
 ![Vocal Black Magic: from a raw voice to a finished song](docs/assets/banner.png)
 
-**Two independently deployable SaaS applications, one lightweight Bun workspace.** Svelte 5 + SvelteKit 3 are the public-facing architecture; Python is retained for local audio prototypes and planned GPU processing.
+**Two apps, one purpose: help artists turn their own voice into original music.**
+
+Vocal Fix is the reference-intake side; TTB Studio is the song-planning side. The goal is an authorized vocal-to-song workflow that preserves the performance rather than replacing its character.
+
+> **Prototype, not a working generation platform.** Local reference upload and deletion work with the Python backend. Vocal cleanup, Gold Vocal assembly, voice conditioning, song generation and Premium Studio processing are not implemented. Authentication, tenant storage and billing are also pending.
 
 | Product | Location | Developer URL |
 | --- | --- | --- |
 | Vocal Fix | [apps/vocal-fix](apps/vocal-fix) | http://localhost:5173 |
 | TTB Studio | [apps/ttb-studio](apps/ttb-studio) | http://localhost:5174 |
 
-- **Vocal Fix**: exactly five authorized recordings, source intake, session deletion, future isolation/cleanup, Gold Vocal and descriptive voice-character profile.
-- **TTB Studio**: Suno-style beat/song creation workspace, ACE-Step / HeartMuLa / external V2 adapter slots, raw/vintage/live/clean styles, opt-in Premium Studio finishing. **TTB is a modular monolith**, not a sprawling service mesh.
-- **Shared packages**: `@vbm/contracts`, `@vbm/ui`, `@vbm/auth`, `@vbm/database`, `@vbm/billing`.
-- **Audio prototypes**: the existing Python APIs remain in `apps/vocal_fix` and `apps/ttb_studio`. The future GPU worker belongs under `services/audio-engine`.
+## What each app does
 
-## Start the SaaS without Docker
+- **Vocal Fix:** accepts exactly five recordings, a performer name and a rights attestation. It stores source files and a session manifest locally. Upload success is not proof of valid decoded audio or a finished Gold Vocal.
+- **TTB Studio:** lets you prepare prompts, lyrics, sound character and optional Premium Studio settings. ACE-Step, HeartMuLa and external V2 are unconfigured adapter choices, not active integrations. Generation requests return an explicit unavailable error.
+- **Planned connection:** a curated Gold Vocal and descriptive profile can become an input to song creation once the processing pipeline and appropriate authorization checks exist. There is no automatic audio transfer today.
+
+## Run locally without Docker
 
 Requires [Bun 1.4+](https://bun.com/) and **no container runtime**.
 
 ```bash
 git clone https://github.com/g-baskin/VocalBlackMagic.git
 cd VocalBlackMagic
-bun install
+bun install --frozen-lockfile
 
-# Terminal A — Vocal Fix
+# Terminal A: Vocal Fix
 bun run dev:vocal
 
-# Terminal B — TTB Studio
+# Terminal B: TTB Studio
 bun run dev:ttb
 ```
 
-The SvelteKit user interfaces run independently even when the Python audio services are offline. To enable **local development only** of reference upload and backend-capability discovery:
+The SvelteKit user interfaces run independently even when the Python audio services are offline. To enable **local development only** of reference upload and backend-capability discovery, use Python 3.11+ (the example uses 3.11):
 
 ```bash
-python3 -m venv .venv
+python3.11 -m venv .venv
 source .venv/bin/activate
 pip install -r requirements.txt
 
@@ -45,6 +50,17 @@ uvicorn apps.ttb_studio.app:app --host 127.0.0.1 --port 8002
 ```
 
 **Security warning:** the original Python prototypes have no account authentication. The SvelteKit bridges block uploads/generation in production until real user authentication, tenant isolation and billing are implemented. Do not expose the Python ports directly.
+
+## If the default ports are occupied
+
+Use these instead of the default dev commands, one per terminal from the repository root. The URL overrides keep the sister-app links aligned with the new ports; `--strictPort` prevents silent fallback to another port.
+
+```bash
+(cd apps/vocal-fix && VITE_TTB_STUDIO_URL=http://127.0.0.1:5414 bun run dev --port 5413 --strictPort)
+(cd apps/ttb-studio && VITE_VOCAL_FIX_URL=http://127.0.0.1:5413 bun run dev --port 5414 --strictPort)
+```
+
+Open http://127.0.0.1:5413 and http://127.0.0.1:5414. If those ports are already in use, choose another pair and update both URL overrides. Do not stop another project's server to free a port.
 
 ## Build and test
 
@@ -59,9 +75,16 @@ On a Linux host, run each production build with Bun and manage it with systemd (
 
 > **Current functional limits:** This is a SaaS UI and API-boundary scaffold, not a production-ready music platform. Vocal source upload is available only in local development; Gold Vocal separation, voice conditioning, real song inference, Premium Studio DSP, payments, database persistence and public user authentication are not implemented. Never represent a request as generated audio without a verified model result.
 
-## Architecture and build specification
+## Architecture and contributing
+
+The two Svelte 5 + SvelteKit 3 apps build independently in a Bun workspace. TTB remains a modular monolith. Shared packages hold contracts and UI; auth, database and billing packages are interfaces rather than working integrations. Python APIs are local prototypes, with GPU inference planned separately.
+
+Before contributing, read the [agent handoff](AGENTS.md) and the relevant specification below. Keep implemented behavior distinct from planned capabilities, and preserve the two independent apps.
+
 
 - [SaaS stack and Docker-free deployment](docs/SAAS_STACK.md)
+- [Changelog](CHANGELOG.md)
+- [Release procedure](docs/RELEASING.md)
 - [Product specification](docs/PRODUCT_SPEC.md)
 - [Architecture](docs/ARCHITECTURE.md)
 - [Implementation roadmap](docs/ROADMAP.md)
