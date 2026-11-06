@@ -30,3 +30,7 @@ node_modules/
 *.log
 .DS_Store
 # bun.lock is committed; keep it in sync (do not ignore).
+
+# VBM engine weights and job data
+services/audio-engine/.cache/
+services/audio-engine/data/

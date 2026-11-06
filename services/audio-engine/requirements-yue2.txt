@@ -1,0 +1,6 @@
+# YuE2 (weights CC BY-NC 4.0: NON-COMMERCIAL). Linux, NVIDIA GPU with 24 GB and BF16.
+# The inference wheel ships inside the weights repo (pinned revision); install after downloading:
+#   python -m vbm_engine.download yue2
+#   pip install "$VBM_ENGINE_CACHE/yue2/YuE2-3B/yue2_infer-0.1.5-py3-none-any.whl"
+# Upstream pins huggingface-hub==0.36.2 for its own install.
+torch

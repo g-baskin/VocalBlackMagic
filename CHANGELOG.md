@@ -4,6 +4,10 @@ This log describes repository changes, not verified public releases. No release 
 
 ## Unreleased
 
+### Added (self-hosted engine and provider routing, in progress)
+- `services/audio-engine`: a self-hosted music engine (FastAPI) speaking the VBM Engine protocol v1 (`docs/ENGINE_PROTOCOL.md`, types in `packages/contracts/src/engine.ts`). Token always required, localhost Host check, GPU-slot queue with idempotency, cancel and restart recovery, honest per-model health, and a disk-checked weight downloader. Backends for ACE-Step 1.5 (MIT; text2music, repaint, cover, extend), HeartMuLa (Apache-2.0), DiffRhythm 2 (Apache-2.0) and YuE2 (CC BY-NC 4.0, marked non-commercial). None has yet run on real model weights; ACE-Step 1.5 cannot run on Intel Macs.
+- TTB Studio: a models-by-runners registry and router (self-hosted engine, then the provider's own API, then Replicate), falling back only when a runner refuses before a job exists. New Replicate entries for ACE-Step 1.5, HeartMuLa, DiffRhythm, YuE, MiniMax Music 2.6, Lyria 3 Pro and ElevenLabs Music, and direct MiniMax, ElevenLabs and Gemini Lyria 3 Pro adapters (tested with mocked responses only). Song creation does not use the router yet.
+
 ### Added (design docs)
 - `docs/DESIGN.md`: Mermaid diagrams of both apps, the request guard, song creation and derivations, the Vocal Fix repair and Voice Forge flows, job states, the data layout and the design system. GitHub renders them, and both apps show the same diagrams in the arcane theme at `/arcana` (shared `MermaidDiagram` and `DesignCodex` components in `@vbm/ui`, Mermaid loaded only on that page).
 
