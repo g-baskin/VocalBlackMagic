@@ -11,6 +11,9 @@ export const POST: RequestHandler = async ({ request, fetch }) => {
       },
       { status: 403 }
     );
+  // Multipart is a "simple" request: require a custom header so cross-site forms cannot post.
+  if (!request.headers.get('x-vbm-intent'))
+    return Response.json({ detail: 'Missing x-vbm-intent header.' }, { status: 415 });
   let form: FormData;
   try {
     form = await request.formData();
