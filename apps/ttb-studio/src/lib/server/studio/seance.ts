@@ -173,6 +173,9 @@ export async function startSeance(deps: SeanceDeps, request: SeanceRequest): Pro
       }))
       .sort((a, b) => a.label.localeCompare(b.label))
   };
+  // Persist before any paid submission, and after each one, so a failed write can never leave
+  // paid takes without a séance record (they would stay sealed and unrankable).
+  await save(deps, seance);
   for (const entry of seance.entries) {
     try {
       const result = await deps.create(
@@ -198,8 +201,8 @@ export async function startSeance(deps: SeanceDeps, request: SeanceRequest): Pro
     } catch (error) {
       entry.error = error instanceof ProviderError ? error.publicMessage : 'Summoning failed.';
     }
+    await save(deps, seance);
   }
-  await save(deps, seance);
   return view(seance, new Map());
 }
 

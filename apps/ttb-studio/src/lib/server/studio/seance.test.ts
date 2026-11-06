@@ -147,6 +147,26 @@ describe('startSeance', () => {
     expect(s.entries.map((e) => e.label)).toEqual(['A', 'B', 'C']);
   });
 
+  test('the record is on disk before the first paid submission and after each one', async () => {
+    const seen: number[] = [];
+    const base = fakeDeps();
+    const f = fakeDeps({
+      create: async (request, opts) => {
+        const ids = (await readdir(path.join(root, 'studio', 'seances')).catch(() => [])).filter(
+          (n) => n.endsWith('.json')
+        );
+        expect(ids).toHaveLength(1);
+        const stored = await loadSeance(f.deps, ids[0].replace(/\.json$/, ''));
+        seen.push(stored.entries.filter((e) => e.job_id).length);
+        return base.deps.create(request, opts);
+      }
+    });
+    const s = await startSeance(f.deps, body);
+    expect(seen).toEqual([0, 1]);
+    const stored = await loadSeance(f.deps, s.id);
+    expect(stored.entries.every((e) => e.job_id)).toBe(true);
+  });
+
   test('pre-reveal JSON never names a model or runner', async () => {
     const f = fakeDeps();
     const s = await startSeance(f.deps, { ...body, title: 'Night' });
