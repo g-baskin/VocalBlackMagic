@@ -2,35 +2,35 @@
 
 ## Status and version choice (2026-11-05)
 - Svelte 5 + SvelteKit 3 and official `@sveltejs/adapter-bun`.
-- Bun >= 1.4. Builds with `bun run --bun build`, serves with `bun ./build`.
+- Bun >= 1.4. Build with `bun run build` (it builds each app), serve with `bun ./build`.
 - Two SvelteKit apps: `apps/vocal-fix` (port 5173 dev / 3001 prod) and `apps/ttb-studio` (5174 / 3002).
 - Shared workspaces: `@vbm/ui`, `@vbm/contracts`, `@vbm/auth`, `@vbm/database`, `@vbm/billing`.
 - Legacy Python FastAPI entrypoints in `apps/vocal_fix` and `apps/ttb_studio` are retained for localhost-only audio prototypes (ports 8001/8002). Target extraction into `services/audio-engine` in a later phase; **not** a second SaaS.
-- Nothing in this scaffold constitutes working authentication, payments, model inference, or public-safe vocal upload.
+- Nothing in this scaffold constitutes working authentication, payments, self-hosted model inference, or public-safe vocal upload; hosted generation is development-only.
 
 ## Local development without Docker
 ```bash
 git clone https://github.com/g-baskin/VocalBlackMagic.git
 cd VocalBlackMagic
-bun install
+bun install --frozen-lockfile
 bun run dev:vocal             # http://localhost:5173
 # in a second terminal
 bun run dev:ttb               # http://localhost:5174
 ```
-The browser UIs render even without Python services, but capabilities will report unavailable. For local-only upload/generation API development:
+The browser UIs render even without Python services. Only Vocal Fix capabilities and upload depend on Python; TTB Studio generation needs only `FAL_KEY` and/or `GEMINI_API_KEY` in `apps/ttb-studio/.env`. For local-only Vocal Fix upload API development:
 ```bash
 python3 -m venv .venv
 source .venv/bin/activate
 pip install -r requirements.txt
 uvicorn apps.vocal_fix.app:app --host 127.0.0.1 --port 8001
-# another terminal, same venv:
+# optional legacy TTB prototype, unused by apps/ttb-studio:
 uvicorn apps.ttb_studio.app:app --host 127.0.0.1 --port 8002
 ```
-Production upload/generation proxies are intentionally disabled (403) until tenant authentication and asset authorization are implemented. Python services have no SaaS authentication; **never expose them directly**.
+Production upload and generation routes intentionally return 403 until tenant authentication and asset authorization are implemented. Python services have no SaaS authentication; **never expose them directly**.
 
 ## Build and serve on Linux (no containers)
 ```bash
-bun install
+bun install --frozen-lockfile
 bun run check
 bun run build
 cd apps/vocal-fix
@@ -55,7 +55,7 @@ Use the sample systemd units in `infra/systemd` (edit directories, users, ports 
 4. Stripe webhooks with signature verification, idempotent credit ledger and refund/retry handling.
 5. Consented vocal-reference processing with identity-policy controls, reference deletion and consent revocation.
 6. Security headers, rate limits, CSRF protection, logs/analytics without raw audio, and staging threat-model review.
-7. Generate/commit `bun.lock` from a successful `bun install`; use frozen installs for deterministic CI thereafter.
+7. `bun.lock` is committed; switch CI to `bun install --frozen-lockfile`.
 
 ## Sources
 - Official SvelteKit Bun adapter: https://svelte.dev/docs/kit/adapter-bun

@@ -15,7 +15,7 @@ jobs:
       - uses: oven-sh/setup-bun@v2
         with:
           bun-version: '1.4.0'
-      # The generated bun.lock must be committed after the first verified install.
+      # bun.lock is committed; keep it in sync with workspace changes.
       - run: bun install
       - run: bun run lint:web
       - run: bun run format:check:web

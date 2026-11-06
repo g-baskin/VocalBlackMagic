@@ -6,7 +6,7 @@
 
 Vocal Fix is the reference-intake side; TTB Studio is the song-planning side. The goal is an authorized vocal-to-song workflow that preserves the performance rather than replacing its character.
 
-> **Prototype, not a working generation platform.** Local reference upload and deletion work with the Python backend. Vocal cleanup, Gold Vocal assembly, voice conditioning, song generation and Premium Studio processing are not implemented. Authentication, tenant storage and billing are also pending.
+> **Prototype, not a working generation platform.** Local reference upload and deletion work with the Python backend. In local development only, TTB Studio can generate songs through hosted providers (fal ACE-Step 1.5, Google Lyria 3.5) when API keys are set. Vocal cleanup, Gold Vocal assembly, voice conditioning and Premium Studio processing are not implemented. Authentication, tenant storage and billing are also pending.
 
 | Product | Location | Developer URL |
 | --- | --- | --- |
@@ -16,7 +16,7 @@ Vocal Fix is the reference-intake side; TTB Studio is the song-planning side. Th
 ## What each app does
 
 - **Vocal Fix:** accepts exactly five recordings, a performer name and a rights attestation. It stores source files and a session manifest locally. Upload success is not proof of valid decoded audio or a finished Gold Vocal.
-- **TTB Studio:** lets you prepare prompts, lyrics, sound character and optional Premium Studio settings. ACE-Step, HeartMuLa and external V2 are unconfigured adapter choices, not active integrations. Generation requests return an explicit unavailable error.
+- **TTB Studio:** lets you prepare prompts, lyrics, sound character and optional Premium Studio settings. In development only, it generates with ACE-Step 1.5 on fal (`FAL_KEY`) or Google Lyria 3.5 (`GEMINI_API_KEY`); ACE-Step complete songs without lyrics get lyrics from Gemini 3.5 Flash-Lite first. There is no login, spend cap or rate limit, so each request can cost money. A missing key returns 503, HeartMuLa and External V2 return 501, and outside development generation returns 403.
 - **Planned connection:** a curated Gold Vocal and descriptive profile can become an input to song creation once the processing pipeline and appropriate authorization checks exist. There is no automatic audio transfer today.
 
 ## Run locally without Docker
@@ -35,7 +35,7 @@ bun run dev:vocal
 bun run dev:ttb
 ```
 
-The SvelteKit user interfaces run independently even when the Python audio services are offline. To enable **local development only** of reference upload and backend-capability discovery, use Python 3.11+ (the example uses 3.11):
+The SvelteKit user interfaces run independently even when the Python audio services are offline. TTB Studio does not need Python: put `FAL_KEY` and/or `GEMINI_API_KEY` in `apps/ttb-studio/.env` (git-ignored; see `.env.example`). To enable **local development only** of Vocal Fix reference upload and capability discovery, use Python 3.11+ (the example uses 3.11):
 
 ```bash
 python3.11 -m venv .venv
@@ -45,11 +45,11 @@ pip install -r requirements.txt
 # Terminal C
 uvicorn apps.vocal_fix.app:app --host 127.0.0.1 --port 8001
 
-# Terminal D (same activated environment)
+# Optional, legacy prototype not used by TTB Studio (same activated environment)
 uvicorn apps.ttb_studio.app:app --host 127.0.0.1 --port 8002
 ```
 
-**Security warning:** the original Python prototypes have no account authentication. The SvelteKit bridges block uploads/generation in production until real user authentication, tenant isolation and billing are implemented. Do not expose the Python ports directly.
+**Security warning:** the original Python prototypes have no account authentication. The SvelteKit apps block uploads and generation in production until real user authentication, tenant isolation and billing are implemented. Do not expose the Python ports directly.
 
 ## If the default ports are occupied
 
@@ -71,7 +71,7 @@ Run `bun run lint`, `bun run format:check` and `bun run check:python`.
 TypeScript/Svelte checks remain `bun run check`. Python checks cover both APIs and tests.
 
 ```bash
-bun test packages
+bun run test
 bun run check
 bun run build
 python -m pytest -q
@@ -79,7 +79,7 @@ python -m pytest -q
 
 On a Linux host, run each production build with Bun and manage it with systemd (sample units in [infra/systemd](infra/systemd)). See [SaaS stack and deployment](docs/SAAS_STACK.md). Docker is optional legacy convenience only; not required by the new applications.
 
-> **Current functional limits:** This is a SaaS UI and API-boundary scaffold, not a production-ready music platform. Vocal source upload is available only in local development; Gold Vocal separation, voice conditioning, real song inference, Premium Studio DSP, payments, database persistence and public user authentication are not implemented. Never represent a request as generated audio without a verified model result.
+> **Current functional limits:** This is a SaaS UI and API-boundary scaffold, not a production-ready music platform. Vocal source upload is available only in local development; Gold Vocal separation, voice conditioning, local model inference, Premium Studio DSP, payments, database persistence and public user authentication are not implemented; hosted song generation is development-only. Never represent a request as generated audio without a verified model result.
 
 ## Architecture and contributing
 
@@ -99,6 +99,7 @@ Before contributing, read the [agent handoff](AGENTS.md) and the relevant specif
 - [Audio models and Gold Vocal pipeline](docs/MODELS_AND_AUDIO.md)
 - [Rights, authorization and privacy](docs/RIGHTS_AND_SAFETY.md)
 - [Agent implementation handoff](AGENTS.md)
+- [Project library](library/README.md): knowledge docs in `library/knowledge/private/` (`architecture`, `security`, `auth`), Draft contracts in `library/knowledge/private/contracts`, backlog PRDs in `library/requirements/backlog`, and a wiki and code graph in `library/knowledge/private/wiki` (`codegraph.md`; regenerate with `python3.12 library/knowledge/private/wiki/tools/build_codegraph.py`)
 
 ## Licensing and vocal rights
 

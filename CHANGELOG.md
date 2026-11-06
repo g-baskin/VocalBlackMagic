@@ -16,6 +16,7 @@ This log describes repository changes, not verified public releases. No release 
 - Lyria requests from a Google project without billing now say to turn on billing, instead of suggesting a retry that cannot succeed.
 
 ### Documentation
+- Corrected docs to describe development-only hosted generation, the 403 production gate, the full `bun run test` command and the legacy status of the Python TTB prototype; added pointers to `library/`.
 - Added this changelog and a manual release procedure.
 
 ### Licensing

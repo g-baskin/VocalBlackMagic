@@ -5,6 +5,8 @@ VocalBlackMagic/
   apps/
     vocal_fix/        # independent FastAPI ASGI app + browser UI
     ttb_studio/        # independent FastAPI ASGI app + browser UI
+    vocal-fix/ ttb-studio/  # SvelteKit 3 + Bun apps (see runtime boundary below)
+  packages/ services/ infra/  # shared contracts, planned worker, systemd units
   docs/                # requirements, architecture, workflows and gates
   tests/               # executable API contract tests
 ```
@@ -13,7 +15,7 @@ VocalBlackMagic/
 - Python 3.11+ with FastAPI, Pydantic, Uvicorn.
 - Separate entrypoints: `apps.vocal_fix.app:app` and `apps.ttb_studio.app:app`.
 - Vocal Fix supports five-file ingestion, metadata and deletion with local disk storage. Processing endpoint is explicitly **not implemented**.
-- TTB Studio exposes preset/engine capability catalog and validates generation requests, then explicitly rejects generation until an engine adapter is installed. It does **not** pretend to generate music.
+- The legacy Python TTB Studio exposes a preset/engine capability catalog and validates generation requests, then explicitly rejects generation. It does **not** pretend to generate music, and the SvelteKit app does not call it. `packages/contracts` `validateGenerationRequest` is the authoritative request validator; the Python model is legacy.
 - Local-only starter: no authentication or hardened tenancy yet. **Do not expose to public traffic** before security phase.
 
 ## Target modular-monolith architecture (TTB)
@@ -34,8 +36,8 @@ Decision context and trade-offs are in the [decision log](decisions/README.md).
 - Store engine/version/parameters/seed and input hashes; do not store secrets in projects.
 
 ## Interface contracts
-- Vocal Fix: GET /api/health; POST /api/references (5 files + consent + owner name); GET/DELETE /api/references/{id}; POST /api/references/{id}/process (501 until implemented).
-- TTB Studio: GET /api/health; GET /api/capabilities; POST /api/generations (503 until provider configured).
+- Vocal Fix: GET /api/health; GET /api/capabilities; POST /api/references (5 files + consent + owner name); GET/DELETE /api/references/{id}; POST /api/references/{id}/process (501 until implemented).
+- TTB Studio: GET /api/health; GET /api/capabilities; POST /api/generations (development only: 202 queued fal job, 200 completed Lyria job with inline audio, 503 missing key, 501 other engines, 415/422 bad requests; 403 outside development); GET /api/generations/{id} (job status) and GET /api/generations/{id}/audio (verified audio), both also 403 outside development.
 - Health, readiness, config/version endpoints before deploying.
 - Structured job errors: unsupported mode, unlicensed provider, invalid reference, insufficient GPU, quality gate failed, cancellation, timeout and retry exhausted.
 
@@ -50,13 +52,13 @@ The earlier FastAPI app entrypoints above are **retained audio prototypes**, not
 
 ```text
 apps/vocal-fix/             SvelteKit 3 + Bun SaaS UI + protected local API bridge
-apps/ttb-studio/             SvelteKit 3 + Bun modular monolith UI + bridge
+apps/ttb-studio/             SvelteKit 3 + Bun modular monolith UI with dev-only hosted provider adapters
 apps/vocal_fix/              legacy Python local reference-ingestion backend
-apps/ttb_studio/             legacy Python local generation-contract backend
+apps/ttb_studio/             legacy Python local generation-contract backend (unused by apps/ttb-studio)
 packages/{ui,contracts}/    shared frontend components and typed API contracts
 packages/{auth,database,billing}/   explicit future integration boundaries
 services/audio-engine/      planned independent Python GPU audio worker
 infra/systemd/              sample no-Docker system services
 ```
 
-The new app bridges permit calls only during local development. Production upload and generation are denied pending user authentication, tenant ownership, private blob storage and billing safeguards. See `docs/SAAS_STACK.md` for the recommended deployment.
+The Vocal Fix bridge and TTB Studio generation routes permit calls only during local development. Production upload and generation are denied pending user authentication, tenant ownership, private blob storage and billing safeguards. See `docs/SAAS_STACK.md` for the recommended deployment.
