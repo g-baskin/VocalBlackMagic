@@ -29,4 +29,4 @@ node_modules/
 *.tsbuildinfo
 *.log
 .DS_Store
-# Commit generated bun.lock after first successful bun install (do not ignore).
+# bun.lock is committed; keep it in sync (do not ignore).

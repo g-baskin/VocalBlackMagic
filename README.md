@@ -6,7 +6,7 @@
 
 Vocal Fix is the reference-intake side; TTB Studio is the song-planning side. The goal is an authorized vocal-to-song workflow that preserves the performance rather than replacing its character.
 
-> **Prototype, not a working generation platform.** Local reference upload and deletion work with the Python backend. Vocal cleanup, Gold Vocal assembly, voice conditioning, song generation and Premium Studio processing are not implemented. Authentication, tenant storage and billing are also pending.
+> **Prototype, not a working generation platform.** Local reference upload and deletion work with the Python backend. In local development only, TTB Studio can generate songs through hosted providers (fal ACE-Step 1.5, Google Lyria 3.5) when API keys are set. Vocal cleanup, Gold Vocal assembly, voice conditioning and Premium Studio processing are not implemented. Authentication, tenant storage and billing are also pending.
 
 | Product | Location | Developer URL |
 | --- | --- | --- |
@@ -17,7 +17,7 @@ Vocal Fix is the reference-intake side; TTB Studio is the song-planning side. Th
 
 - **Vocal Fix** (development only, no authentication): two modes, *Fix a take* (one recording) and *Forge a Gold Vocal* (exactly five). Intake requires a performer name and rights attestation; each file is probed and fully decoded with ffmpeg before `integrity_verified` is set. It then diagnoses loudness, clipping, noise and silence with timestamps, and repairs takes as staged, cancellable jobs: optional Demucs vocal isolation and resemble-enhance on Replicate (paid, `REPLICATE_API_TOKEN` in `apps/vocal-fix/.env`), then a local ffmpeg polish preset (Natural, Radio Presence, Ethereal Air, Raw Grit), with before/after scores and A/B playback. The local polish adapts denoise and a between-phrase gate to the measured noise floor and caps make-up gain at +12 dB. If noise, clipping or overall drops by more than 5 points, it retries once with a stronger setting. If the score is still worse, the result says so (for example: try AI enhance) instead of hiding it. At most 2 jobs run at once (1 forge); the rest queue. Job status is saved under `data/vocal-fix/jobs/`, and jobs cut off by a restart are reported as failed. API routes answer only to localhost, 127.0.0.1 or [::1] Host headers (DNS-rebinding guard). Forge mode ranks phrases across the five repaired takes and joins the best ones with silence into a Gold Vocal WAV plus a JSON of source timestamps, along with a descriptive profile of observable traits only. *Voice Forge* trains an RVC voice on Replicate only after the performer types their own name and confirms it is their voice; the result is registered in `data/shared/voices/` for TTB Studio and can be revoked. Originals are never modified; every result is a new versioned file under `data/vocal-fix/sessions/`. It was tested end to end with an AI-generated synthetic voice, not a real singer.
 - **TTB Studio:** a song studio for local development only. Every studio route returns 403 unless `NODE_ENV=development` and answers only to a localhost Host header; there is no authentication. With `REPLICATE_API_TOKEN` it creates songs with MiniMax Music 1.5 (default), ACE-Step, Stable Audio 2.5 or Lyria 2 on Replicate, in Simple mode (a description; lyrics by Claude 3.5 Haiku, falling back to Claude 4.5 Haiku when that fails) or Custom mode (title, tagged lyrics, style tags, instrumental, 1 or 2 takes). fal ACE-Step 1.5 and Google Lyria 3.5 still work when `FAL_KEY` / `GEMINI_API_KEY` are set. Each new song can get FLUX Schnell cover art (optional, about $0.003); derived songs inherit their parent's cover. Finished audio and covers are format-checked and stored with `meta.json` under `data/studio/songs/<id>/` (or `VBM_DATA_DIR`). From the library a song can be split into stems (Demucs) and played in a stem mixer, reimagined (MiniMax Music-01), given a local ffmpeg Studio Master (-14 LUFS, -1 dBTP; original kept, A/B in the player), or sung in a voice from the shared registry. In Custom mode a song can also be summoned directly in a forged voice: MiniMax Music-01 takes a 30 s excerpt of that voice's Gold Vocal plus a music reference from the library. Only voices that are `ready` with own-voice consent are offered, and the voice id and consent session are recorded in the song's metadata. A lyrics workshop writes, rewrites and extends lyrics. Paid actions cost a few cents each on Replicate; at most 3 paid jobs may run at once.
-- **Planned connection:** a curated Gold Vocal and descriptive profile can become an input to song creation once the processing pipeline and appropriate authorization checks exist. There is no automatic audio transfer today.
+- **How they connect:** Vocal Fix writes forged voices to the shared registry in `data/shared/voices/`; TTB Studio reads it and offers only `ready` voices with own-voice consent. Both apps share the `packages/ui` design system and `packages/contracts` types. There is still no authentication, so this connection is for local development only.
 
 ## Run locally without Docker
 
@@ -35,7 +35,7 @@ bun run dev:vocal
 bun run dev:ttb
 ```
 
-The SvelteKit user interfaces run independently even when the Python audio services are offline. To enable **local development only** of reference upload and backend-capability discovery, use Python 3.11+ (the example uses 3.11):
+The SvelteKit user interfaces run independently even when the Python audio services are offline. TTB Studio does not need Python: put `FAL_KEY` and/or `GEMINI_API_KEY` in `apps/ttb-studio/.env` (git-ignored; see `.env.example`). To enable **local development only** of Vocal Fix reference upload and capability discovery, use Python 3.11+ (the example uses 3.11):
 
 ```bash
 python3.11 -m venv .venv
@@ -45,11 +45,11 @@ pip install -r requirements.txt
 # Terminal C
 uvicorn apps.vocal_fix.app:app --host 127.0.0.1 --port 8001
 
-# Terminal D (same activated environment)
+# Optional, legacy prototype not used by TTB Studio (same activated environment)
 uvicorn apps.ttb_studio.app:app --host 127.0.0.1 --port 8002
 ```
 
-**Security warning:** the original Python prototypes have no account authentication. The SvelteKit bridges block uploads/generation in production until real user authentication, tenant isolation and billing are implemented. Do not expose the Python ports directly.
+**Security warning:** the original Python prototypes have no account authentication. The SvelteKit apps block uploads and generation in production until real user authentication, tenant isolation and billing are implemented. Do not expose the Python ports directly.
 
 ## If the default ports are occupied
 
@@ -80,7 +80,7 @@ Run `bun run lint`, `bun run format:check` and `bun run check:python`.
 TypeScript/Svelte checks remain `bun run check`. Python checks cover both APIs and tests.
 
 ```bash
-bun test packages
+bun run test
 bun run check
 bun run build
 python -m pytest -q
@@ -88,7 +88,7 @@ python -m pytest -q
 
 On a Linux host, run each production build with Bun and manage it with systemd (sample units in [infra/systemd](infra/systemd)). See [SaaS stack and deployment](docs/SAAS_STACK.md). Docker is optional legacy convenience only; not required by the new applications.
 
-> **Current functional limits:** This is a SaaS UI and API-boundary scaffold, not a production-ready music platform. Vocal source upload is available only in local development; Gold Vocal separation, voice conditioning, real song inference, Premium Studio DSP, payments, database persistence and public user authentication are not implemented. Never represent a request as generated audio without a verified model result.
+> **Current functional limits:** This is a SaaS UI and API-boundary scaffold, not a production-ready music platform. Vocal source upload is available only in local development; Gold Vocal separation, voice conditioning, local model inference, Premium Studio DSP, payments, database persistence and public user authentication are not implemented; hosted song generation is development-only. Never represent a request as generated audio without a verified model result.
 
 ## Architecture and contributing
 
@@ -108,6 +108,7 @@ Before contributing, read the [agent handoff](AGENTS.md) and the relevant specif
 - [Audio models and Gold Vocal pipeline](docs/MODELS_AND_AUDIO.md)
 - [Rights, authorization and privacy](docs/RIGHTS_AND_SAFETY.md)
 - [Agent implementation handoff](AGENTS.md)
+- [Project library](library/README.md): knowledge docs in `library/knowledge/private/` (`architecture`, `security`, `auth`), Draft contracts in `library/knowledge/private/contracts`, backlog PRDs in `library/requirements/backlog`, and a wiki and code graph in `library/knowledge/private/wiki` (`codegraph.md`; regenerate with `python3.12 library/knowledge/private/wiki/tools/build_codegraph.py`)
 
 ## Licensing and vocal rights
 

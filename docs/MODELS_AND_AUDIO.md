@@ -1,7 +1,9 @@
 # Model selection, sound design and Gold Vocal pipeline
 
 ## Generation adapters
-- **ACE-Step 1.5**: primary candidate for full-song and instrumental generation, reference conditioning and iteration. Confirm actual published API/weight license and runtime requirements before deployment.
+- **ACE-Step 1.5**: primary candidate for full-song and instrumental generation, reference conditioning and iteration. Confirm actual published API/weight license and runtime requirements before deployment. Currently used through fal hosting, in development only.
+- **Google Lyria 3.5**: hosted, paid alternative engine, development only.
+- **Gemini 3.5 Flash-Lite**: writes lyrics automatically for ACE-Step complete songs submitted without lyrics; development only.
 - **HeartMuLa**: optional alternate engine, benchmark against ACE-Step for expressive vocals and raw musicality. Verify both repo and **model weights** license separately.
 - **External V2**: configurable integration slot. 'Music.ai V2', 'MusicAI V2' and 'AISong V2' must NOT be treated as synonymous. Confirm provider identity, API endpoint, license and allowed outputs. Do not hardcode an unverified endpoint.
 - Model selection must be based on listening tests with reproducible prompts, not marketing labels.
@@ -31,5 +33,5 @@
 - Input: supported codec, integrity, max duration/size, no malware, consent.
 - Separation: listen for bleed, comb filtering and missing consonants; automated metrics alone are insufficient.
 - Gold Vocal: no clipped peaks, gross loudness inconsistency, poor source attribution or false identity claim.
-- Generated audio: silence detection, clipped peaks, excessive digital artifacts, duration and intelligibility expectations; manual A/B tests.
+- Generated audio: silence detection, clipped peaks, excessive digital artifacts, duration and intelligibility expectations; manual A/B tests. Currently implemented: format sniffing and size bounds (1 KiB to 160 MiB) only.
 - Export: correct bit-depth, sample rate, channel count, metadata and no unintended limiter/dither.
