@@ -1,10 +1,11 @@
+import { json } from '@sveltejs/kit';
+import { FAL_KEY, GEMINI_API_KEY } from '$app/env/private';
 import type { RequestHandler } from './$types';
-import { passthrough, upstreamUnavailable, upstreamUrl } from '../../../lib/server/backend';
-export const GET: RequestHandler = async ({ fetch }) => {
-  try {
-    const result = await fetch(upstreamUrl('/api/capabilities'), {
-      signal: AbortSignal.timeout(3000), cache: 'no-store'
-    });
-    return passthrough(result);
-  } catch (error) { return upstreamUnavailable(error); }
-};
+import { buildCapabilities } from '../../../lib/server/music/capabilities';
+import { configuredKey, generationAllowed } from '../../../lib/server/music/gate';
+
+export const GET: RequestHandler = () => json(buildCapabilities({
+  falConfigured: configuredKey(FAL_KEY) !== null,
+  lyriaConfigured: configuredKey(GEMINI_API_KEY) !== null,
+  generationAllowed: generationAllowed()
+}), { headers: { 'cache-control': 'no-store' } });

@@ -24,7 +24,7 @@ Production-ready means **all** of: licensed model, verified output, user auth, t
 
 <!-- gg:init:start -->
 ## Implemented state
-Vocal Black Magic currently stores authorized vocal references and offers a music-request editor; it does not process vocals or generate songs.
+Vocal Black Magic currently stores authorized vocal references and offers a music-request editor. In development only, TTB Studio generates songs through hosted providers (fal ACE-Step, Google Lyria 3.5) when `FAL_KEY` or `GEMINI_API_KEY` is set; audio is verified and streamed back, not stored. It does not process vocals.
 
 - Hyphenated app directories are SvelteKit/Bun frontends; underscored Python directories own local filesystem intake and unconfigured generation endpoints. Docker Compose runs only the Python prototypes, not the frontends.
 - `packages/auth`, `database` and `billing` are contracts, not integrated services. `assertAuthenticated` checks a supplied object; it does not establish a verified session.
@@ -33,7 +33,7 @@ Vocal Black Magic currently stores authorized vocal references and offers a musi
 - Non-development Svelte reference and generation routes intentionally return 403. Production systemd units trigger this guard; changing NODE_ENV to bypass it does not supply authentication.
 - Successful upload means extension/size validation, not decoded audio validation: manifests retain `integrity_verified: false`. Python tests use synthetic bytes, so they cannot establish media quality.
 - Python processing returns 501 and generation returns 503 even for valid requests. Health endpoints report process health, not model readiness.
-- Python and TypeScript independently define generation validation. Python supplies defaults, but the Svelte bridge requires explicit numeric controls, premium boolean and null-or-string lyrics. Direct Python endpoint tests do not exercise that bridge.
+- TTB Studio generation no longer bridges to Python: SvelteKit calls fal and Lyria directly (`apps/ttb-studio/src/lib/server/music/`), and keys are declared in `apps/ttb-studio/src/env.ts` for `$app/env/private`. The Python `ttb_studio` generation endpoint is a legacy prototype and does not accept `lyria-3.5` or `duration_seconds`.
 - `VFM_DATA_DIR` defaults relative to the Python process working directory. Changing cwd without an explicit data path makes existing sessions appear missing.
 - Sister-app URLs use build-time `VITE_VOCAL_FIX_URL` / `VITE_TTB_STUDIO_URL`; Python backend URLs use runtime `VOCAL_FIX_API_URL` / `TTB_STUDIO_API_URL`. Changing runtime environment alone will not repair links in an existing frontend build.
 - Keep the SvelteKit 3 `$app/tsconfig` inheritance and adapter configuration in Vite; the earlier `.svelte-kit/tsconfig.json` template was corrected in commit `4f1d435`.
