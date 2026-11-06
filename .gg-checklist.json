@@ -1,0 +1,75 @@
+{
+  "version": 1,
+  "items": {
+    "accessibility": {
+      "checkedAt": "2026-11-06T01:40:03.688Z",
+      "commit": "057c9e7",
+      "uncommittedChanges": true,
+      "result": "pass",
+      "summary": "All three recorded findings fixed and verified with source assertions, contrast calculation and preset-handler tests. This limited re-check does not verify browser focus or screen-reader behavior.",
+      "findings": [],
+      "evidence": [
+        "Scope: Re-check only the three recorded accessibility findings, eyebrow contrast, legacy TTB preset selection state and live status announcements.",
+        "apps/vocal-fix/src/app.css:11: changed eyebrow foreground to #955d38; python3 -B WCAG calculation confirms 4.81:1 against #f3f2ee.",
+        "apps/ttb_studio/index.html:13,22: all five presets have aria-pressed; Node executes actual selection handler with DOM doubles, all five transitions pass.",
+        "apps/ttb_studio/index.html:20: HTMLParser assertions confirm role=status and aria-live=polite; initial preset selection assertions pass.",
+        "bun test packages: 4 passed, 0 failed. git diff --check: passed.",
+        "Not checked: browser rendering, keyboard focus/tab order, assistive technology announcements or deployment. Typecheck/build not run.",
+        "Skill loaded: none; routine targeted accessibility fixes."
+      ]
+    },
+    "agent-setup": {
+      "checkedAt": "2026-11-06T01:37:49.769Z",
+      "commit": "057c9e7",
+      "uncommittedChanges": true,
+      "result": "pass",
+      "summary": "Root AGENTS.md regenerated with bounded context, preserved product rules, and verified implementation notes; recurring Svelte, Python and security skills are installed.",
+      "findings": [],
+      "evidence": [
+        "Scope: main checkout context, command/config accuracy, and installed recurring-work skills; dashboard worktree excluded.",
+        "Read AGENTS.md, both Python APIs, Svelte bridges, manifests, tsconfig/Vite, pytest.ini, CI, Compose and systemd units.",
+        "wc -c: AGENTS.md 4606 bytes; with inspected parent context files 7682 bytes. Fences and generated-block budget validated.",
+        "Confirmed local SKILL.md files for svelte-stinger, python-stinger and security-stinger; .gg/skills is empty but global skills exist.",
+        "Not checked: skill execution across future sessions, deployments, inference readiness or application test reruns."
+      ]
+    },
+    "build-release": {
+      "checkedAt": "2026-11-06T01:36:00.133Z",
+      "commit": "057c9e7",
+      "uncommittedChanges": true,
+      "result": "pass",
+      "summary": "Both recorded documentation gaps are fixed: added a version-aware changelog and manual release procedure. Documentation checks pass; this re-check did not rerun builds or test deployment.",
+      "findings": [],
+      "evidence": [
+        "Scope: Re-check only the two recorded findings, missing changelog and release procedure; no broader build or launch-readiness review.",
+        "Added CHANGELOG.md with 0.2.0 repository history, initial scaffold history, component-version distinction and explicit unpublished status.",
+        "Added docs/RELEASING.md covering version bumps, clean candidate checks, approval, tags, release notes, independent deployment and code rollback.",
+        "Updated README.md to link CHANGELOG.md and docs/RELEASING.md.",
+        "git diff --check: passed.",
+        "python3 -B documentation assertions: local Markdown links resolve, changelog matches root version 0.2.0, release code fences balanced.",
+        "Read git log -8 and git show --stat -3 to ground changelog entries; reviewed docs/ARCHITECTURE.md and component manifest.",
+        "Not checked: install, build, runtime tests, publication, deployment or rollback execution. Only documentation changed; no versions bumped or releases published.",
+        "Skill loaded: changelog-release-notes-stinger; its Hivemind-specific release mechanics do not apply to this repository."
+      ]
+    },
+    "docs": {
+      "checkedAt": "2026-11-06T01:42:31.988Z",
+      "commit": "057c9e7",
+      "uncommittedChanges": true,
+      "result": "pass",
+      "summary": "README/setup documentation covers purpose, installation, local run and tests; required runtime settings have examples and MIT LICENSE exists. Static review plus contract tests only; fresh setup and deployment not verified.",
+      "findings": [],
+      "evidence": [
+        "Scope: README/setup instructions, environment-variable coverage and licence-file presence; current working tree reviewed.",
+        "Read README.md, .env.example, LICENSE, docs/SAAS_STACK.md, docs/ROADMAP.md and docs/RIGHTS_AND_SAFETY.md.",
+        "Read root/app package.json, requirements.txt, pytest.ini, CI, Dockerfile, compose.yaml, systemd units and existing checklist record.",
+        "grep runtime environment reads: API URLs and data path covered by .env.example; optional sister-app URL overrides documented in README.",
+        "bun test packages: 4 passed, 0 failed. bun --version: 1.3.14, below documented 1.4+ prerequisite.",
+        "python3 -B README link validation: all 15 local links resolve.",
+        "Read contracts tests, tests/test_apps.py and Python intake source to assess commands and data behavior.",
+        "Not checked: fresh install, servers, deployment, Python tests, lint/typecheck/build (generated-file writes avoided); no security or licensing audit.",
+        "Skill loaded: none, as requested. Initial rg unavailable; used grep instead."
+      ]
+    }
+  }
+}

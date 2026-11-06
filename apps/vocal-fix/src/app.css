@@ -8,7 +8,7 @@ button:disabled{cursor:not-allowed;opacity:.55}
 input[type=text],input[type=file]{background:white;width:100%;border-radius:8px;border:1px solid #bdc8c0;padding:12px;min-height:45px}
 a{color:var(--accent)}
 main{max-width:1130px;margin:0 auto;padding:50px 24px 90px}
-.eyebrow{text-transform:uppercase;letter-spacing:.16em;font-weight:800;font-size:.72rem;color:#9e653e}
+.eyebrow{text-transform:uppercase;letter-spacing:.16em;font-weight:800;font-size:.72rem;color:#955d38}
 h1,h2{font-family:'Fraunces',Georgia,serif;line-height:1.06;letter-spacing:-.035em}
 h1{font-size:clamp(3rem,6vw,5.4rem);margin:14px 0}
 h2{font-size:1.6rem}
