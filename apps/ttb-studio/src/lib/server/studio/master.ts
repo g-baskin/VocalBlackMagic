@@ -1,6 +1,8 @@
 import { ProviderError } from '../music/errors';
 
-export const ffmpegPath = process.env.FFMPEG_PATH?.trim() || '/usr/local/bin/ffmpeg';
+/** Explicit env path first, then whatever is on PATH (Homebrew, apt), then the Intel Homebrew default. */
+export const ffmpegPath =
+  process.env.FFMPEG_PATH?.trim() || Bun.which('ffmpeg') || '/usr/local/bin/ffmpeg';
 
 export interface Loudness {
   input_i: string;

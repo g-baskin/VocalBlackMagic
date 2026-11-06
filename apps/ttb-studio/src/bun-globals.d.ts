@@ -14,6 +14,7 @@ declare global {
     spawn(cmd: string[], options: { stdout: 'ignore' | 'pipe'; stderr: 'pipe' }): BunSubprocess;
     file(path: string): BunFile;
     write(path: string, data: Response | Blob | Uint8Array | string): Promise<number>;
+    which(command: string): string | null;
   };
 }
 export {};

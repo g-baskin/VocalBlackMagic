@@ -1,8 +1,13 @@
 import { VocalFixError } from './errors';
 import type { Probe } from './storage';
 
-export const FFMPEG = process.env.VBM_FFMPEG?.trim() || '/usr/local/bin/ffmpeg';
-export const FFPROBE = process.env.VBM_FFPROBE?.trim() || '/usr/local/bin/ffprobe';
+/** Explicit env path first, then whatever is on PATH (Homebrew, apt), then the Intel Homebrew default. */
+function findTool(envValue: string | undefined, name: string): string {
+  return envValue?.trim() || Bun.which(name) || `/usr/local/bin/${name}`;
+}
+
+export const FFMPEG = findTool(process.env.VBM_FFMPEG, 'ffmpeg');
+export const FFPROBE = findTool(process.env.VBM_FFPROBE, 'ffprobe');
 export const MAX_UPLOAD_BYTES = 100 * 1024 * 1024;
 export const MAX_DURATION_SECONDS = 600;
 export const ALLOWED_CODECS = new Set([
