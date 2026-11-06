@@ -62,6 +62,26 @@ describe('audio verification', () => {
     await expect(drain(new Response(wavBytes(500)))).rejects.toBeDefined();
     await expect(drain(new Response(wavBytes(4096), { headers: { 'content-length': String(200 * 1024 * 1024) } }))).rejects.toThrow(ProviderError);
   });
+  test('looks past an ID3 tag to find FLAC, as ACE-Step 1.5 sends it', async () => {
+    const flac = (n: number) => { const b = new Uint8Array(n); b.set(ascii('fLaC'), 0); return b; };
+    const id3Then = (inner: Uint8Array, tag: number) => {
+      const b = new Uint8Array(10 + tag + inner.length);
+      b.set(ascii('ID3'), 0); b[3] = 4; b[8] = (tag >> 7) & 0x7f; b[9] = tag & 0x7f; b.set(inner, 10 + tag);
+      return b;
+    };
+    const tagged = id3Then(flac(8192), 13702);
+    expect(sniffAudio(tagged)).toBe('audio/flac');
+    expect(sniffAudio(id3Then(Uint8Array.from([0xff, 0xfb, 0x90, 0, 0, 0, 0, 0, 0, 0, 0, 0]), 300))).toBe('audio/mpeg');
+    expect(sniffAudio(id3Then(new Uint8Array(12), 300))).toBe('audio/mpeg');
+    expect(inspectBase64Audio(Buffer.from(tagged).toString('base64')).kind).toBe('audio/flac');
+    const chunked = new ReadableStream<Uint8Array>({
+      start(controller) { for (let i = 0; i < tagged.length; i += 1000) controller.enqueue(tagged.slice(i, i + 1000)); controller.close(); }
+    });
+    const response = await verifiedAudioResponse(new Response(chunked));
+    expect(response.headers.get('content-type')).toBe('audio/flac');
+    expect(new Uint8Array(await response.arrayBuffer())).toEqual(tagged);
+    await expect(verifiedAudioResponse(new Response(tagged.slice(0, 1500)))).rejects.toThrow(ProviderError);
+  });
   test('refuses non-audio downloads', async () => {
     await expect(verifiedAudioResponse(new Response('<html>' + 'x'.repeat(2000)))).rejects.toThrow(ProviderError);
     await expect(verifiedAudioResponse(new Response('gone', { status: 404 }))).rejects.toThrow(ProviderError);
@@ -69,19 +89,21 @@ describe('audio verification', () => {
 });
 
 describe('fal ACE-Step adapter', () => {
-  test('uses prompt-to-audio without lyrics and the lyric endpoint with them', () => {
-    expect(buildFalSubmission({ ...base, mode: 'instrumental' })).toMatchObject({
-      endpoint: 'fal-ai/ace-step/prompt-to-audio', body: { instrumental: true, duration: 90, enable_safety_checker: true }
+  test('sends ACE-Step 1.5 real lyrics, or the instrumental tag', () => {
+    expect(buildFalSubmission({ ...base, mode: 'instrumental', lyrics: 'ignored' }, null)).toMatchObject({
+      endpoint: 'fal-ai/ace-step-1.5', body: { lyrics: '[Instrumental]', duration: 90, thinking: true, enable_safety_checker: true }
     });
-    const sung = buildFalSubmission({ ...base, lyrics: '[verse]\nline one' });
-    expect(sung.endpoint).toBe('fal-ai/ace-step');
-    expect(sung.body.lyrics).toBe('[verse]\nline one');
-    expect(buildFalSubmission({ ...base, mode: 'instrumental', lyrics: 'ignored' }).body.lyrics).toBeUndefined();
+    const sung = buildFalSubmission(base, '[Verse]\nline one');
+    expect(sung.endpoint).toBe('fal-ai/ace-step-1.5');
+    expect(sung.body).toMatchObject({ lyrics: '[Verse]\nline one', prompt: 'Dark boom bap with haunting piano\nSound character: Raw / Underground.' });
+  });
+  test('never submits a complete song without lyrics', () => {
+    expect(() => buildFalSubmission(base, null)).toThrow(ProviderError);
   });
   test('submits to the queue with the key in the header only', async () => {
     const { fetch, calls } = fakeFetch([Response.json({ request_id: requestId })]);
-    expect(await submitFal({ apiKey: 'secret', fetch }, base)).toBe(requestId);
-    expect(calls[0].url).toBe('https://queue.fal.run/fal-ai/ace-step/prompt-to-audio');
+    expect(await submitFal({ apiKey: 'secret', fetch }, base, '[Verse]\nwords')).toBe(requestId);
+    expect(calls[0].url).toBe('https://queue.fal.run/fal-ai/ace-step-1.5');
     expect((calls[0].init?.headers as Record<string, string>).authorization).toBe('Key secret');
     expect(String(calls[0].init?.body)).not.toContain('secret');
   });
@@ -95,17 +117,17 @@ describe('fal ACE-Step adapter', () => {
     expect((await falStatus(deps, requestId)).status).toBe('running');
     expect((await falStatus(deps, requestId)).status).toBe('completed');
     expect((await falStatus(deps, requestId)).status).toBe('failed');
-    expect(calls[0].url).toBe('https://queue.fal.run/fal-ai/ace-step/requests/' + requestId + '/status');
+    expect(calls[0].url).toBe('https://queue.fal.run/fal-ai/ace-step-1.5/requests/' + requestId + '/status');
   });
   test('reports missing credit and bad keys clearly', async () => {
     const { fetch } = fakeFetch([new Response('no credit', { status: 402 }), new Response('bad', { status: 401 })]);
-    await expect(submitFal({ apiKey: 'k', fetch }, base)).rejects.toMatchObject({ status: 402 });
-    await expect(submitFal({ apiKey: 'k', fetch }, base)).rejects.toMatchObject({ status: 502, publicMessage: 'fal rejected the API key. Check FAL_KEY.' });
+    await expect(submitFal({ apiKey: 'k', fetch }, base, 'la la land')).rejects.toMatchObject({ status: 402 });
+    await expect(submitFal({ apiKey: 'k', fetch }, base, 'la la land')).rejects.toMatchObject({ status: 502, publicMessage: 'fal rejected the API key. Check FAL_KEY.' });
   });
   test('a missing job reads as not found only after submission', async () => {
     const { fetch } = fakeFetch([new Response('nope', { status: 404 }), new Response('nope', { status: 404 })]);
     await expect(falStatus({ apiKey: 'k', fetch }, requestId)).rejects.toMatchObject({ status: 404 });
-    await expect(submitFal({ apiKey: 'k', fetch }, base)).rejects.toMatchObject({ status: 502 });
+    await expect(submitFal({ apiKey: 'k', fetch }, base, 'la la land')).rejects.toMatchObject({ status: 502 });
   });
   test('only follows audio URLs on fal media hosts', async () => {
     expect(isAllowedFalMediaUrl('https://v3.fal.media/files/a/song.wav')).toBe(true);

@@ -2,10 +2,12 @@ import { FAL_KEY, GEMINI_API_KEY } from '$app/env/private';
 import type { RequestHandler } from './$types';
 import { validateGenerationRequest, type GenerationJob, type GenerationRequest } from '@vbm/contracts';
 import { errorResponse } from '../../../lib/server/music/errors';
-import { submitFal } from '../../../lib/server/music/fal';
+import { aceStepRequestError, submitFal } from '../../../lib/server/music/fal';
 import { configuredKey, generationDisabledResponse, isJsonRequest } from '../../../lib/server/music/gate';
 import { falJobId } from '../../../lib/server/music/jobs';
+import { writeLyrics } from '../../../lib/server/music/lyricist';
 import { generateLyria } from '../../../lib/server/music/lyria';
+import { sungLyrics } from '../../../lib/server/music/prompt';
 
 const noStore = { 'cache-control': 'no-store' };
 
@@ -29,8 +31,25 @@ export const POST: RequestHandler = async ({ request, fetch }) => {
     if (payload.engine === 'ace-step') {
       const apiKey = configuredKey(FAL_KEY);
       if (!apiKey) return Response.json({ detail: 'ACE-Step is not configured. Set FAL_KEY in the server environment.' }, { status: 503 });
-      const requestId = await submitFal({ apiKey, fetch }, payload);
-      const job: GenerationJob = { job_id: falJobId(requestId), engine: 'ace-step', status: 'queued' };
+      const invalid = aceStepRequestError(payload);
+      if (invalid) return Response.json({ detail: invalid }, { status: 422 });
+      let lyrics = sungLyrics(payload);
+      let written: string | undefined;
+      if (payload.mode === 'full-song' && !lyrics) {
+        const geminiKey = configuredKey(GEMINI_API_KEY);
+        if (!geminiKey) return Response.json({ detail: 'Writing lyrics automatically needs GEMINI_API_KEY. Add it, or paste your own lyrics.' }, { status: 503 });
+        written = await writeLyrics({ apiKey: geminiKey, fetch }, payload);
+        lyrics = written;
+      }
+      let requestId: string;
+      try { requestId = await submitFal({ apiKey, fetch }, payload, lyrics); }
+      catch (failure) {
+        if (!written) throw failure;
+        // Hand back the paid-for lyrics so a retry can reuse them instead of paying again.
+        const failed = errorResponse(failure);
+        return Response.json({ ...(await failed.json()), lyrics: written }, { status: failed.status });
+      }
+      const job: GenerationJob = { job_id: falJobId(requestId), engine: 'ace-step', status: 'queued', lyrics: written };
       return Response.json(job, { status: 202, headers: noStore });
     }
     if (payload.engine === 'lyria-3.5') {

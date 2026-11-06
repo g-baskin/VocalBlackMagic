@@ -72,6 +72,7 @@
   }
 
   const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
+  const downloadExtensions: Record<string, string> = { 'audio/wav': 'wav', 'audio/flac': 'flac', 'audio/ogg': 'ogg', 'audio/mpeg': 'mp3' };
   const retryable = (status: number) => status === 429 || status >= 500;
   const maxPollFailures = 3;
 
@@ -130,7 +131,8 @@
     if (error) { message = error; tone = 'warning'; return; }
     const token = ++run;
     busy = true;
-    report(token, engine === 'lyria-3.5' ? 'Generating with Lyria. This can take a few minutes…' : 'Submitting your song…', 'neutral');
+    const writing = engine === 'ace-step' && mode === 'full-song' && !payload.lyrics;
+    report(token, engine === 'lyria-3.5' ? 'Generating with Lyria. This can take a few minutes…' : writing ? 'Writing lyrics, then submitting your song…' : 'Submitting your song…', 'neutral');
     songLyrics = null; clearAudio();
     try {
       const response = await fetch('/api/generations', {
@@ -139,7 +141,15 @@
       });
       const body = await readJson<JobReply>(response);
       if (token !== run) return;
-      if (!response.ok) { report(token, body.detail || 'The song request failed (HTTP ' + response.status + ').'); return; }
+      if (!response.ok) {
+        const detail = body.detail || 'The song request failed (HTTP ' + response.status + ').';
+        if (body.lyrics) {
+          lyrics = body.lyrics;
+          songLyrics = body.lyrics;
+          report(token, detail + ' The written lyrics were put in the lyrics box so a retry reuses them.');
+        } else report(token, detail);
+        return;
+      }
       if (body.status === 'completed' && body.audio) {
         showAudio(inlineBlob(body.audio));
         songLyrics = body.lyrics ?? null;
@@ -147,6 +157,7 @@
         return;
       }
       if (!body.job_id) { report(token, 'The server returned an unexpected response.'); return; }
+      songLyrics = body.lyrics ?? null;
       report(token, 'Waiting in the provider queue…', 'neutral');
       await pollJob(body.job_id, token);
     } catch (error) { report(token, error instanceof Error ? error.message : 'Generation failed.'); }
@@ -167,7 +178,7 @@
       </div>
       <div class="field">
         <label for="lyrics">Original lyrics (optional)</label>
-        <textarea id="lyrics" bind:value={lyrics} maxlength="15000" placeholder="Add lyrics to generate a full song…"></textarea>
+        <textarea id="lyrics" bind:value={lyrics} maxlength="15000" placeholder="Paste your lyrics, or leave empty to have original lyrics written for you…"></textarea>
       </div>
       <div class="duo">
         <div class="field">
@@ -180,7 +191,7 @@
         <div class="field">
           <label for="engine">Generation model</label>
           <select id="engine" bind:value={engine}>
-            <option value="ace-step">ACE-Step via fal</option>
+            <option value="ace-step">ACE-Step 1.5 via fal</option>
             <option value="lyria-3.5">Google Lyria 3.5</option>
             <option value="heartmula">HeartMuLa</option>
             <option value="external-v2">External V2 (verify provider)</option>
@@ -222,7 +233,7 @@
       <div style="margin:25px 0"><StatusPanel title="Generation status" {message} {tone} /></div>
       {#if audioSrc}
         <audio controls src={audioSrc} aria-label="Generated song"></audio>
-        <p><a href={audioSrc} download={audioType === 'audio/wav' ? 'song.wav' : 'song.mp3'}>Download song</a></p>
+        <p><a href={audioSrc} download={'song.' + (downloadExtensions[audioType] ?? 'mp3')}>Download song</a></p>
       {/if}
       {#if songLyrics}
         <details><summary>Lyrics and structure</summary><pre>{songLyrics}</pre></details>
