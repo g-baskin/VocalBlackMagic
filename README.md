@@ -1,5 +1,7 @@
 # Vocal Black Magic
 
+![Vocal Black Magic: from a raw voice to a finished song](docs/assets/banner.png)
+
 **Two independently deployable SaaS applications, one lightweight Bun workspace.** Svelte 5 + SvelteKit 3 are the public-facing architecture; Python is retained for local audio prototypes and planned GPU processing.
 
 | Product | Location | Developer URL |
