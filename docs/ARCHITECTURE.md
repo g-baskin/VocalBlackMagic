@@ -40,3 +40,19 @@ VocalBlackMagic/
 - Performer-consent evidence, voice identity restriction policies, source retention rules, delete/export endpoints, audit log, abuse reporting.
 - Observability with metrics, tracing and errors; avoid leaking voice assets or lyrics to analytics providers.
 - CI tests, dependencies/license scan, secret detection, tagged releases, reproducible model revisions, GPU quota and cancellation.
+
+## Updated runtime boundary — SaaS migration
+The earlier FastAPI app entrypoints above are **retained audio prototypes**, not the user-facing web apps. The new SaaS layer is:
+
+```text
+apps/vocal-fix/             SvelteKit 3 + Bun SaaS UI + protected local API bridge
+apps/ttb-studio/             SvelteKit 3 + Bun modular monolith UI + bridge
+apps/vocal_fix/              legacy Python local reference-ingestion backend
+apps/ttb_studio/             legacy Python local generation-contract backend
+packages/{ui,contracts}/    shared frontend components and typed API contracts
+packages/{auth,database,billing}/   explicit future integration boundaries
+services/audio-engine/      planned independent Python GPU audio worker
+infra/systemd/              sample no-Docker system services
+```
+
+The new app bridges permit calls only during local development. Production upload and generation are denied pending user authentication, tenant ownership, private blob storage and billing safeguards. See `docs/SAAS_STACK.md` for the recommended deployment.

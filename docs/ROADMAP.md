@@ -6,7 +6,7 @@
 - [x] Five-file upload/consent contract and request validation; no model inference simulation.
 - [x] Presets, Premium Studio toggle and generation contract.
 - [x] Starter automated endpoint tests.
-- [ ] CI validation in GitHub Actions (add after framework works).
+- [x] GitHub Actions workflows added for Svelte/Bun and Python. CI status must be verified; a workflow file alone is not evidence of passing tests.
 
 ## Phase 1 — Vocal Fix pipeline
 - [ ] FFmpeg transcode and media probe with upload-size/duration/codec enforcement.
@@ -43,3 +43,15 @@
 - Unsupported engine/model returns explicit error; no fake waveform or placeholder 'success'.
 - Premium Studio never overwrites dry audio; idempotent pipeline retries and job cancellation.
 - Performance/load tests with long tracks and simultaneous uploads.
+
+## Phase 0B — SaaS migration (SvelteKit 3 / Bun)
+- [x] Two independent SvelteKit 3 app surfaces in Bun workspaces.
+- [x] Shared UI, contracts and placeholder auth/database/billing contracts.
+- [x] Frontend-to-local-Python proxy contracts and fail-closed production audio upload/generation.
+- [x] Docker-free systemd reference units and architecture documentation.
+- [ ] Verify passing SvelteKit 3 TypeScript checks, production builds and Python tests in CI.
+- [ ] Commit reproducible `bun.lock` and switch to frozen-lockfile installs.
+- [ ] Integrate an auth provider; secure production session checks and per-tenant access.
+- [ ] Stripe checkout and signed webhooks, entitlements, idempotent credits ledger.
+- [ ] PostgreSQL migrations, S3-compatible private audio storage, queue and GPU worker.
+- **Gate:** do not enable production vocal uploads or generation before the security and cost-accounting checklist is complete.
