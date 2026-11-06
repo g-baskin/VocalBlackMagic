@@ -4,6 +4,10 @@ This log describes repository changes, not verified public releases. No release 
 
 ## Unreleased
 
+### Changed
+- Both SvelteKit apps now use Node.js 22 and npm 11 instead of Bun, with the Node adapter, npm lockfile, native Node contract tests and production smoke tests.
+- Updated CI and systemd commands. Run `npm ci` in a fresh checkout before development; Python workers and production access restrictions are unchanged.
+
 ### Documentation
 - Added this changelog and a manual release procedure.
 

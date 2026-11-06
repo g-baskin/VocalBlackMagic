@@ -45,8 +45,8 @@ VocalBlackMagic/
 The earlier FastAPI app entrypoints above are **retained audio prototypes**, not the user-facing web apps. The new SaaS layer is:
 
 ```text
-apps/vocal-fix/             SvelteKit 3 + Bun SaaS UI + protected local API bridge
-apps/ttb-studio/             SvelteKit 3 + Bun modular monolith UI + bridge
+apps/vocal-fix/             SvelteKit 3 + Node.js SaaS UI + protected local API bridge
+apps/ttb-studio/             SvelteKit 3 + Node.js modular monolith UI + bridge
 apps/vocal_fix/              legacy Python local reference-ingestion backend
 apps/ttb_studio/             legacy Python local generation-contract backend
 packages/{ui,contracts}/    shared frontend components and typed API contracts

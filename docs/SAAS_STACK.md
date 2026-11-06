@@ -1,8 +1,8 @@
-# SaaS migration — SvelteKit 3 + Bun (Docker optional)
+# SaaS migration — SvelteKit 3 + Node.js (Docker optional)
 
 ## Status and version choice (2026-11-05)
-- Svelte 5 + SvelteKit 3 and official `@sveltejs/adapter-bun`.
-- Bun >= 1.4. Builds with `bun run --bun build`, serves with `bun ./build`.
+- Svelte 5 + SvelteKit 3 and official `@sveltejs/adapter-node`.
+- Node.js >=22.17 <23 with npm 11.6.2. Builds with `npm run build`, serves with `node ./build`.
 - Two SvelteKit apps: `apps/vocal-fix` (port 5173 dev / 3001 prod) and `apps/ttb-studio` (5174 / 3002).
 - Shared workspaces: `@vbm/ui`, `@vbm/contracts`, `@vbm/auth`, `@vbm/database`, `@vbm/billing`.
 - Legacy Python FastAPI entrypoints in `apps/vocal_fix` and `apps/ttb_studio` are retained for localhost-only audio prototypes (ports 8001/8002). Target extraction into `services/audio-engine` in a later phase; **not** a second SaaS.
@@ -12,10 +12,10 @@
 ```bash
 git clone https://github.com/g-baskin/VocalBlackMagic.git
 cd VocalBlackMagic
-bun install
-bun run dev:vocal             # http://localhost:5173
+npm ci
+npm run dev:vocal             # http://localhost:5173
 # in a second terminal
-bun run dev:ttb               # http://localhost:5174
+npm run dev:ttb               # http://localhost:5174
 ```
 The browser UIs render even without Python services, but capabilities will report unavailable. For local-only upload/generation API development:
 ```bash
@@ -30,16 +30,16 @@ Production upload/generation proxies are intentionally disabled (403) until tena
 
 ## Build and serve on Linux (no containers)
 ```bash
-bun install
-bun run check
-bun run build
+npm ci
+npm run check
+npm run build
 cd apps/vocal-fix
-HOST=127.0.0.1 PORT=3001 bun ./build
+HOST=127.0.0.1 PORT=3001 node ./build
 # other shell:
 cd apps/ttb-studio
-HOST=127.0.0.1 PORT=3002 bun ./build
+HOST=127.0.0.1 PORT=3002 node ./build
 ```
-Use the sample systemd units in `infra/systemd` (edit directories, users, ports and Bun executable location). Use a reverse proxy with TLS to publish *only after* authentication and tenancy are complete. No Docker daemon is required.
+Use the sample systemd units in `infra/systemd` (edit directories, users, ports and Node.js executable location). Use a reverse proxy with TLS to publish *only after* authentication and tenancy are complete. No Docker daemon is required.
 
 ## Cost/resource model
 - SvelteKit server: commodity CPU/RAM, independent of GPU inference.
@@ -55,9 +55,9 @@ Use the sample systemd units in `infra/systemd` (edit directories, users, ports 
 4. Stripe webhooks with signature verification, idempotent credit ledger and refund/retry handling.
 5. Consented vocal-reference processing with identity-policy controls, reference deletion and consent revocation.
 6. Security headers, rate limits, CSRF protection, logs/analytics without raw audio, and staging threat-model review.
-7. Generate/commit `bun.lock` from a successful `bun install`; use frozen installs for deterministic CI thereafter.
+7. Keep `package-lock.json` committed; review dependency changes and use `npm ci` for deterministic CI installs.
 
 ## Sources
-- Official SvelteKit Bun adapter: https://svelte.dev/docs/kit/adapter-bun
+- Official SvelteKit Node adapter: https://svelte.dev/docs/kit/adapter-node
 - SvelteKit v3 migration: https://svelte.dev/docs/kit/migrating-to-sveltekit-3
-- Bun workspaces: https://bun.com/docs/pm/workspaces
+- npm workspaces: https://docs.npmjs.com/cli/v11/using-npm/workspaces

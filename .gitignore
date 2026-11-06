@@ -17,7 +17,7 @@ data/
 *.ckpt
 *.pt
 *.pth
-# Bun / SvelteKit / Vite
+# Node.js / SvelteKit / Vite
 node_modules/
 **/node_modules/
 **/.svelte-kit/
@@ -27,4 +27,4 @@ node_modules/
 *.tsbuildinfo
 *.log
 .DS_Store
-# Commit generated bun.lock after first successful bun install (do not ignore).
+# Commit generated package-lock.json after first successful npm install (do not ignore).
