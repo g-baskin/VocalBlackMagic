@@ -55,9 +55,13 @@ export async function generateLyria(deps: LyriaDeps, request: GenerationRequest)
     signal: AbortSignal.timeout(300_000)
   });
   if (!response.ok) {
-    const detail = 'lyria failed with ' + response.status + ': ' + (await response.text().catch(() => '')).slice(0, 300);
+    const body = await response.text().catch(() => '');
+    const detail = 'lyria failed with ' + response.status + ': ' + body.slice(0, 300);
     if (response.status === 400) throw new ProviderError(422, 'Lyria rejected the song request. Prompts that imitate real artists are one common cause.', detail);
     if (response.status === 401 || response.status === 403) throw new ProviderError(502, 'Google rejected the API key or the project lacks paid Lyria access. Check GEMINI_API_KEY.', detail);
+    // Google reports an unbilled project as a 429 with a zero free-tier quota; retrying cannot succeed.
+    if (response.status === 429 && /free tier|limit:\s*0\b/i.test(body))
+      throw new ProviderError(402, 'Lyria has no free tier. Turn on billing for the Google project that owns GEMINI_API_KEY, then try again.', detail);
     if (response.status === 429) throw new ProviderError(429, 'Lyria is rate limiting requests. Try again shortly.', detail);
     throw new ProviderError(502, 'Lyria could not process the request.', detail);
   }

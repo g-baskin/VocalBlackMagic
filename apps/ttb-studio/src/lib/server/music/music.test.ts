@@ -154,6 +154,16 @@ describe('Google Lyria 3.5 adapter', () => {
     expect(headers['api-revision']).toBe('2026-05-20');
     expect(JSON.parse(String(calls[0].init?.body)).model).toBe('lyria-3.5');
   });
+  test('an unbilled project asks for billing instead of a retry', async () => {
+    const freeTier = JSON.stringify({ error: { message: 'Rate limit exceeded for model lyria-3-pro (limit: 0 requests per day on Free Tier). Please upgrade your tier at https://ai.dev/rate-limit.', code: 'too_many_requests' } });
+    const { fetch } = fakeFetch([new Response(freeTier, { status: 429 }), new Response('{"error":{"message":"Too many requests"}}', { status: 429 })]);
+    const request = { ...base, engine: 'lyria-3.5' as const };
+    await expect(generateLyria({ apiKey: 'g-key', fetch }, request)).rejects.toMatchObject({
+      status: 402,
+      publicMessage: 'Lyria has no free tier. Turn on billing for the Google project that owns GEMINI_API_KEY, then try again.'
+    });
+    await expect(generateLyria({ apiKey: 'g-key', fetch }, request)).rejects.toMatchObject({ status: 429, publicMessage: 'Lyria is rate limiting requests. Try again shortly.' });
+  });
 });
 
 describe('capabilities', () => {

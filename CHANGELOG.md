@@ -7,6 +7,9 @@ This log describes repository changes, not verified public releases. No release 
 ### Added
 - TTB Studio hosted song generation through fal (ACE-Step) and Google Lyria 3.5, with job status polling, audio format verification and in-browser playback. Development only; keys come from `FAL_KEY` and `GEMINI_API_KEY`.
 
+### Fixed
+- Lyria requests from a Google project without billing now say to turn on billing, instead of suggesting a retry that cannot succeed.
+
 ### Documentation
 - Added this changelog and a manual release procedure.
 
