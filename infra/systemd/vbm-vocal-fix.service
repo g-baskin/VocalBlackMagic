@@ -1,0 +1,23 @@
+[Unit]
+Description=Vocal Black Magic - Vocal Fix SvelteKit
+After=network.target
+
+[Service]
+Type=simple
+User=vbm
+Group=vbm
+WorkingDirectory=/opt/VocalBlackMagic/apps/vocal-fix
+Environment=NODE_ENV=production
+Environment=HOST=127.0.0.1
+Environment=PORT=3001
+EnvironmentFile=-/etc/vbm/vocal-fix.env
+ExecStart=/usr/local/bin/bun ./build
+Restart=on-failure
+RestartSec=5
+NoNewPrivileges=true
+ProtectSystem=strict
+ProtectHome=true
+PrivateTmp=true
+
+[Install]
+WantedBy=multi-user.target

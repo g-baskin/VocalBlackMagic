@@ -1,0 +1,20 @@
+{
+  "name": "vocal-black-magic",
+  "private": true,
+  "version": "0.2.0",
+  "packageManager": "bun@1.4.0",
+  "workspaces": [
+    "apps/vocal-fix",
+    "apps/ttb-studio",
+    "packages/*"
+  ],
+  "scripts": {
+    "dev:vocal": "bun run --filter @vbm/vocal-fix dev",
+    "dev:ttb": "bun run --filter @vbm/ttb-studio dev",
+    "build": "bun run build:vocal && bun run build:ttb",
+    "build:vocal": "bun run --filter @vbm/vocal-fix build",
+    "build:ttb": "bun run --filter @vbm/ttb-studio build",
+    "check": "bun run --filter @vbm/vocal-fix check && bun run --filter @vbm/ttb-studio check",
+    "test": "bun test packages"
+  }
+}

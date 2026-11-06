@@ -1,7 +1,9 @@
+# Python
 __pycache__/
 *.py[cod]
 .pytest_cache/
 .venv/
+# Application secrets and user data
 .env
 .env.*
 !.env.example
@@ -15,4 +17,14 @@ data/
 *.ckpt
 *.pt
 *.pth
+# Bun / SvelteKit / Vite
+node_modules/
+**/node_modules/
+**/.svelte-kit/
+**/build/
+**/.vite/
+**/dist/
+*.tsbuildinfo
+*.log
 .DS_Store
+# Commit generated bun.lock after first successful bun install (do not ignore).

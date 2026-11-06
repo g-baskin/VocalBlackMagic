@@ -1,0 +1,13 @@
+{
+  "name": "@vbm/ui",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    "./BrandHeader.svelte": "./src/BrandHeader.svelte",
+    "./StatusPanel.svelte": "./src/StatusPanel.svelte"
+  },
+  "peerDependencies": {
+    "svelte": "^5.57.1"
+  }
+}
