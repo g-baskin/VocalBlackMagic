@@ -10,6 +10,9 @@ This log describes repository changes, not verified public releases. No release 
 ### Documentation
 - Added this changelog and a manual release procedure.
 
+### Licensing
+- Relicensed the project from MIT to the GNU Affero General Public License v3.0 or later (AGPL-3.0-or-later). Copies obtained earlier keep their MIT terms.
+
 ## 0.2.0 (current repository version, not a published release)
 
 ### Added

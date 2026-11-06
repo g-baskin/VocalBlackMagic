@@ -1,7 +1,7 @@
 # Roadmap and implementation acceptance criteria
 
 ## Phase 0 — Repo foundation (this initial commit)
-- [x] Public GitHub monorepo, README, MIT license, docs, ignore rules.
+- [x] Public GitHub monorepo, README, license (AGPL-3.0-or-later; MIT before November 2026), docs, ignore rules.
 - [x] Two separately runnable FastAPI apps and independent browser surfaces.
 - [x] Five-file upload/consent contract and request validation; no model inference simulation.
 - [x] Presets, Premium Studio toggle and generation contract.
