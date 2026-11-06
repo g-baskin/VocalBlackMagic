@@ -7,7 +7,7 @@ export const soundCharacterNames: Record<SoundCharacter, string> = {
   clean: 'Studio Clean',
   custom: 'Custom'
 };
-export const generationEngines = ['ace-step', 'heartmula', 'external-v2'] as const;
+export const generationEngines = ['ace-step', 'lyria-3.5', 'heartmula', 'external-v2'] as const;
 export type GenerationEngine = (typeof generationEngines)[number];
 export type SongMode = 'full-song' | 'instrumental';
 export interface GenerationRequest {
@@ -20,6 +20,24 @@ export interface GenerationRequest {
   texture: number;
   human_variation: number;
   mastering_intensity: number;
+  duration_seconds: number;
+}
+export const minSongSeconds = 10;
+export const maxSongSeconds = 240;
+export type GenerationJobStatus = 'queued' | 'running' | 'completed' | 'failed';
+export interface InlineAudio {
+  content_type: 'audio/mpeg' | 'audio/wav';
+  data_base64: string;
+  bytes: number;
+}
+export interface GenerationJob {
+  job_id: string;
+  engine: GenerationEngine;
+  status: GenerationJobStatus;
+  detail?: string;
+  audio_url?: string;
+  audio?: InlineAudio;
+  lyrics?: string | null;
 }
 export interface EngineCapability {
   id: GenerationEngine;
@@ -56,6 +74,8 @@ export function validateGenerationRequest(request: GenerationRequest): string | 
   if (!generationEngines.includes(request.engine)) return 'Unknown generation engine.';
   if (!soundCharacters.includes(request.sound_character)) return 'Unknown sound character.';
   if (request.mode !== 'full-song' && request.mode !== 'instrumental') return 'Unknown song mode.';
+  if (!Number.isInteger(request.duration_seconds) || request.duration_seconds < minSongSeconds || request.duration_seconds > maxSongSeconds)
+    return 'duration_seconds must be an integer from ' + minSongSeconds + ' to ' + maxSongSeconds + '.';
   for (const field of ['texture','human_variation','mastering_intensity'] as const) {
     if (!Number.isInteger(request[field]) || request[field] < 0 || request[field] > 100) return field + ' must be an integer from 0 to 100.';
   }

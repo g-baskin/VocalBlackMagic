@@ -15,6 +15,6 @@
     "build:vocal": "bun run --filter @vbm/vocal-fix build",
     "build:ttb": "bun run --filter @vbm/ttb-studio build",
     "check": "bun run --filter @vbm/vocal-fix check && bun run --filter @vbm/ttb-studio check",
-    "test": "bun test packages"
+    "test": "bun test packages apps/ttb-studio/src"
   }
 }

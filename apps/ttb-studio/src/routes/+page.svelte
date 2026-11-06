@@ -1,10 +1,11 @@
 <script lang="ts">
-  import { onMount } from 'svelte';
+  import { onDestroy, onMount } from 'svelte';
   import BrandHeader from '@vbm/ui/BrandHeader.svelte';
   import StatusPanel from '@vbm/ui/StatusPanel.svelte';
   import {
-    soundCharacters, soundCharacterNames, validateGenerationRequest,
-    type SoundCharacter, type GenerationEngine, type SongMode, type TTBCapabilities, type GenerationRequest
+    soundCharacters, soundCharacterNames, validateGenerationRequest, minSongSeconds, maxSongSeconds,
+    type SoundCharacter, type GenerationEngine, type SongMode, type TTBCapabilities, type GenerationRequest,
+    type GenerationJob, type InlineAudio
   } from '@vbm/contracts';
 
   const vocalUrl = import.meta.env.VITE_VOCAL_FIX_URL || 'http://localhost:5173';
@@ -17,42 +18,139 @@
   let texture = $state(70);
   let human = $state(65);
   let mastering = $state(25);
+  let duration = $state(120);
+  let audioSrc = $state<string | null>(null);
+  let audioType = $state('audio/mpeg');
+  let songLyrics = $state<string | null>(null);
+  let run = 0;
   let busy = $state(false);
-  let message = $state('Checking local audio engines…');
+  let message = $state('Checking hosted models…');
   let tone = $state<'neutral'|'warning'|'success'>('neutral');
   let capabilities = $state<TTBCapabilities | null>(null);
+  type Tone = 'neutral' | 'warning' | 'success';
+  type JobReply = GenerationJob & { detail?: string };
 
   onMount(async () => {
     try {
       const response = await fetch('/api/capabilities');
-      if (!response.ok) { message = 'Python audio service is offline. The design editor remains available.'; tone = 'warning'; return; }
+      if (!response.ok) { message = 'Could not check hosted model availability. The editor remains available.'; tone = 'warning'; return; }
       capabilities = await response.json() as TTBCapabilities;
-      message = 'The model adapters are not configured yet. You can prepare settings, but audio generation remains unavailable.';
-      tone = 'neutral';
-    } catch { message = 'Audio backend unavailable.'; tone = 'warning'; }
+      message = capabilities.generation_ready
+        ? 'Ready. Choose a model and generate a song.'
+        : 'No hosted model is ready. Add FAL_KEY or GEMINI_API_KEY to the server environment.';
+      tone = capabilities.generation_ready ? 'success' : 'neutral';
+    } catch { message = 'Could not check hosted model availability.'; tone = 'warning'; }
   });
+
+  onDestroy(() => { run += 1; clearAudio(); });
+
+  // Ignore results from a superseded or unmounted request.
+  function report(token: number, text: string, nextTone: Tone = 'warning') {
+    if (token !== run) return;
+    message = text;
+    tone = nextTone;
+  }
+
+  async function readJson<T>(response: Response): Promise<Partial<T>> {
+    try { return await response.json() as Partial<T>; } catch { return {}; }
+  }
+
+  function clearAudio() {
+    if (audioSrc) URL.revokeObjectURL(audioSrc);
+    audioSrc = null;
+  }
+
+  function showAudio(blob: Blob) {
+    clearAudio();
+    audioType = blob.type || 'audio/mpeg';
+    audioSrc = URL.createObjectURL(blob);
+  }
+
+  function inlineBlob(audio: InlineAudio): Blob {
+    const bytes = Uint8Array.from(atob(audio.data_base64), (char) => char.charCodeAt(0));
+    return new Blob([bytes], { type: audio.content_type });
+  }
+
+  const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
+  const retryable = (status: number) => status === 429 || status >= 500;
+  const maxPollFailures = 3;
+
+  async function loadAudio(url: string, jobId: string, token: number) {
+    report(token, 'Downloading and verifying audio…', 'neutral');
+    try {
+      const audio = await fetch(url);
+      if (!audio.ok) {
+        const body = await readJson<{ detail: string }>(audio);
+        report(token, (body.detail || 'The finished audio could not be verified.') + ' Job id: ' + jobId);
+        return;
+      }
+      const blob = await audio.blob();
+      if (token !== run) return;
+      showAudio(blob);
+      report(token, 'Song ready.', 'success');
+    } catch { report(token, 'The audio download was incomplete. Job id: ' + jobId); }
+  }
+
+  async function pollJob(jobId: string, token: number) {
+    const deadline = Date.now() + 15 * 60_000;
+    let failures = 0;
+    // A paid job keeps running server-side, so transient errors retry and the id is shown on give-up.
+    const giveUp = (text: string) => report(token, text + ' Job id: ' + jobId);
+    while (token === run && Date.now() < deadline) {
+      await sleep(3000 * 2 ** failures);
+      if (token !== run) return;
+      let response: Response;
+      try { response = await fetch('/api/generations/' + encodeURIComponent(jobId)); }
+      catch {
+        if (++failures > maxPollFailures) { giveUp('Lost connection while checking the song.'); return; }
+        continue;
+      }
+      const job = await readJson<JobReply>(response);
+      if (!response.ok) {
+        if (retryable(response.status) && ++failures <= maxPollFailures) continue;
+        giveUp(job.detail || 'Could not check the generation job.');
+        return;
+      }
+      failures = 0;
+      if (job.status === 'failed') { report(token, job.detail || 'The provider could not generate this song.'); return; }
+      if (job.status === 'completed' && job.audio_url) { await loadAudio(job.audio_url, jobId, token); return; }
+      report(token, job.status === 'queued' ? 'Waiting in the provider queue…' : 'Generating your song…', 'neutral');
+    }
+    if (token === run) giveUp('The song is taking longer than 15 minutes. Try again later.');
+  }
 
   async function generate(event: SubmitEvent) {
     event.preventDefault();
     const payload: GenerationRequest = {
       prompt, lyrics: lyrics.trim() || null, mode, engine,
       sound_character: character, premium_studio: premium,
-      texture, human_variation: human, mastering_intensity: mastering
+      texture, human_variation: human, mastering_intensity: mastering, duration_seconds: duration
     };
     const error = validateGenerationRequest(payload);
     if (error) { message = error; tone = 'warning'; return; }
-    busy = true; message = 'Checking generation readiness…'; tone = 'neutral';
+    const token = ++run;
+    busy = true;
+    report(token, engine === 'lyria-3.5' ? 'Generating with Lyria. This can take a few minutes…' : 'Submitting your song…', 'neutral');
+    songLyrics = null; clearAudio();
     try {
       const response = await fetch('/api/generations', {
         method: 'POST', headers: { 'content-type': 'application/json' },
         body: JSON.stringify(payload)
       });
-      const body = await response.json();
-      if (!response.ok) { message = body.detail || 'No generation provider configured.'; tone = 'warning'; return; }
-      message = 'Generation job accepted. Inspect the job dashboard for status.';
-      tone = 'success';
-    } catch (error) { message = error instanceof Error ? error.message : 'Generation failed.'; tone = 'warning'; }
-    finally { busy = false; }
+      const body = await readJson<JobReply>(response);
+      if (token !== run) return;
+      if (!response.ok) { report(token, body.detail || 'The song request failed (HTTP ' + response.status + ').'); return; }
+      if (body.status === 'completed' && body.audio) {
+        showAudio(inlineBlob(body.audio));
+        songLyrics = body.lyrics ?? null;
+        report(token, 'Song ready.', 'success');
+        return;
+      }
+      if (!body.job_id) { report(token, 'The server returned an unexpected response.'); return; }
+      report(token, 'Waiting in the provider queue…', 'neutral');
+      await pollJob(body.job_id, token);
+    } catch (error) { report(token, error instanceof Error ? error.message : 'Generation failed.'); }
+    finally { if (token === run) busy = false; }
   }
 </script>
 
@@ -82,11 +180,16 @@
         <div class="field">
           <label for="engine">Generation model</label>
           <select id="engine" bind:value={engine}>
-            <option value="ace-step">ACE-Step 1.5</option>
+            <option value="ace-step">ACE-Step via fal</option>
+            <option value="lyria-3.5">Google Lyria 3.5</option>
             <option value="heartmula">HeartMuLa</option>
             <option value="external-v2">External V2 (verify provider)</option>
           </select>
         </div>
+      </div>
+      <div class="field">
+        <div class="meter"><label for="duration">Song length</label><span class="value">{duration} s</span></div>
+        <input class="slider" id="duration" type="range" min={minSongSeconds} max={maxSongSeconds} step="10" bind:value={duration} />
       </div>
       <div class="field">
         <label>Sound character</label>
@@ -103,7 +206,7 @@
         <span><strong>Premium Studio finishing</strong><small>Optional, separate from sound character. When implemented, it will preserve the original unmastered recording.</small></span>
       </label>
       <button class="primary" type="submit" disabled={busy || prompt.trim().length < 5}>
-        {busy ? 'Checking…' : 'Check generation readiness'}
+        {busy ? 'Generating…' : 'Generate song'}
       </button>
     </form>
     <aside class="panel">
@@ -116,16 +219,23 @@
       <input class="slider" id="human" type="range" min="0" max="100" step="1" bind:value={human} />
       <div class="meter"><label for="master">Mastering intensity</label><span class="value">{mastering}%</span></div>
       <input class="slider" id="master" type="range" min="0" max="100" step="1" bind:value={mastering} />
-      <div style="margin:25px 0"><StatusPanel title="Generation readiness" {message} {tone} /></div>
+      <div style="margin:25px 0"><StatusPanel title="Generation status" {message} {tone} /></div>
+      {#if audioSrc}
+        <audio controls src={audioSrc} aria-label="Generated song"></audio>
+        <p><a href={audioSrc} download={audioType === 'audio/wav' ? 'song.wav' : 'song.mp3'}>Download song</a></p>
+      {/if}
+      {#if songLyrics}
+        <details><summary>Lyrics and structure</summary><pre>{songLyrics}</pre></details>
+      {/if}
       <h2>Engine availability</h2>
       {#if capabilities}
         {#each capabilities.engines as item (item.id)}
           <p><strong>{item.name}</strong> · {item.status}</p>
         {/each}
       {:else}
-        <p class="note">Start the Python prototype on 127.0.0.1:8002 for local capability discovery.</p>
+        <p class="note">Checking hosted model availability…</p>
       {/if}
-      <p class="note">No real audio is generated by this scaffold. Model deployment, premium processing, storage, and billing are implementation phases.</p>
+      <p class="note">Songs are generated by hosted providers, not on this computer. Audio is verified before playback and is not saved yet. Premium Studio, storage and billing are later phases.</p>
     </aside>
   </div>
 </main>
