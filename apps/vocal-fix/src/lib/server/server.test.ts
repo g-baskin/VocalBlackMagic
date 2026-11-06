@@ -88,6 +88,25 @@ describe('ffprobe validation', () => {
     await writeFile(bad, new Uint8Array(4096).fill(7));
     await expect(probeAndVerify(bad)).rejects.toThrow(VocalFixError);
   });
+  test('rejects a file that is corrupted partway through', async () => {
+    const good = join(dir, 'tone.flac');
+    await ffmpeg([
+      '-y',
+      '-f',
+      'lavfi',
+      '-i',
+      'sine=frequency=440:duration=4',
+      '-c:a',
+      'flac',
+      good
+    ]);
+    const bytes = new Uint8Array(await Bun.file(good).arrayBuffer());
+    const middle = Math.floor(bytes.length / 2);
+    for (let i = middle; i < Math.min(bytes.length, middle + 4096); i++) bytes[i] = (i * 37) & 0xff;
+    const bad = join(dir, 'corrupt.flac');
+    await writeFile(bad, bytes);
+    await expect(probeAndVerify(bad)).rejects.toThrow('decode cleanly');
+  });
   test('parseProbe rejects missing audio', () => {
     expect(() => parseProbe('{"streams":[]}')).toThrow('No audio stream');
   });

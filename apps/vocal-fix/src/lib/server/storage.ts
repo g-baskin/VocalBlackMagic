@@ -15,6 +15,8 @@ export interface Probe {
   sample_rate: number;
   channels: number;
   bit_rate: number | null;
+  /** Non-fatal messages from the full decode (ffmpeg exited 0), kept for the record. */
+  decode_warnings?: string;
 }
 
 export interface Recording {

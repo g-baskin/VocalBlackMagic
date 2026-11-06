@@ -130,8 +130,18 @@ export async function probeAndVerify(path: string, signal?: AbortSignal): Promis
       signal
     }
   );
-  if (decode.code !== 0 || decode.stderr.trim())
-    throw new VocalFixError('Audio failed to decode cleanly.', 422);
+  // -xerror makes ffmpeg exit non-zero on any real decode error. Messages with a zero exit are
+  // non-fatal (some ffmpeg builds note container quirks in browser WebM/Opus recordings), so they
+  // are kept on the probe instead of rejecting a file that decoded completely.
+  const stderr = decode.stderr.trim();
+  if (decode.code !== 0) {
+    const detail = stderr.split('\n')[0]?.slice(0, 200);
+    throw new VocalFixError(
+      detail ? `Audio failed to decode cleanly: ${detail}` : 'Audio failed to decode cleanly.',
+      422
+    );
+  }
+  if (stderr) parsed.decode_warnings = stderr.slice(0, 500);
   return parsed;
 }
 
