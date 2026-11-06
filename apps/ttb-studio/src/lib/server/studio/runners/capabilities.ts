@@ -1,16 +1,17 @@
 import type { StudioModel, StudioModelInfo } from '@vbm/contracts';
 import { modelCosts } from './routed';
 import { models } from './models';
-import { runnerUnavailable, type RunnerKeys } from './router';
+import { runnerUnavailable, type HealthCache, type RunnerKeys } from './router';
 
 /** Models x runners with live status (the engine's health is asked once per call). */
 export async function modelInfos(keys: RunnerKeys, allowed: boolean): Promise<StudioModelInfo[]> {
   const out: StudioModelInfo[] = [];
+  const cache: HealthCache = {};
   for (const model of models) {
     const runners: StudioModelInfo['runners'] = [];
     for (const runner of model.runners) {
       const reason = allowed
-        ? await runnerUnavailable(runner, keys)
+        ? await runnerUnavailable(runner, keys, cache)
         : 'disabled outside development';
       runners.push({
         kind: runner.kind,

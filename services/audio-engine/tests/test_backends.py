@@ -74,3 +74,26 @@ def test_diffrhythm_subprocess_gets_absolute_paths_and_the_download_cache(
     env = seen["env"]
     assert isinstance(env, dict)
     assert env["HF_HUB_CACHE"] == str(backend.hf_home) and Path(env["HF_HUB_CACHE"]).is_absolute()
+
+
+def test_ace_step_readiness_needs_every_upstream_folder(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """Regression: the main HF repo ships the 1.7B LM, and upstream also needs vae/ and
+    Qwen3-Embedding-0.6B/. Only the DiT plus a 0.6B LM folder must not read as installed."""
+    from vbm_engine.backends import ace_step
+
+    monkeypatch.setattr(ace_step, "module_available", lambda _name: True)
+    b = ace_step.AceStepBackend(tmp_path)
+    ck = b.checkpoint_dir
+    for d in ("acestep-v15-turbo", "acestep-5Hz-lm-0.6B"):
+        (ck / d).mkdir(parents=True)
+        (ck / d / "w.safetensors").write_bytes(b"x")
+    r = b.readiness("cuda")
+    assert not r.installed and "weights not downloaded" in (r.reason or "")
+    for d in ("acestep-5Hz-lm-1.7B", "vae", "Qwen3-Embedding-0.6B"):
+        (ck / d).mkdir(parents=True)
+    assert not b.readiness("cuda").installed  # empty folders are not weights
+    for d in ("acestep-5Hz-lm-1.7B", "vae", "Qwen3-Embedding-0.6B"):
+        (ck / d / "w.safetensors").write_bytes(b"x")
+    assert b.readiness("cuda").installed

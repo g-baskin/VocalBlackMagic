@@ -36,37 +36,39 @@
   };
 </script>
 
-<div class="picker" role="radiogroup" aria-label="Model">
+<div class="picker">
   {#each groups as group (group.id)}
-    <p class="group">{group.title}</p>
-    <ul>
-      {#each group.list as item (item.value)}
-        <li>
-          <label class:on={value === item.value} class:off={item.disabled}>
-            <input
-              type="radio"
-              name="model"
-              value={item.value}
-              bind:group={value}
-              disabled={item.disabled}
-            />
-            <span class="head">
-              <span class="name">{item.name}</span>
-              <span class="badges">
-                {#if item.runner}<span class="badge run"
-                    >{runnerNames[item.runner] ?? item.runner}</span
-                  >{/if}
-                <span class="badge" class:nc={!item.commercial}
-                  >{item.commercial ? item.license : 'Non-commercial'}</span
-                >
+    <fieldset>
+      <legend class="group">{group.title}</legend>
+      <ul>
+        {#each group.list as item (item.value)}
+          <li>
+            <label class:on={value === item.value} class:off={item.disabled}>
+              <input
+                type="radio"
+                name="model"
+                value={item.value}
+                bind:group={value}
+                disabled={item.disabled}
+              />
+              <span class="head">
+                <span class="name">{item.name}</span>
+                <span class="badges">
+                  {#if item.runner}<span class="badge run"
+                      >{runnerNames[item.runner] ?? item.runner}</span
+                    >{/if}
+                  <span class="badge" class:nc={!item.commercial}
+                    >{item.commercial ? item.license : 'Non-commercial'}</span
+                  >
+                </span>
               </span>
-            </span>
-            <span class="detail">{item.detail}</span>
-            {#if item.reason}<span class="reason">{item.reason}</span>{/if}
-          </label>
-        </li>
-      {/each}
-    </ul>
+              <span class="detail">{item.detail}</span>
+              {#if item.reason}<span class="reason">{item.reason}</span>{/if}
+            </label>
+          </li>
+        {/each}
+      </ul>
+    </fieldset>
   {/each}
 </div>
 
@@ -75,7 +77,16 @@
     display: grid;
     gap: 0.5rem;
   }
+  fieldset {
+    border: 0;
+    margin: 0;
+    padding: 0;
+    min-width: 0;
+    display: grid;
+    gap: 0.4rem;
+  }
   .group {
+    padding: 0;
     margin: 0.4rem 0 0;
     font-family: var(--vbm-font-mono);
     font-size: 0.72rem;

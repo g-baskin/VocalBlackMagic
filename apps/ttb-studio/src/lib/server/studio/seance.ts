@@ -71,6 +71,8 @@ export class SeanceRefused extends ProviderError {
 }
 
 const idPattern = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/;
+/** Length requested for every séance take (models that pick their own length ignore it). */
+export const seanceSeconds = 60;
 export const isSeanceId = (id: string) => idPattern.test(id);
 const dir = (deps: Pick<SeanceDeps, 'root'>) => path.join(deps.root, 'studio', 'seances');
 function file(deps: Pick<SeanceDeps, 'root'>, id: string, suffix = '.json'): string {
@@ -183,7 +185,8 @@ export async function startSeance(deps: SeanceDeps, request: SeanceRequest): Pro
           instrumental,
           engine: 'minimax-music-1.5',
           model: entry.model,
-          duration_seconds: null,
+          // Same, short length for every take: a fair comparison, and GPU-billed runners cost less.
+          duration_seconds: seanceSeconds,
           sound_character: 'raw',
           takes: 1,
           cover: false

@@ -45,13 +45,13 @@ except ImportError:  # importable without modal (tests, mypy, CI)
 APP_NAME = "vbm-engine"
 GPU = os.environ.get("VBM_MODAL_GPU", "L4")
 BACKEND = os.environ.get("VBM_MODAL_BACKEND", "ace-step")
-SCALEDOWN_SECONDS = int(os.environ.get("VBM_MODAL_SCALEDOWN", "300"))
+SCALEDOWN_SECONDS = int(os.environ.get("VBM_MODAL_SCALEDOWN", "60"))
 CACHE = "/cache"
 HERE = Path(__file__).resolve().parent
 TORCH_INDEX = "https://download.pytorch.org/whl/cu128"
 
 BACKEND_REQS = {
-    "ace-step": ["requirements-ace-step.txt"],
+    "ace-step": [],
     "heartmula": ["requirements-heartmula.txt"],
     "diffrhythm2": [],
     "yue2": [],
@@ -68,7 +68,11 @@ def _image() -> Any:
         .apt_install("git", "ffmpeg", "libsndfile1", "espeak-ng")
         .pip_install_from_requirements(str(HERE / "requirements-base.txt"))
     )
-    if BACKEND != "none":
+    if BACKEND == "ace-step":
+        img = img.add_local_file(
+            str(HERE / "install-ace-step.sh"), "/opt/install-ace-step.sh", copy=True
+        ).run_commands("sh /opt/install-ace-step.sh")
+    elif BACKEND != "none":
         img = img.pip_install("torch", "torchaudio", extra_index_url=TORCH_INDEX)
     for req in BACKEND_REQS[BACKEND]:
         img = img.pip_install_from_requirements(str(HERE / req), extra_index_url=TORCH_INDEX)
@@ -94,7 +98,8 @@ if modal is not None:
         secrets=[secret],
         max_containers=1,
         scaledown_window=SCALEDOWN_SECONDS,
-        timeout=3600,
+        timeout=900,
+        startup_timeout=900,
     )
     @modal.concurrent(max_inputs=32)
     @modal.asgi_app()
@@ -106,7 +111,8 @@ if modal is not None:
         # Public URL: token required (create_app refuses without one); no localhost Host guard.
         return create_app(replace(Settings.from_env(), local_bind=False))
 
-    @app.function(image=image, gpu=GPU, volumes={CACHE: volume}, secrets=[secret], timeout=7200)
+    # CPU only: downloading weights needs no GPU, so it is not billed at GPU rates.
+    @app.function(image=image, volumes={CACHE: volume}, secrets=[secret], timeout=3600)
     def download(model: str) -> None:
         from vbm_engine.download import main
 

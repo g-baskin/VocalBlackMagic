@@ -32,7 +32,7 @@ Security: the engine **refuses to start without `VBM_ENGINE_TOKEN`**, on any add
 
 | Model          | Licence                               | Tasks                               | GPU memory                                            | Download (estimate) | Upstream (pinned)                                                                                           |
 | -------------- | ------------------------------------- | ----------------------------------- | ----------------------------------------------------- | ------------------- | ----------------------------------------------------------------------------------------------------------- |
-| `ace-step-1.5` | MIT                                   | text2music, extend, repaint, cover  | about 8 GB (turbo DiT + 0.6B LM)                      | about 10 GB         | `ace-step/ACE-Step-1.5` @ `ca1e85fe`                                                                        |
+| `ace-step-1.5` | MIT                                   | text2music, extend, repaint, cover  | about 12 GB (turbo DiT + 1.7B LM, estimate)           | about 10 GB         | `ace-step/ACE-Step-1.5` @ `ca1e85fe`                                                                        |
 | `heartmula`    | Apache-2.0                            | text2music (max 240 s)              | about 16 GB (bf16; upstream lazy loading helps)       | about 16 GB         | `HeartMuLa/heartlib` @ `5858ca8f`                                                                           |
 | `diffrhythm-2` | Apache-2.0                            | text2music (max 210 s)              | about 12 GB                                           | about 6 GB          | `ASLP-lab/DiffRhythm2` @ `7804f821`                                                                         |
 | `yue2`         | **CC BY-NC 4.0 (non-commercial)**     | text2music                          | 24 GB NVIDIA with BF16 (upstream's stated minimum)    | about 16 GB         | `m-a-p/YuE2-3B` HF rev `8f24312f`, wheel `yue2_infer` 0.1.5                                                  |
@@ -40,7 +40,7 @@ Security: the engine **refuses to start without `VBM_ENGINE_TOKEN`**, on any add
 The memory and download figures are estimates, except YuE2's 24 GB, which comes from its model card. Measure them on first real use. The download command insists on the estimate plus 5 GB free before it starts.
 
 Notes per model:
-- **ACE-Step 1.5:** extend uses upstream's repaint outpainting (`padding_utils.py` pads silence when the repaint range goes past the source), so it runs as one pass after the source and one before. Upstream has no torch for Intel Macs, so it can't run on an x86_64 Mac (torch stops at 2.2.2 there; upstream needs 2.9.1 or newer on macOS arm64, or CUDA builds).
+- **ACE-Step 1.5:** extend uses upstream's repaint outpainting (`padding_utils.py` pads silence when the repaint range goes past the source), so it runs as one pass after the source and one before. It is installed with `install-ace-step.sh` (upstream's nano-vllm dependency isn't on PyPI), and the LM runs on the `pt` backend by default (`VBM_ACESTEP_LM_BACKEND=vllm` opts in). Upstream has no torch for Intel Macs, so it can't run on an x86_64 Mac (torch stops at 2.2.2 there; upstream needs 2.9.1 or newer on macOS arm64, or CUDA builds).
 - **HeartMuLa / DiffRhythm 2:** upstream only exposes generation from text, so they offer text2music only. DiffRhythm 2 isn't a pip package: the download clones it at the pinned commit, and it needs `espeak-ng`.
 - **YuE2:** `commercial: false`. It's here for personal use, and the Studio labels it. Upstream "cover" takes a sheet-music (ABC) score and transcribed lyrics rather than audio, so it isn't offered. Song length follows the lyrics.
 
@@ -50,7 +50,7 @@ Notes per model:
 cd services/audio-engine
 /usr/local/bin/python3.12 -m venv .venv
 .venv/bin/pip install -r requirements-base.txt -r requirements-dev.txt
-# optional, GPU machines: .venv/bin/pip install -r requirements-ace-step.txt --extra-index-url https://download.pytorch.org/whl/cu128
+# optional, GPU machines: PATH=$PWD/.venv/bin:$PATH ACESTEP_SRC=$PWD/.cache/ace-step-src sh install-ace-step.sh
 export VBM_ENGINE_TOKEN="$(openssl rand -hex 32)"
 .venv/bin/python -m vbm_engine.download ace-step-1.5     # checks free disk first
 .venv/bin/python -m vbm_engine --host 127.0.0.1 --port 8090

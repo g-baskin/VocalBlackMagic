@@ -137,7 +137,8 @@ function directCall(direct: Direct, prompt: string): { url: string; init: Reques
         headers: { ...json, 'x-api-key': direct.key, 'anthropic-version': '2023-06-01' },
         body: JSON.stringify({
           model: lyricistModels.anthropic,
-          max_tokens: 1500,
+          // Claude thinks only when asked (no `thinking` block here), so this is all visible text.
+          max_tokens: lyricistOutputTokens,
           system: lyricistSystem,
           messages: [{ role: 'user', content: prompt }]
         })
@@ -151,7 +152,10 @@ function directCall(direct: Direct, prompt: string): { url: string; init: Reques
         headers: { ...json, authorization: 'Bearer ' + direct.key },
         body: JSON.stringify({
           model: lyricistModels.openai,
-          max_completion_tokens: 1500,
+          // GPT-6 Luna reasons at `medium` by default and reasoning tokens count against this
+          // limit (https://platform.openai.com/docs/guides/reasoning); lyrics need little thought.
+          reasoning_effort: 'low',
+          max_completion_tokens: lyricistOutputTokens,
           messages: [
             { role: 'system', content: lyricistSystem },
             { role: 'user', content: prompt }
@@ -169,14 +173,40 @@ function directCall(direct: Direct, prompt: string): { url: string; init: Reques
       headers: { ...json, 'x-goog-api-key': direct.key },
       body: JSON.stringify({
         system_instruction: { parts: [{ text: lyricistSystem }] },
-        contents: [{ role: 'user', parts: [{ text: prompt }] }]
+        contents: [{ role: 'user', parts: [{ text: prompt }] }],
+        // 3.5 Flash-Lite thinks at `minimal` by default; pin it so a default change cannot eat
+        // the visible budget (https://ai.google.dev/gemini-api/docs/thinking).
+        generationConfig: {
+          maxOutputTokens: lyricistOutputTokens,
+          // Enum values per https://ai.google.dev/api/generate-content (ThinkingConfig.thinkingLevel).
+          thinkingConfig: { thinkingLevel: 'MINIMAL' }
+        }
       })
     }
   };
 }
 
+/** Room for the lyrics plus any reasoning tokens the provider counts against the same limit. */
+export const lyricistOutputTokens = 4096;
+
+/** True when the provider stopped at its token limit: the lyrics may be cut off mid-song. */
+export function hitTokenLimit(name: Direct['name'], data: unknown): boolean {
+  const d = data as Record<string, unknown>;
+  if (name === 'anthropic') return d.stop_reason === 'max_tokens';
+  if (name === 'openai')
+    return (
+      (d.choices as { finish_reason?: unknown }[] | undefined)?.[0]?.finish_reason === 'length'
+    );
+  return (
+    (d.candidates as { finishReason?: unknown }[] | undefined)?.[0]?.finishReason === 'MAX_TOKENS'
+  );
+}
+
 export function directText(name: Direct['name'], data: unknown): string {
   const d = data as Record<string, unknown>;
+  // A truncated answer is never a complete song: fail so the chain falls back.
+  if (hitTokenLimit(name, data))
+    throw new ProviderError(502, 'The lyricist ran out of room.', name + ' hit its token limit');
   let text: unknown;
   if (name === 'anthropic')
     text = (d.content as { type?: string; text?: string }[] | undefined)

@@ -21,6 +21,7 @@ before generating, and a cancel during generation discards the output (JobManage
 
 from __future__ import annotations
 
+import os
 import threading
 from pathlib import Path
 from typing import Any
@@ -29,9 +30,13 @@ from vbm_engine.backends.base import GenerationInput, JobContext, Readiness, mod
 
 UPSTREAM_COMMIT = "ca1e85fe9430179831e6bc6be790c332190a3866"
 HF_REPO = "ACE-Step/Ace-Step1.5"
+HF_REVISION = "19671f406d603126926c1b7e2adc169acbcade22"
 DIT_CONFIG = "acestep-v15-turbo"
-LM_MODEL = "acestep-5Hz-lm-0.6B"
-MIN_CUDA_GB = 8.0
+# The main repo ships the 1.7B LM (upstream DEFAULT_LM_MODEL); 0.6B lives in a separate repo.
+LM_MODEL = "acestep-5Hz-lm-1.7B"
+# Folders upstream's _ensure_models_present expects under checkpoints/ (MAIN_MODEL_COMPONENTS).
+REQUIRED_DIRS = (DIT_CONFIG, LM_MODEL, "vae", "Qwen3-Embedding-0.6B")
+MIN_CUDA_GB = 12.0
 
 
 class AceStepBackend:
@@ -48,9 +53,10 @@ class AceStepBackend:
         self._llm: Any = None
 
     def _weights_present(self) -> bool:
-        return (self.checkpoint_dir / DIT_CONFIG).is_dir() and (
-            self.checkpoint_dir / LM_MODEL
-        ).is_dir()
+        return all(
+            (self.checkpoint_dir / d).is_dir() and any((self.checkpoint_dir / d).iterdir())
+            for d in REQUIRED_DIRS
+        )
 
     def readiness(self, device: str) -> Readiness:
         if not module_available("acestep") or not module_available("torch"):
@@ -71,7 +77,7 @@ class AceStepBackend:
         from huggingface_hub import snapshot_download
 
         self.checkpoint_dir.mkdir(parents=True, exist_ok=True)
-        snapshot_download(repo_id=HF_REPO, local_dir=str(self.checkpoint_dir))
+        snapshot_download(repo_id=HF_REPO, revision=HF_REVISION, local_dir=str(self.checkpoint_dir))
 
     def _load(self, device: str) -> tuple[Any, Any]:
         with self._lock:
@@ -89,7 +95,9 @@ class AceStepBackend:
                 llm.initialize(
                     checkpoint_dir=str(self.checkpoint_dir),
                     lm_model_path=LM_MODEL,
-                    backend="vllm" if device == "cuda" else "pt",
+                    # "pt" by default: nano-vllm needs flash-attn wheels that exist only for
+                    # Python 3.11; VBM_ACESTEP_LM_BACKEND=vllm opts in.
+                    backend=os.environ.get("VBM_ACESTEP_LM_BACKEND", "pt"),
                     device=device,
                 )
                 self._dit, self._llm = dit, llm

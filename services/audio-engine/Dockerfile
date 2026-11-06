@@ -26,11 +26,11 @@ RUN apt-get update \
     && python3.12 -m venv /opt/venv
 
 WORKDIR /app
-COPY requirements-*.txt ./
+COPY requirements-*.txt install-ace-step.sh ./
 RUN pip install --no-cache-dir -r requirements-base.txt \
     && case "$BACKEND" in \
          none) ;; \
-         ace-step) pip install --no-cache-dir --extra-index-url "$TORCH_INDEX" -r requirements-ace-step.txt ;; \
+         ace-step) TORCH_INDEX="$TORCH_INDEX" sh install-ace-step.sh ;; \
          heartmula) pip install --no-cache-dir --extra-index-url "$TORCH_INDEX" torch torchaudio \
                     && pip install --no-cache-dir -r requirements-heartmula.txt ;; \
          diffrhythm2|yue2) pip install --no-cache-dir --extra-index-url "$TORCH_INDEX" torch torchaudio ;; \

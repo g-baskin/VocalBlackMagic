@@ -60,3 +60,50 @@ describe('lyricist chain (mocked)', () => {
     expect(none.status).toBe(503);
   });
 });
+
+describe('lyricist token limits', () => {
+  test('a token-limit stop falls back instead of returning cut-off lyrics', async () => {
+    const bodies: Record<string, unknown>[] = [];
+    const urls: string[] = [];
+    const fetcher = (async (url: string, init: RequestInit) => {
+      urls.push(url);
+      bodies.push(JSON.parse(String(init.body)));
+      if (url.includes('anthropic'))
+        return Response.json({
+          stop_reason: 'max_tokens',
+          content: [{ type: 'text', text: reply }]
+        });
+      if (url.includes('openai'))
+        return Response.json({
+          choices: [{ finish_reason: 'length', message: { content: reply } }]
+        });
+      return Response.json({
+        candidates: [{ finishReason: 'STOP', content: { parts: [{ text: reply }] } }]
+      });
+    }) as unknown as typeof fetch;
+    const result = await runLyricistChain(
+      { anthropic: 'a', openai: 'o', gemini: 'g', replicate: null, fetch: fetcher },
+      request
+    );
+    expect(result.lyricist).toBe('gemini/gemini-3.5-flash-lite');
+    expect(urls).toHaveLength(3);
+    expect(bodies[0].max_tokens).toBe(4096);
+    expect(bodies[1]).toMatchObject({ reasoning_effort: 'low', max_completion_tokens: 4096 });
+    expect(bodies[2].generationConfig).toEqual({
+      maxOutputTokens: 4096,
+      thinkingConfig: { thinkingLevel: 'MINIMAL' }
+    });
+  });
+
+  test('Gemini MAX_TOKENS with nothing after it is a 502, not a song', async () => {
+    const fetcher = (async () =>
+      Response.json({
+        candidates: [{ finishReason: 'MAX_TOKENS', content: { parts: [{ text: reply }] } }]
+      })) as unknown as typeof fetch;
+    const error = await runLyricistChain(
+      { anthropic: null, openai: null, gemini: 'g', replicate: null, fetch: fetcher },
+      request
+    ).catch((e) => e);
+    expect(error.status).toBe(502);
+  });
+});

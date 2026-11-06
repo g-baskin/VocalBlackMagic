@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { cannotCompare, positionIn, takeDuration } from '../../lib/client/seance-time';
   import { onDestroy, onMount } from 'svelte';
   import ArcanePanel from '@vbm/ui/ArcanePanel.svelte';
   import RuneButton from '@vbm/ui/RuneButton.svelte';
@@ -50,9 +51,8 @@
   const pending = $derived(
     seance?.entries.some((e) => e.status === 'running' || e.status === 'queued') ?? false
   );
-  const duration = $derived(
-    Math.max(0, ...Object.values(buffers).map((b) => (b as AudioBuffer).duration))
-  );
+  // The transport shows the active take's own length (not the longest take's).
+  const duration = $derived(takeDuration(buffers, active));
   const nameOf = (id: string | undefined) => models.find((m) => m.id === id)?.name ?? id ?? '';
 
   onMount(async () => {
@@ -176,7 +176,7 @@
     source = ctx.createBufferSource();
     source.buffer = buffer;
     source.connect(ctx.destination);
-    position = Math.min(at, buffer.duration);
+    position = positionIn(at, buffer.duration);
     startedAt = ctx.currentTime;
     source.start(0, position);
     playing = true;
@@ -359,7 +359,7 @@
               <Waveform
                 buffer={buffers[e.label] ?? null}
                 currentTime={active === e.label ? position : 0}
-                {duration}
+                duration={takeDuration(buffers, e.label)}
                 onseek={(s) => {
                   choose(e.label);
                   seek(s);
@@ -413,8 +413,13 @@
         <RuneButton onclick={reveal} {busy} disabled={busy}>Reveal the spirits</RuneButton>
       {:else if pending}
         <p class="note">The spirits are still arriving. Ranking opens when every take is in.</p>
+      {:else if !seance.revealed && cannotCompare(seance.entries)}
+        <p class="note">
+          Only {finished.length} of {seance.entries.length} takes arrived, so there is nothing to rank.
+          Hold another séance with the models that answered.
+        </p>
       {/if}
-      {#if seance.revealed}
+      {#if seance.revealed || cannotCompare(seance.entries)}
         <RuneButton variant="ghost" onclick={again}>Hold another séance</RuneButton>
       {/if}
     </ArcanePanel>

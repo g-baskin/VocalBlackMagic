@@ -335,11 +335,21 @@ async function storeReplicateOutput(
   return storeSong(ctx, job.plan, task.take, await outputResponse(ctx.fetch, url));
 }
 
+/** Engine 5xx, 429, network and timeout errors while polling are temporary: keep the task running. */
+export function transientEngineError(error: unknown): boolean {
+  if (error instanceof ProviderError) return error.status === 429 || error.status >= 500;
+  if (error instanceof DOMException)
+    return error.name === 'TimeoutError' || error.name === 'AbortError';
+  return error instanceof TypeError;
+}
+
 async function advanceTask(ctx: JobContext, job: JobRecord, task: JobTask): Promise<void> {
   if (task.provider === 'engine') {
     if (!ctx.engine)
       throw new ProviderError(503, 'VBM_ENGINE_URL / VBM_ENGINE_TOKEN are not configured.');
-    const engineJob = await getEngineJob(ctx.engine, task.prediction_id);
+    const engineJob = await getEngineJob(ctx.engine, task.prediction_id).catch((error: unknown) => {
+      throw transientEngineError(error) ? new ProviderError(503, 'The engine is busy.') : error;
+    });
     if (engineJob.status === 'succeeded') {
       job.stages = stages(job.kind, 'bind');
       const meta = await storeSong(

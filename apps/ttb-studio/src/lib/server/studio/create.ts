@@ -12,6 +12,7 @@ import {
 } from './engines';
 import {
   assertJobCapacity,
+  maybeCover,
   maxActiveJobs,
   seanceMaxActiveJobs,
   publicJob,
@@ -230,8 +231,11 @@ export async function createSongs(
           )
         ).id
       );
+    const finished = await recordFinishedJob(deps, 'create', routedPlan, ids);
+    // Synchronous runners (MiniMax, ElevenLabs, Lyria 3 Pro direct) never pass through advanceJob.
+    for (const songId of ids) await maybeCover(deps, finished, songId);
     return {
-      job: publicJob(await recordFinishedJob(deps, 'create', routedPlan, ids)),
+      job: publicJob(finished),
       lyrics,
       title
     };
@@ -252,7 +256,9 @@ export async function createSongs(
       );
       ids.push(meta.id);
     }
-    return { job: publicJob(await recordFinishedJob(deps, 'create', plan, ids)), lyrics, title };
+    const finished = await recordFinishedJob(deps, 'create', plan, ids);
+    for (const songId of ids) await maybeCover(deps, finished, songId);
+    return { job: publicJob(finished), lyrics, title };
   }
   let tasks: JobTask[];
   if (request.engine === 'fal-ace-step' && deps.fal) {

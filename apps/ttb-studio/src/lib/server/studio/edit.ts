@@ -30,7 +30,8 @@ import { ProviderError } from '../music/errors';
 import { falFailure, falHeaders, isFalRequestId, type FalDeps } from '../music/fal';
 import { assertJobCapacity, publicJob, recordJob, type JobContext, type JobTask } from './jobs';
 import { ffmpegPath } from './master';
-import { engineHealth, RunnerRefused, submitEngineJob, type EngineDeps } from './runners/engine';
+import { RunnerRefused, submitEngineJob, type EngineDeps } from './runners/engine';
+import { sharedHealth, type HealthCache } from './runners/router';
 import type { RunnerAttempt } from './runners/router';
 
 const engineTask: Record<EditAction, EngineTask> = {
@@ -59,6 +60,8 @@ export interface EditDeps extends JobContext {
   engine?: EngineDeps | null;
   /** Measures a file's duration in seconds; ffmpeg by default (injected in tests). */
   probe?: (file: string) => Promise<number | null>;
+  /** How long the probe may take before the duration counts as unknown (default 15 s). */
+  probeTimeoutMs?: number;
 }
 
 /** Duration from ffmpeg's banner ("Duration: 00:02:03.45"); null when ffmpeg cannot tell. */
@@ -67,9 +70,32 @@ export async function ffmpegDuration(file: string): Promise<number | null> {
     stdout: 'ignore',
     stderr: 'pipe'
   });
-  const text = await new Response(proc.stderr).text();
-  await proc.exited;
-  return parseDuration(text);
+  const kill = setTimeout(() => proc.kill(), 15_000);
+  try {
+    const text = await new Response(proc.stderr).text();
+    await proc.exited;
+    return parseDuration(text);
+  } finally {
+    clearTimeout(kill);
+  }
+}
+
+/** Runs a duration probe with a time limit; any failure or timeout means "unknown" (null). */
+export async function boundedProbe(
+  probe: (file: string) => Promise<number | null>,
+  file: string,
+  ms: number
+): Promise<number | null> {
+  let timer: ReturnType<typeof setTimeout> | undefined;
+  const timeout = new Promise<null>((resolve) => {
+    timer = setTimeout(() => resolve(null), ms);
+  });
+  try {
+    const seconds = await Promise.race([probe(file).catch(() => null), timeout]);
+    return typeof seconds === 'number' && Number.isFinite(seconds) && seconds > 0 ? seconds : null;
+  } finally {
+    clearTimeout(timer);
+  }
 }
 
 export function parseDuration(text: string): number | null {
@@ -95,14 +121,15 @@ interface Candidate {
 export async function editCandidates(
   deps: EditDeps,
   action: EditAction,
-  request?: EditRequest
+  request?: EditRequest,
+  cache: HealthCache = {}
 ): Promise<Candidate[]> {
   let health: EngineHealth | null = null;
   let engineReason: string | null = null;
   if (!deps.engine) engineReason = 'needs VBM_ENGINE_URL and VBM_ENGINE_TOKEN';
   else {
     try {
-      health = await engineHealth(deps.engine);
+      health = await sharedHealth(deps.engine, cache);
     } catch (error) {
       engineReason = error instanceof ProviderError ? error.publicMessage : 'engine unreachable';
     }
@@ -147,11 +174,12 @@ export async function editCandidates(
 /** Which edits a song can have now (and why not). */
 export async function editInfos(deps: EditDeps, song: SongMeta): Promise<StudioEditInfo[]> {
   const out: StudioEditInfo[] = [];
+  const cache: HealthCache = {};
   for (const action of ['extend', 'repaint', 'cover'] as const) {
     let reason: string | null = null;
     if (!song.audio) reason = 'This song has no audio to edit.';
     else if (!sourceFormat(song.audio.content_type)) reason = 'Edits need WAV, FLAC or MP3 audio.';
-    const candidates = await editCandidates(deps, action);
+    const candidates = await editCandidates(deps, action, undefined, cache);
     const first = reason ? undefined : candidates.find((c) => !c.reason);
     out.push({
       action,
@@ -265,7 +293,12 @@ export async function startEdit(
   const format = sourceFormat(parent.audio.content_type);
   if (!format) throw new ProviderError(422, 'Edits need WAV, FLAC or MP3 audio.');
   const audio = await deps.library.audioFile(parent.id, 'main');
-  const seconds = await (deps.probe ?? ffmpegDuration)(audio.file);
+  // Extend and restyle work without a known length; only repaint needs it to check the range.
+  const seconds = await boundedProbe(
+    deps.probe ?? ffmpegDuration,
+    audio.file,
+    deps.probeTimeoutMs ?? 15_000
+  );
   if (request.action === 'repaint') {
     if (seconds === null) throw new ProviderError(503, 'Could not measure the song (ffmpeg).');
     if (request.repaint!.end_seconds > seconds + 0.05)

@@ -106,6 +106,10 @@ describe('séance job cap', () => {
     const stored = JSON.parse(
       await readFile(path.join(root, 'studio', 'seances', seance.id + '.json'), 'utf8')
     );
+    const job = JSON.parse(
+      await readFile(path.join(root, 'studio', 'jobs', stored.entries[0].job_id + '.json'), 'utf8')
+    );
+    expect(job.plan.params.duration_seconds).toBe(60);
     expect(stored.entries.map((e: { error: string | null }) => e.error)).toEqual([
       null,
       null,
