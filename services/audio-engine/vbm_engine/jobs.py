@@ -42,7 +42,8 @@ class JobManager:
         max_queue: int = 16,
         clock: Callable[[], str] = _now,
     ) -> None:
-        self._dir = data_dir / "jobs"
+        # Absolute, so work dirs stay valid for backends that run subprocesses in another cwd.
+        self._dir = data_dir.resolve() / "jobs"
         self._dir.mkdir(parents=True, exist_ok=True)
         self._backends = backends
         self.device = device
@@ -239,14 +240,22 @@ class JobManager:
                 "sample_rate": info.sample_rate,
                 "seed": inp.seed,
             }
-            self._update(
-                job_id,
-                status="succeeded",
-                stage="done",
-                progress=1.0,
-                output=output,
-                _output_file=final.name,
-            )
+            # Commit success under the same lock cancel() takes, so a cancellation accepted
+            # while the output was being measured or moved can never be overwritten by success.
+            with self._lock:
+                cancelled = job_id in self._cancel
+                if not cancelled:
+                    job = self._jobs[job_id]
+                    job.update(
+                        status="succeeded",
+                        stage="done",
+                        progress=1.0,
+                        output=output,
+                        _output_file=final.name,
+                    )
+                    self._save(job)
+            if cancelled:
+                raise JobCancelled()
         except JobCancelled:
             self._discard_outputs(wd)
             self._update(job_id, status="cancelled", stage="cancelled", output=None)

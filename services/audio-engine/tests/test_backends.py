@@ -33,3 +33,44 @@ def test_download_refuses_when_disk_is_short(
     assert download.main(["yue2"]) == 3
     assert "Not enough disk" in capsys.readouterr().err
     assert not (tmp_path / "cache").exists()
+
+
+def test_diffrhythm_subprocess_gets_absolute_paths_and_the_download_cache(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    import json
+
+    from vbm_engine.backends import diffrhythm
+    from vbm_engine.backends.base import GenerationInput, JobContext
+
+    monkeypatch.chdir(tmp_path)
+    seen: dict[str, object] = {}
+
+    class FakeProc:
+        returncode = 0
+
+        def __init__(self, cmd: list[str], cwd: Path, env: dict[str, str]) -> None:
+            seen.update(cmd=cmd, cwd=cwd, env=env)
+
+        def poll(self) -> int:
+            return 0
+
+    monkeypatch.setattr("vbm_engine.backends.diffrhythm.subprocess.Popen", FakeProc)
+    backend = diffrhythm.DiffRhythm2Backend(Path("rel-cache"))
+    work = Path("rel-data") / "jobs" / "abc"
+    work.mkdir(parents=True)
+    ctx = JobContext(
+        work_dir=work, device="cpu", report=lambda p, s: None, is_cancelled=lambda: False
+    )
+    inp = GenerationInput("text2music", "lofi", "[verse]\nhi", False, 30.0, 1)
+    out = backend.generate(inp, ctx)
+
+    cmd = seen["cmd"]
+    assert isinstance(cmd, list)
+    jsonl = Path(cmd[cmd.index("--input-jsonl") + 1])
+    assert jsonl.is_absolute() and jsonl.is_file()
+    assert Path(cmd[cmd.index("--output-dir") + 1]).is_absolute() and out.is_absolute()
+    assert Path(json.loads(jsonl.read_text())["lyrics"]).is_absolute()
+    env = seen["env"]
+    assert isinstance(env, dict)
+    assert env["HF_HUB_CACHE"] == str(backend.hf_home) and Path(env["HF_HUB_CACHE"]).is_absolute()

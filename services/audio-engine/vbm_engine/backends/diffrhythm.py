@@ -37,7 +37,7 @@ class DiffRhythm2Backend:
     max_duration_seconds = 210
 
     def __init__(self, cache_dir: Path) -> None:
-        self.root = cache_dir / "diffrhythm-2"
+        self.root = cache_dir.resolve() / "diffrhythm-2"
         self.src = self.root / "src"
         self.hf_home = self.root / "hf"
 
@@ -70,11 +70,13 @@ class DiffRhythm2Backend:
 
     def generate(self, inp: GenerationInput, ctx: JobContext) -> Path:
         ctx.checkpoint(0.05, "starting DiffRhythm 2")
-        out_dir = ctx.work_dir / "dr2"
+        # The subprocess runs with cwd=self.src, so every path handed to it must be absolute.
+        work_dir = ctx.work_dir.resolve()
+        out_dir = work_dir / "dr2"
         out_dir.mkdir(parents=True, exist_ok=True)
-        lrc = ctx.work_dir / "lyrics.lrc"
+        lrc = work_dir / "lyrics.lrc"
         lrc.write_text("" if inp.instrumental else inp.lyrics, encoding="utf-8")
-        jsonl = ctx.work_dir / "input.jsonl"
+        jsonl = work_dir / "input.jsonl"
         row = {"song_name": "song", "style_prompt": inp.prompt, "lyrics": str(lrc)}
         jsonl.write_text(json.dumps(row) + "\n", encoding="utf-8")
         cmd = [
@@ -97,6 +99,9 @@ class DiffRhythm2Backend:
             **_base_env(),
             "PYTHONPATH": str(self.src),
             "HF_HOME": str(self.hf_home),
+            # download() uses snapshot_download(cache_dir=hf_home), which stores models directly
+            # under hf_home; point the hub cache there too so inference reuses those weights.
+            "HF_HUB_CACHE": str(self.hf_home),
             "CUDA_VISIBLE_DEVICES": _cuda_env(ctx.device),
         }
         ctx.checkpoint(0.2, "generating")

@@ -160,6 +160,30 @@ def test_cancel_queued_and_running(client: TestClient, backend: FakeBackend) -> 
     assert client.delete("/v1/jobs/nope", headers=AUTH).json()["code"] == "not_found"
 
 
+def test_cancel_during_output_measurement_is_never_overwritten_by_success(
+    client: TestClient, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    import threading
+
+    from vbm_engine.audio import measure as real_measure
+
+    measuring, release = threading.Event(), threading.Event()
+
+    def slow_measure(path: Path) -> Any:
+        measuring.set()
+        release.wait(5)
+        return real_measure(path)
+
+    monkeypatch.setattr("vbm_engine.jobs.measure", slow_measure)
+    job_id = client.post("/v1/jobs", json=BODY, headers=AUTH).json()["id"]
+    assert measuring.wait(5)
+    assert client.delete(f"/v1/jobs/{job_id}", headers=AUTH).json()["stage"] == "cancelling"
+    release.set()
+    job = wait(client, job_id, ("cancelled", "succeeded", "failed"))
+    assert job["status"] == "cancelled" and "output" not in job
+    assert client.get(f"/v1/jobs/{job_id}/audio", headers=AUTH).status_code == 404
+
+
 def test_backend_failure_reports_no_output(client: TestClient, backend: FakeBackend) -> None:
     backend.fail = True
     job_id = client.post("/v1/jobs", json=BODY, headers=AUTH).json()["id"]
