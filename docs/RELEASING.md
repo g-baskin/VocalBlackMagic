@@ -16,7 +16,7 @@ Use a clean checkout of the reviewed candidate commit, Bun 1.4.0, Node 22.17.0 a
 
 ```bash
 bun install --minimum-release-age=172800 --frozen-lockfile
-bun test packages
+bun run test
 bun run check
 bun run build
 python3 -m venv .venv

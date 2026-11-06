@@ -1,0 +1,1106 @@
+{
+  "directed": true,
+  "graph": {
+    "generator": "build_codegraph.py",
+    "repo": "VocalBlackMagic"
+  },
+  "links": [
+    {
+      "relation": "imports",
+      "source": "apps/ttb-studio/src/env.ts",
+      "target": "pkg:@sveltejs/kit/env"
+    },
+    {
+      "relation": "imports",
+      "source": "apps/ttb-studio/src/lib/server/music/audio.ts",
+      "target": "apps/ttb-studio/src/lib/server/music/errors.ts"
+    },
+    {
+      "relation": "imports",
+      "source": "apps/ttb-studio/src/lib/server/music/capabilities.ts",
+      "target": "packages/contracts/src/index.ts"
+    },
+    {
+      "relation": "imports",
+      "source": "apps/ttb-studio/src/lib/server/music/fal.ts",
+      "target": "apps/ttb-studio/src/lib/server/music/errors.ts"
+    },
+    {
+      "relation": "imports",
+      "source": "apps/ttb-studio/src/lib/server/music/fal.ts",
+      "target": "apps/ttb-studio/src/lib/server/music/prompt.ts"
+    },
+    {
+      "relation": "calls_external",
+      "source": "apps/ttb-studio/src/lib/server/music/fal.ts",
+      "target": "external:queue.fal.run"
+    },
+    {
+      "relation": "imports",
+      "source": "apps/ttb-studio/src/lib/server/music/fal.ts",
+      "target": "packages/contracts/src/index.ts"
+    },
+    {
+      "relation": "imports",
+      "source": "apps/ttb-studio/src/lib/server/music/lyria.ts",
+      "target": "apps/ttb-studio/src/lib/server/music/audio.ts"
+    },
+    {
+      "relation": "imports",
+      "source": "apps/ttb-studio/src/lib/server/music/lyria.ts",
+      "target": "apps/ttb-studio/src/lib/server/music/errors.ts"
+    },
+    {
+      "relation": "imports",
+      "source": "apps/ttb-studio/src/lib/server/music/lyria.ts",
+      "target": "apps/ttb-studio/src/lib/server/music/prompt.ts"
+    },
+    {
+      "relation": "calls_external",
+      "source": "apps/ttb-studio/src/lib/server/music/lyria.ts",
+      "target": "external:generativelanguage.googleapis.com"
+    },
+    {
+      "relation": "imports",
+      "source": "apps/ttb-studio/src/lib/server/music/lyria.ts",
+      "target": "packages/contracts/src/index.ts"
+    },
+    {
+      "relation": "imports",
+      "source": "apps/ttb-studio/src/lib/server/music/lyricist.ts",
+      "target": "apps/ttb-studio/src/lib/server/music/errors.ts"
+    },
+    {
+      "relation": "imports",
+      "source": "apps/ttb-studio/src/lib/server/music/lyricist.ts",
+      "target": "apps/ttb-studio/src/lib/server/music/fal.ts"
+    },
+    {
+      "relation": "imports",
+      "source": "apps/ttb-studio/src/lib/server/music/lyricist.ts",
+      "target": "apps/ttb-studio/src/lib/server/music/lyria.ts"
+    },
+    {
+      "relation": "calls_external",
+      "source": "apps/ttb-studio/src/lib/server/music/lyricist.ts",
+      "target": "external:generativelanguage.googleapis.com"
+    },
+    {
+      "relation": "imports",
+      "source": "apps/ttb-studio/src/lib/server/music/lyricist.ts",
+      "target": "packages/contracts/src/index.ts"
+    },
+    {
+      "relation": "imports",
+      "source": "apps/ttb-studio/src/lib/server/music/lyrics.test.ts",
+      "target": "apps/ttb-studio/src/lib/server/music/errors.ts"
+    },
+    {
+      "relation": "imports",
+      "source": "apps/ttb-studio/src/lib/server/music/lyrics.test.ts",
+      "target": "apps/ttb-studio/src/lib/server/music/fal.ts"
+    },
+    {
+      "relation": "imports",
+      "source": "apps/ttb-studio/src/lib/server/music/lyrics.test.ts",
+      "target": "apps/ttb-studio/src/lib/server/music/lyria.ts"
+    },
+    {
+      "relation": "imports",
+      "source": "apps/ttb-studio/src/lib/server/music/lyrics.test.ts",
+      "target": "apps/ttb-studio/src/lib/server/music/lyricist.ts"
+    },
+    {
+      "relation": "imports",
+      "source": "apps/ttb-studio/src/lib/server/music/lyrics.test.ts",
+      "target": "packages/contracts/src/index.ts"
+    },
+    {
+      "relation": "imports",
+      "source": "apps/ttb-studio/src/lib/server/music/lyrics.test.ts",
+      "target": "pkg:bun:test"
+    },
+    {
+      "relation": "imports",
+      "source": "apps/ttb-studio/src/lib/server/music/music.test.ts",
+      "target": "apps/ttb-studio/src/lib/server/music/audio.ts"
+    },
+    {
+      "relation": "imports",
+      "source": "apps/ttb-studio/src/lib/server/music/music.test.ts",
+      "target": "apps/ttb-studio/src/lib/server/music/capabilities.ts"
+    },
+    {
+      "relation": "imports",
+      "source": "apps/ttb-studio/src/lib/server/music/music.test.ts",
+      "target": "apps/ttb-studio/src/lib/server/music/errors.ts"
+    },
+    {
+      "relation": "imports",
+      "source": "apps/ttb-studio/src/lib/server/music/music.test.ts",
+      "target": "apps/ttb-studio/src/lib/server/music/fal.ts"
+    },
+    {
+      "relation": "imports",
+      "source": "apps/ttb-studio/src/lib/server/music/music.test.ts",
+      "target": "apps/ttb-studio/src/lib/server/music/gate.ts"
+    },
+    {
+      "relation": "imports",
+      "source": "apps/ttb-studio/src/lib/server/music/music.test.ts",
+      "target": "apps/ttb-studio/src/lib/server/music/jobs.ts"
+    },
+    {
+      "relation": "imports",
+      "source": "apps/ttb-studio/src/lib/server/music/music.test.ts",
+      "target": "apps/ttb-studio/src/lib/server/music/lyria.ts"
+    },
+    {
+      "relation": "imports",
+      "source": "apps/ttb-studio/src/lib/server/music/music.test.ts",
+      "target": "packages/contracts/src/index.ts"
+    },
+    {
+      "relation": "imports",
+      "source": "apps/ttb-studio/src/lib/server/music/music.test.ts",
+      "target": "pkg:bun:test"
+    },
+    {
+      "relation": "imports",
+      "source": "apps/ttb-studio/src/lib/server/music/prompt.ts",
+      "target": "packages/contracts/src/index.ts"
+    },
+    {
+      "relation": "imports",
+      "source": "apps/ttb-studio/src/routes/+page.svelte",
+      "target": "packages/contracts/src/index.ts"
+    },
+    {
+      "relation": "imports",
+      "source": "apps/ttb-studio/src/routes/+page.svelte",
+      "target": "packages/ui/src/BrandHeader.svelte"
+    },
+    {
+      "relation": "imports",
+      "source": "apps/ttb-studio/src/routes/+page.svelte",
+      "target": "packages/ui/src/StatusPanel.svelte"
+    },
+    {
+      "relation": "imports",
+      "source": "apps/ttb-studio/src/routes/+page.svelte",
+      "target": "pkg:svelte"
+    },
+    {
+      "relation": "browser_fetch",
+      "source": "apps/ttb-studio/src/routes/+page.svelte",
+      "target": "route:apps/ttb-studio:GET /api/capabilities"
+    },
+    {
+      "relation": "browser_fetch",
+      "source": "apps/ttb-studio/src/routes/+page.svelte",
+      "target": "route:apps/ttb-studio:GET /api/generations/[id]"
+    },
+    {
+      "relation": "browser_fetch",
+      "source": "apps/ttb-studio/src/routes/+page.svelte",
+      "target": "route:apps/ttb-studio:POST /api/generations"
+    },
+    {
+      "relation": "imports",
+      "source": "apps/ttb-studio/src/routes/api/capabilities/+server.ts",
+      "target": "apps/ttb-studio/src/lib/server/music/capabilities.ts"
+    },
+    {
+      "relation": "imports",
+      "source": "apps/ttb-studio/src/routes/api/capabilities/+server.ts",
+      "target": "apps/ttb-studio/src/lib/server/music/gate.ts"
+    },
+    {
+      "relation": "imports",
+      "source": "apps/ttb-studio/src/routes/api/capabilities/+server.ts",
+      "target": "pkg:$app/env/private"
+    },
+    {
+      "relation": "imports",
+      "source": "apps/ttb-studio/src/routes/api/capabilities/+server.ts",
+      "target": "pkg:@sveltejs/kit"
+    },
+    {
+      "relation": "imports",
+      "source": "apps/ttb-studio/src/routes/api/generations/+server.ts",
+      "target": "apps/ttb-studio/src/lib/server/music/errors.ts"
+    },
+    {
+      "relation": "imports",
+      "source": "apps/ttb-studio/src/routes/api/generations/+server.ts",
+      "target": "apps/ttb-studio/src/lib/server/music/fal.ts"
+    },
+    {
+      "relation": "imports",
+      "source": "apps/ttb-studio/src/routes/api/generations/+server.ts",
+      "target": "apps/ttb-studio/src/lib/server/music/gate.ts"
+    },
+    {
+      "relation": "imports",
+      "source": "apps/ttb-studio/src/routes/api/generations/+server.ts",
+      "target": "apps/ttb-studio/src/lib/server/music/jobs.ts"
+    },
+    {
+      "relation": "imports",
+      "source": "apps/ttb-studio/src/routes/api/generations/+server.ts",
+      "target": "apps/ttb-studio/src/lib/server/music/lyria.ts"
+    },
+    {
+      "relation": "imports",
+      "source": "apps/ttb-studio/src/routes/api/generations/+server.ts",
+      "target": "apps/ttb-studio/src/lib/server/music/lyricist.ts"
+    },
+    {
+      "relation": "imports",
+      "source": "apps/ttb-studio/src/routes/api/generations/+server.ts",
+      "target": "apps/ttb-studio/src/lib/server/music/prompt.ts"
+    },
+    {
+      "relation": "imports",
+      "source": "apps/ttb-studio/src/routes/api/generations/+server.ts",
+      "target": "packages/contracts/src/index.ts"
+    },
+    {
+      "relation": "imports",
+      "source": "apps/ttb-studio/src/routes/api/generations/+server.ts",
+      "target": "pkg:$app/env/private"
+    },
+    {
+      "relation": "imports",
+      "source": "apps/ttb-studio/src/routes/api/generations/[id]/+server.ts",
+      "target": "apps/ttb-studio/src/lib/server/music/errors.ts"
+    },
+    {
+      "relation": "imports",
+      "source": "apps/ttb-studio/src/routes/api/generations/[id]/+server.ts",
+      "target": "apps/ttb-studio/src/lib/server/music/fal.ts"
+    },
+    {
+      "relation": "imports",
+      "source": "apps/ttb-studio/src/routes/api/generations/[id]/+server.ts",
+      "target": "apps/ttb-studio/src/lib/server/music/gate.ts"
+    },
+    {
+      "relation": "imports",
+      "source": "apps/ttb-studio/src/routes/api/generations/[id]/+server.ts",
+      "target": "apps/ttb-studio/src/lib/server/music/jobs.ts"
+    },
+    {
+      "relation": "imports",
+      "source": "apps/ttb-studio/src/routes/api/generations/[id]/+server.ts",
+      "target": "packages/contracts/src/index.ts"
+    },
+    {
+      "relation": "imports",
+      "source": "apps/ttb-studio/src/routes/api/generations/[id]/+server.ts",
+      "target": "pkg:$app/env/private"
+    },
+    {
+      "relation": "imports",
+      "source": "apps/ttb-studio/src/routes/api/generations/[id]/audio/+server.ts",
+      "target": "apps/ttb-studio/src/lib/server/music/audio.ts"
+    },
+    {
+      "relation": "imports",
+      "source": "apps/ttb-studio/src/routes/api/generations/[id]/audio/+server.ts",
+      "target": "apps/ttb-studio/src/lib/server/music/errors.ts"
+    },
+    {
+      "relation": "imports",
+      "source": "apps/ttb-studio/src/routes/api/generations/[id]/audio/+server.ts",
+      "target": "apps/ttb-studio/src/lib/server/music/fal.ts"
+    },
+    {
+      "relation": "imports",
+      "source": "apps/ttb-studio/src/routes/api/generations/[id]/audio/+server.ts",
+      "target": "apps/ttb-studio/src/lib/server/music/gate.ts"
+    },
+    {
+      "relation": "imports",
+      "source": "apps/ttb-studio/src/routes/api/generations/[id]/audio/+server.ts",
+      "target": "apps/ttb-studio/src/lib/server/music/jobs.ts"
+    },
+    {
+      "relation": "imports",
+      "source": "apps/ttb-studio/src/routes/api/generations/[id]/audio/+server.ts",
+      "target": "pkg:$app/env/private"
+    },
+    {
+      "relation": "imports",
+      "source": "apps/ttb-studio/src/routes/api/health/+server.ts",
+      "target": "pkg:@sveltejs/kit"
+    },
+    {
+      "relation": "imports",
+      "source": "apps/ttb-studio/vite.config.ts",
+      "target": "pkg:@sveltejs/adapter-bun"
+    },
+    {
+      "relation": "imports",
+      "source": "apps/ttb-studio/vite.config.ts",
+      "target": "pkg:@sveltejs/kit/vite"
+    },
+    {
+      "relation": "imports",
+      "source": "apps/ttb-studio/vite.config.ts",
+      "target": "pkg:vite"
+    },
+    {
+      "relation": "static_page_fetch",
+      "source": "apps/ttb_studio/index.html",
+      "target": "endpoint:apps/ttb_studio:GET /api/capabilities"
+    },
+    {
+      "relation": "static_page_fetch",
+      "source": "apps/ttb_studio/index.html",
+      "target": "endpoint:apps/ttb_studio:POST /api/generations"
+    },
+    {
+      "relation": "imports",
+      "source": "apps/vocal-fix/src/routes/+page.svelte",
+      "target": "packages/contracts/src/index.ts"
+    },
+    {
+      "relation": "imports",
+      "source": "apps/vocal-fix/src/routes/+page.svelte",
+      "target": "packages/ui/src/BrandHeader.svelte"
+    },
+    {
+      "relation": "imports",
+      "source": "apps/vocal-fix/src/routes/+page.svelte",
+      "target": "packages/ui/src/StatusPanel.svelte"
+    },
+    {
+      "relation": "imports",
+      "source": "apps/vocal-fix/src/routes/+page.svelte",
+      "target": "pkg:svelte"
+    },
+    {
+      "relation": "browser_fetch",
+      "source": "apps/vocal-fix/src/routes/+page.svelte",
+      "target": "route:apps/vocal-fix:DELETE /api/references/[session_id]"
+    },
+    {
+      "relation": "browser_fetch",
+      "source": "apps/vocal-fix/src/routes/+page.svelte",
+      "target": "route:apps/vocal-fix:GET /api/capabilities"
+    },
+    {
+      "relation": "browser_fetch",
+      "source": "apps/vocal-fix/src/routes/+page.svelte",
+      "target": "route:apps/vocal-fix:POST /api/references"
+    },
+    {
+      "relation": "imports",
+      "source": "apps/vocal-fix/src/routes/api/capabilities/+server.ts",
+      "target": "apps/vocal-fix/src/lib/server/backend.ts"
+    },
+    {
+      "relation": "proxies_to",
+      "source": "apps/vocal-fix/src/routes/api/capabilities/+server.ts",
+      "target": "endpoint:apps/vocal_fix:GET /api/capabilities"
+    },
+    {
+      "relation": "imports",
+      "source": "apps/vocal-fix/src/routes/api/health/+server.ts",
+      "target": "pkg:@sveltejs/kit"
+    },
+    {
+      "relation": "imports",
+      "source": "apps/vocal-fix/src/routes/api/references/+server.ts",
+      "target": "apps/vocal-fix/src/lib/server/backend.ts"
+    },
+    {
+      "relation": "proxies_to",
+      "source": "apps/vocal-fix/src/routes/api/references/+server.ts",
+      "target": "endpoint:apps/vocal_fix:POST /api/references"
+    },
+    {
+      "relation": "imports",
+      "source": "apps/vocal-fix/src/routes/api/references/[session_id]/+server.ts",
+      "target": "apps/vocal-fix/src/lib/server/backend.ts"
+    },
+    {
+      "relation": "proxies_to",
+      "source": "apps/vocal-fix/src/routes/api/references/[session_id]/+server.ts",
+      "target": "endpoint:apps/vocal_fix:DELETE /api/references/{session_id}"
+    },
+    {
+      "relation": "proxies_to",
+      "source": "apps/vocal-fix/src/routes/api/references/[session_id]/+server.ts",
+      "target": "endpoint:apps/vocal_fix:GET /api/references/{session_id}"
+    },
+    {
+      "relation": "imports",
+      "source": "apps/vocal-fix/vite.config.ts",
+      "target": "pkg:@sveltejs/adapter-bun"
+    },
+    {
+      "relation": "imports",
+      "source": "apps/vocal-fix/vite.config.ts",
+      "target": "pkg:@sveltejs/kit/vite"
+    },
+    {
+      "relation": "imports",
+      "source": "apps/vocal-fix/vite.config.ts",
+      "target": "pkg:vite"
+    },
+    {
+      "relation": "static_page_fetch",
+      "source": "apps/vocal_fix/index.html",
+      "target": "endpoint:apps/vocal_fix:POST /api/references"
+    },
+    {
+      "relation": "defined_in",
+      "source": "endpoint:apps/ttb_studio:GET /",
+      "target": "apps/ttb_studio/app.py"
+    },
+    {
+      "relation": "defined_in",
+      "source": "endpoint:apps/ttb_studio:GET /api/capabilities",
+      "target": "apps/ttb_studio/app.py"
+    },
+    {
+      "relation": "defined_in",
+      "source": "endpoint:apps/ttb_studio:GET /api/health",
+      "target": "apps/ttb_studio/app.py"
+    },
+    {
+      "relation": "defined_in",
+      "source": "endpoint:apps/ttb_studio:POST /api/generations",
+      "target": "apps/ttb_studio/app.py"
+    },
+    {
+      "relation": "defined_in",
+      "source": "endpoint:apps/vocal_fix:DELETE /api/references/{session_id}",
+      "target": "apps/vocal_fix/app.py"
+    },
+    {
+      "relation": "defined_in",
+      "source": "endpoint:apps/vocal_fix:GET /",
+      "target": "apps/vocal_fix/app.py"
+    },
+    {
+      "relation": "defined_in",
+      "source": "endpoint:apps/vocal_fix:GET /api/capabilities",
+      "target": "apps/vocal_fix/app.py"
+    },
+    {
+      "relation": "defined_in",
+      "source": "endpoint:apps/vocal_fix:GET /api/health",
+      "target": "apps/vocal_fix/app.py"
+    },
+    {
+      "relation": "defined_in",
+      "source": "endpoint:apps/vocal_fix:GET /api/references/{session_id}",
+      "target": "apps/vocal_fix/app.py"
+    },
+    {
+      "relation": "defined_in",
+      "source": "endpoint:apps/vocal_fix:POST /api/references",
+      "target": "apps/vocal_fix/app.py"
+    },
+    {
+      "relation": "defined_in",
+      "source": "endpoint:apps/vocal_fix:POST /api/references/{session_id}/process",
+      "target": "apps/vocal_fix/app.py"
+    },
+    {
+      "relation": "imports",
+      "source": "packages/contracts/src/index.test.ts",
+      "target": "packages/contracts/src/index.ts"
+    },
+    {
+      "relation": "imports",
+      "source": "packages/contracts/src/index.test.ts",
+      "target": "pkg:bun:test"
+    },
+    {
+      "relation": "defined_in",
+      "source": "route:apps/ttb-studio:GET /api/capabilities",
+      "target": "apps/ttb-studio/src/routes/api/capabilities/+server.ts"
+    },
+    {
+      "relation": "defined_in",
+      "source": "route:apps/ttb-studio:GET /api/generations/[id]",
+      "target": "apps/ttb-studio/src/routes/api/generations/[id]/+server.ts"
+    },
+    {
+      "relation": "defined_in",
+      "source": "route:apps/ttb-studio:GET /api/generations/[id]/audio",
+      "target": "apps/ttb-studio/src/routes/api/generations/[id]/audio/+server.ts"
+    },
+    {
+      "relation": "defined_in",
+      "source": "route:apps/ttb-studio:GET /api/health",
+      "target": "apps/ttb-studio/src/routes/api/health/+server.ts"
+    },
+    {
+      "relation": "defined_in",
+      "source": "route:apps/ttb-studio:PAGE /",
+      "target": "apps/ttb-studio/src/routes/+page.svelte"
+    },
+    {
+      "relation": "defined_in",
+      "source": "route:apps/ttb-studio:POST /api/generations",
+      "target": "apps/ttb-studio/src/routes/api/generations/+server.ts"
+    },
+    {
+      "relation": "defined_in",
+      "source": "route:apps/vocal-fix:DELETE /api/references/[session_id]",
+      "target": "apps/vocal-fix/src/routes/api/references/[session_id]/+server.ts"
+    },
+    {
+      "relation": "defined_in",
+      "source": "route:apps/vocal-fix:GET /api/capabilities",
+      "target": "apps/vocal-fix/src/routes/api/capabilities/+server.ts"
+    },
+    {
+      "relation": "defined_in",
+      "source": "route:apps/vocal-fix:GET /api/health",
+      "target": "apps/vocal-fix/src/routes/api/health/+server.ts"
+    },
+    {
+      "relation": "defined_in",
+      "source": "route:apps/vocal-fix:GET /api/references/[session_id]",
+      "target": "apps/vocal-fix/src/routes/api/references/[session_id]/+server.ts"
+    },
+    {
+      "relation": "defined_in",
+      "source": "route:apps/vocal-fix:PAGE /",
+      "target": "apps/vocal-fix/src/routes/+page.svelte"
+    },
+    {
+      "relation": "defined_in",
+      "source": "route:apps/vocal-fix:POST /api/references",
+      "target": "apps/vocal-fix/src/routes/api/references/+server.ts"
+    },
+    {
+      "relation": "imports",
+      "source": "tests/test_apps.py",
+      "target": "apps/ttb_studio/app.py"
+    },
+    {
+      "relation": "imports",
+      "source": "tests/test_apps.py",
+      "target": "apps/vocal_fix/app.py"
+    }
+  ],
+  "multigraph": false,
+  "nodes": [
+    {
+      "app": "apps/__init__.py",
+      "id": "apps/__init__.py",
+      "kind": "module",
+      "lines": 2,
+      "type": "file"
+    },
+    {
+      "app": "apps/ttb-studio",
+      "id": "apps/ttb-studio/src/env.ts",
+      "kind": "module",
+      "lines": 16,
+      "type": "file"
+    },
+    {
+      "app": "apps/ttb-studio",
+      "id": "apps/ttb-studio/src/lib/server/backend.ts",
+      "kind": "module",
+      "lines": 25,
+      "type": "file"
+    },
+    {
+      "app": "apps/ttb-studio",
+      "id": "apps/ttb-studio/src/lib/server/music/audio.ts",
+      "kind": "module",
+      "lines": 150,
+      "type": "file"
+    },
+    {
+      "app": "apps/ttb-studio",
+      "id": "apps/ttb-studio/src/lib/server/music/capabilities.ts",
+      "kind": "module",
+      "lines": 37,
+      "type": "file"
+    },
+    {
+      "app": "apps/ttb-studio",
+      "id": "apps/ttb-studio/src/lib/server/music/errors.ts",
+      "kind": "module",
+      "lines": 30,
+      "type": "file"
+    },
+    {
+      "app": "apps/ttb-studio",
+      "id": "apps/ttb-studio/src/lib/server/music/fal.ts",
+      "kind": "module",
+      "lines": 161,
+      "type": "file"
+    },
+    {
+      "app": "apps/ttb-studio",
+      "id": "apps/ttb-studio/src/lib/server/music/gate.ts",
+      "kind": "module",
+      "lines": 26,
+      "type": "file"
+    },
+    {
+      "app": "apps/ttb-studio",
+      "id": "apps/ttb-studio/src/lib/server/music/jobs.ts",
+      "kind": "module",
+      "lines": 15,
+      "type": "file"
+    },
+    {
+      "app": "apps/ttb-studio",
+      "id": "apps/ttb-studio/src/lib/server/music/lyria.ts",
+      "kind": "module",
+      "lines": 117,
+      "type": "file"
+    },
+    {
+      "app": "apps/ttb-studio",
+      "id": "apps/ttb-studio/src/lib/server/music/lyricist.ts",
+      "kind": "module",
+      "lines": 145,
+      "type": "file"
+    },
+    {
+      "app": "apps/ttb-studio",
+      "id": "apps/ttb-studio/src/lib/server/music/lyrics.test.ts",
+      "kind": "module",
+      "lines": 155,
+      "type": "file"
+    },
+    {
+      "app": "apps/ttb-studio",
+      "id": "apps/ttb-studio/src/lib/server/music/music.test.ts",
+      "kind": "module",
+      "lines": 322,
+      "type": "file"
+    },
+    {
+      "app": "apps/ttb-studio",
+      "id": "apps/ttb-studio/src/lib/server/music/prompt.ts",
+      "kind": "module",
+      "lines": 16,
+      "type": "file"
+    },
+    {
+      "app": "apps/ttb-studio",
+      "id": "apps/ttb-studio/src/routes/+layout.svelte",
+      "kind": "svelte-component",
+      "lines": 14,
+      "type": "file"
+    },
+    {
+      "app": "apps/ttb-studio",
+      "id": "apps/ttb-studio/src/routes/+page.svelte",
+      "kind": "svelte-component",
+      "lines": 399,
+      "type": "file"
+    },
+    {
+      "app": "apps/ttb-studio",
+      "id": "apps/ttb-studio/src/routes/api/capabilities/+server.ts",
+      "kind": "module",
+      "lines": 16,
+      "type": "file"
+    },
+    {
+      "app": "apps/ttb-studio",
+      "id": "apps/ttb-studio/src/routes/api/generations/+server.ts",
+      "kind": "module",
+      "lines": 115,
+      "type": "file"
+    },
+    {
+      "app": "apps/ttb-studio",
+      "id": "apps/ttb-studio/src/routes/api/generations/[id]/+server.ts",
+      "kind": "module",
+      "lines": 42,
+      "type": "file"
+    },
+    {
+      "app": "apps/ttb-studio",
+      "id": "apps/ttb-studio/src/routes/api/generations/[id]/audio/+server.ts",
+      "kind": "module",
+      "lines": 30,
+      "type": "file"
+    },
+    {
+      "app": "apps/ttb-studio",
+      "id": "apps/ttb-studio/src/routes/api/health/+server.ts",
+      "kind": "module",
+      "lines": 11,
+      "type": "file"
+    },
+    {
+      "app": "apps/ttb-studio",
+      "id": "apps/ttb-studio/vite.config.ts",
+      "kind": "module",
+      "lines": 8,
+      "type": "file"
+    },
+    {
+      "app": "apps/ttb_studio",
+      "id": "apps/ttb_studio/__init__.py",
+      "kind": "module",
+      "lines": 2,
+      "type": "file"
+    },
+    {
+      "app": "apps/ttb_studio",
+      "id": "apps/ttb_studio/app.py",
+      "kind": "module",
+      "lines": 71,
+      "type": "file"
+    },
+    {
+      "app": "apps/ttb_studio",
+      "id": "apps/ttb_studio/index.html",
+      "kind": "static-page",
+      "lines": 304,
+      "type": "file"
+    },
+    {
+      "app": "apps/vocal-fix",
+      "id": "apps/vocal-fix/src/lib/server/backend.ts",
+      "kind": "module",
+      "lines": 25,
+      "type": "file"
+    },
+    {
+      "app": "apps/vocal-fix",
+      "id": "apps/vocal-fix/src/routes/+layout.svelte",
+      "kind": "svelte-component",
+      "lines": 11,
+      "type": "file"
+    },
+    {
+      "app": "apps/vocal-fix",
+      "id": "apps/vocal-fix/src/routes/+page.svelte",
+      "kind": "svelte-component",
+      "lines": 194,
+      "type": "file"
+    },
+    {
+      "app": "apps/vocal-fix",
+      "id": "apps/vocal-fix/src/routes/api/capabilities/+server.ts",
+      "kind": "module",
+      "lines": 17,
+      "type": "file"
+    },
+    {
+      "app": "apps/vocal-fix",
+      "id": "apps/vocal-fix/src/routes/api/health/+server.ts",
+      "kind": "module",
+      "lines": 11,
+      "type": "file"
+    },
+    {
+      "app": "apps/vocal-fix",
+      "id": "apps/vocal-fix/src/routes/api/references/+server.ts",
+      "kind": "module",
+      "lines": 52,
+      "type": "file"
+    },
+    {
+      "app": "apps/vocal-fix",
+      "id": "apps/vocal-fix/src/routes/api/references/[session_id]/+server.ts",
+      "kind": "module",
+      "lines": 46,
+      "type": "file"
+    },
+    {
+      "app": "apps/vocal-fix",
+      "id": "apps/vocal-fix/vite.config.ts",
+      "kind": "module",
+      "lines": 8,
+      "type": "file"
+    },
+    {
+      "app": "apps/vocal_fix",
+      "id": "apps/vocal_fix/__init__.py",
+      "kind": "module",
+      "lines": 2,
+      "type": "file"
+    },
+    {
+      "app": "apps/vocal_fix",
+      "id": "apps/vocal_fix/app.py",
+      "kind": "module",
+      "lines": 163,
+      "type": "file"
+    },
+    {
+      "app": "apps/vocal_fix",
+      "id": "apps/vocal_fix/index.html",
+      "kind": "static-page",
+      "lines": 245,
+      "type": "file"
+    },
+    {
+      "app": "apps/ttb_studio",
+      "id": "endpoint:apps/ttb_studio:GET /",
+      "method": "GET",
+      "path": "/",
+      "type": "python-endpoint"
+    },
+    {
+      "app": "apps/ttb_studio",
+      "id": "endpoint:apps/ttb_studio:GET /api/capabilities",
+      "method": "GET",
+      "path": "/api/capabilities",
+      "type": "python-endpoint"
+    },
+    {
+      "app": "apps/ttb_studio",
+      "id": "endpoint:apps/ttb_studio:GET /api/health",
+      "method": "GET",
+      "path": "/api/health",
+      "type": "python-endpoint"
+    },
+    {
+      "app": "apps/ttb_studio",
+      "id": "endpoint:apps/ttb_studio:POST /api/generations",
+      "method": "POST",
+      "path": "/api/generations",
+      "type": "python-endpoint"
+    },
+    {
+      "app": "apps/vocal_fix",
+      "id": "endpoint:apps/vocal_fix:DELETE /api/references/{session_id}",
+      "method": "DELETE",
+      "path": "/api/references/{session_id}",
+      "type": "python-endpoint"
+    },
+    {
+      "app": "apps/vocal_fix",
+      "id": "endpoint:apps/vocal_fix:GET /",
+      "method": "GET",
+      "path": "/",
+      "type": "python-endpoint"
+    },
+    {
+      "app": "apps/vocal_fix",
+      "id": "endpoint:apps/vocal_fix:GET /api/capabilities",
+      "method": "GET",
+      "path": "/api/capabilities",
+      "type": "python-endpoint"
+    },
+    {
+      "app": "apps/vocal_fix",
+      "id": "endpoint:apps/vocal_fix:GET /api/health",
+      "method": "GET",
+      "path": "/api/health",
+      "type": "python-endpoint"
+    },
+    {
+      "app": "apps/vocal_fix",
+      "id": "endpoint:apps/vocal_fix:GET /api/references/{session_id}",
+      "method": "GET",
+      "path": "/api/references/{session_id}",
+      "type": "python-endpoint"
+    },
+    {
+      "app": "apps/vocal_fix",
+      "id": "endpoint:apps/vocal_fix:POST /api/references",
+      "method": "POST",
+      "path": "/api/references",
+      "type": "python-endpoint"
+    },
+    {
+      "app": "apps/vocal_fix",
+      "id": "endpoint:apps/vocal_fix:POST /api/references/{session_id}/process",
+      "method": "POST",
+      "path": "/api/references/{session_id}/process",
+      "type": "python-endpoint"
+    },
+    {
+      "id": "external:generativelanguage.googleapis.com",
+      "type": "external-service"
+    },
+    {
+      "id": "external:queue.fal.run",
+      "type": "external-service"
+    },
+    {
+      "app": "packages/auth",
+      "id": "packages/auth/src/index.ts",
+      "kind": "module",
+      "lines": 16,
+      "type": "file"
+    },
+    {
+      "app": "packages/billing",
+      "id": "packages/billing/src/index.ts",
+      "kind": "module",
+      "lines": 18,
+      "type": "file"
+    },
+    {
+      "app": "packages/contracts",
+      "id": "packages/contracts/src/index.test.ts",
+      "kind": "module",
+      "lines": 28,
+      "type": "file"
+    },
+    {
+      "app": "packages/contracts",
+      "id": "packages/contracts/src/index.ts",
+      "kind": "module",
+      "lines": 92,
+      "type": "file"
+    },
+    {
+      "app": "packages/database",
+      "id": "packages/database/src/index.ts",
+      "kind": "module",
+      "lines": 16,
+      "type": "file"
+    },
+    {
+      "app": "packages/ui",
+      "id": "packages/ui/src/BrandHeader.svelte",
+      "kind": "svelte-component",
+      "lines": 63,
+      "type": "file"
+    },
+    {
+      "app": "packages/ui",
+      "id": "packages/ui/src/StatusPanel.svelte",
+      "kind": "svelte-component",
+      "lines": 42,
+      "type": "file"
+    },
+    {
+      "id": "pkg:$app/env/private",
+      "type": "external-package"
+    },
+    {
+      "id": "pkg:@sveltejs/adapter-bun",
+      "type": "external-package"
+    },
+    {
+      "id": "pkg:@sveltejs/kit",
+      "type": "external-package"
+    },
+    {
+      "id": "pkg:@sveltejs/kit/env",
+      "type": "external-package"
+    },
+    {
+      "id": "pkg:@sveltejs/kit/vite",
+      "type": "external-package"
+    },
+    {
+      "id": "pkg:bun:test",
+      "type": "external-package"
+    },
+    {
+      "id": "pkg:svelte",
+      "type": "external-package"
+    },
+    {
+      "id": "pkg:vite",
+      "type": "external-package"
+    },
+    {
+      "app": "apps/ttb-studio",
+      "id": "route:apps/ttb-studio:GET /api/capabilities",
+      "method": "GET",
+      "path": "/api/capabilities",
+      "type": "sveltekit-route"
+    },
+    {
+      "app": "apps/ttb-studio",
+      "id": "route:apps/ttb-studio:GET /api/generations/[id]",
+      "method": "GET",
+      "path": "/api/generations/[id]",
+      "type": "sveltekit-route"
+    },
+    {
+      "app": "apps/ttb-studio",
+      "id": "route:apps/ttb-studio:GET /api/generations/[id]/audio",
+      "method": "GET",
+      "path": "/api/generations/[id]/audio",
+      "type": "sveltekit-route"
+    },
+    {
+      "app": "apps/ttb-studio",
+      "id": "route:apps/ttb-studio:GET /api/health",
+      "method": "GET",
+      "path": "/api/health",
+      "type": "sveltekit-route"
+    },
+    {
+      "app": "apps/ttb-studio",
+      "id": "route:apps/ttb-studio:PAGE /",
+      "method": "PAGE",
+      "path": "/",
+      "type": "sveltekit-route"
+    },
+    {
+      "app": "apps/ttb-studio",
+      "id": "route:apps/ttb-studio:POST /api/generations",
+      "method": "POST",
+      "path": "/api/generations",
+      "type": "sveltekit-route"
+    },
+    {
+      "app": "apps/vocal-fix",
+      "id": "route:apps/vocal-fix:DELETE /api/references/[session_id]",
+      "method": "DELETE",
+      "path": "/api/references/[session_id]",
+      "type": "sveltekit-route"
+    },
+    {
+      "app": "apps/vocal-fix",
+      "id": "route:apps/vocal-fix:GET /api/capabilities",
+      "method": "GET",
+      "path": "/api/capabilities",
+      "type": "sveltekit-route"
+    },
+    {
+      "app": "apps/vocal-fix",
+      "id": "route:apps/vocal-fix:GET /api/health",
+      "method": "GET",
+      "path": "/api/health",
+      "type": "sveltekit-route"
+    },
+    {
+      "app": "apps/vocal-fix",
+      "id": "route:apps/vocal-fix:GET /api/references/[session_id]",
+      "method": "GET",
+      "path": "/api/references/[session_id]",
+      "type": "sveltekit-route"
+    },
+    {
+      "app": "apps/vocal-fix",
+      "id": "route:apps/vocal-fix:PAGE /",
+      "method": "PAGE",
+      "path": "/",
+      "type": "sveltekit-route"
+    },
+    {
+      "app": "apps/vocal-fix",
+      "id": "route:apps/vocal-fix:POST /api/references",
+      "method": "POST",
+      "path": "/api/references",
+      "type": "sveltekit-route"
+    },
+    {
+      "app": "tests",
+      "id": "tests/test_apps.py",
+      "kind": "test",
+      "lines": 82,
+      "type": "file"
+    }
+  ]
+}

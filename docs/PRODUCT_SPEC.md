@@ -16,7 +16,7 @@ One public monorepo, two **independently runnable apps**. Avoid merging user wor
 ### App B — TTB Studio (ttb-studio)
 - **Modular monolith:** one app for projects, generation, editor, playback, export and model configuration.
 - Prompt-to-beat, lyrics-to-song, prompt-to-instrumental and full-song generation; custom lyrics, voice role and expressive controls.
-- Engine adapters: ACE-Step, HeartMuLa and a configurable third-party 'V2' adapter, **only after provider/API/model rights have been verified**.
+- Engine adapters: ACE-Step (hosted on fal, development only today), Google Lyria 3.5 (hosted, development only today), HeartMuLa and a configurable third-party 'V2' adapter, **only after provider/API/model rights have been verified**.
 - Character presets: Raw / Underground; Vintage / Analog; Live / Organic; Studio Clean; Custom.
 - 'Premium Studio' optional switch *independent* of sound preset. Never conflate premium with higher musical authenticity.
 - Sliders: rawness/texture, human variation, vocal performance, arrangement complexity, mastering intensity, reference strength and seed where engines support them. Avoid promising controls unsupported by a chosen model; UI must indicate per-engine support.

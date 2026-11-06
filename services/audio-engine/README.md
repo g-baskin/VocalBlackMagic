@@ -3,8 +3,8 @@
 **This is the planned extraction point, not a deployed worker.**
 
 Retained prototype Python FastAPI apps:
-- `apps/vocal_fix/app.py` — source upload and reference-session metadata.
-- `apps/ttb_studio/app.py` — generation request validation and unavailable-engine response.
+- `apps/vocal_fix/app.py`: source upload and reference-session metadata.
+- `apps/ttb_studio/app.py`: generation request validation and unavailable-engine response; superseded and unused by `apps/ttb-studio`, which calls hosted providers directly in development.
 
 Future work:
 - Move audio model adapters here without entangling the SvelteKit product lifecycles.

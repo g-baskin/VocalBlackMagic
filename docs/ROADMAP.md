@@ -17,8 +17,8 @@
 - **Gate:** five authorized inputs produce reproducible attributable Gold Vocal, with no silent failures or nonconsensual identity inference.
 
 ## Phase 2 — TTB generation MVP
-- [ ] ACE-Step adapter, version pin, health probe, license check and real WAV output.
-- [ ] Full-song, instrumental and custom-lyrics flows with asynchronous progress and cancel/retry.
+- [ ] ACE-Step adapter, version pin, health probe, license check and real WAV output. Partial: a development-only hosted fal adapter pinned to `fal-ai/ace-step-1.5` returns format-verified audio; health probe, license check and a self-hosted adapter remain.
+- [ ] Full-song, instrumental and custom-lyrics flows with asynchronous progress and cancel/retry. Partial: fal jobs report progress by polling (Lyria is synchronous); cancel remains open.
 - [ ] Save projects, generation settings, variants and artifacts.
 - [ ] Character-presets renderer; optional Premium Studio **derived** mastering.
 - **Gate:** real generated audio, validated duration, audible A/B difference, original source unchanged.
@@ -47,10 +47,10 @@
 ## Phase 0B — SaaS migration (SvelteKit 3 / Bun)
 - [x] Two independent SvelteKit 3 app surfaces in Bun workspaces.
 - [x] Shared UI, contracts and placeholder auth/database/billing contracts.
-- [x] Frontend-to-local-Python proxy contracts and fail-closed production audio upload/generation.
+- [x] Vocal Fix proxy to local Python; fail-closed production upload and generation.
 - [x] Docker-free systemd reference units and architecture documentation.
-- [ ] Verify passing SvelteKit 3 TypeScript checks, production builds and Python tests in CI.
-- [ ] Commit reproducible `bun.lock` and switch to frozen-lockfile installs.
+- [x] Verify passing SvelteKit 3 TypeScript checks, production builds and Python tests in CI.
+- [ ] `bun.lock` is committed; switch CI to frozen-lockfile installs.
 - [ ] Integrate an auth provider; secure production session checks and per-tenant access.
 - [ ] Stripe checkout and signed webhooks, entitlements, idempotent credits ledger.
 - [ ] PostgreSQL migrations, S3-compatible private audio storage, queue and GPU worker.
