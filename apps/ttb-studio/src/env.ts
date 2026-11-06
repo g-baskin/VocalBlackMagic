@@ -8,6 +8,10 @@ export const variables = defineEnvVars({
     description: 'fal.ai API key for ACE-Step song generation (server only).',
     schema: optionalKey
   },
+  REPLICATE_API_TOKEN: {
+    description: 'Replicate API token for studio engines, lyrics, stems and voice (server only).',
+    schema: optionalKey
+  },
   GEMINI_API_KEY: {
     description: 'Google Gemini API key with paid Lyria 3.5 access (server only).',
     schema: optionalKey

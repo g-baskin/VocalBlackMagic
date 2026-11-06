@@ -5,9 +5,41 @@
   "type": "module",
   "exports": {
     "./BrandHeader.svelte": "./src/BrandHeader.svelte",
-    "./StatusPanel.svelte": "./src/StatusPanel.svelte"
+    "./StatusPanel.svelte": "./src/StatusPanel.svelte",
+    "./ArcaneShell.svelte": "./src/ArcaneShell.svelte",
+    "./ArcanePanel.svelte": "./src/ArcanePanel.svelte",
+    "./RuneButton.svelte": "./src/RuneButton.svelte",
+    "./ArcaneInput.svelte": "./src/ArcaneInput.svelte",
+    "./ArcaneTextarea.svelte": "./src/ArcaneTextarea.svelte",
+    "./ArcaneSelect.svelte": "./src/ArcaneSelect.svelte",
+    "./RuneToggle.svelte": "./src/RuneToggle.svelte",
+    "./RitualProgress.svelte": "./src/RitualProgress.svelte",
+    "./SigilLoader.svelte": "./src/SigilLoader.svelte",
+    "./OracleStatus.svelte": "./src/OracleStatus.svelte",
+    "./RuneMeter.svelte": "./src/RuneMeter.svelte",
+    "./Waveform.svelte": "./src/Waveform.svelte",
+    "./Spectrogram.svelte": "./src/Spectrogram.svelte",
+    "./PitchTrace.svelte": "./src/PitchTrace.svelte",
+    "./SummoningCircle.svelte": "./src/SummoningCircle.svelte",
+    "./GrimoirePlayer.svelte": "./src/GrimoirePlayer.svelte",
+    "./Sigil.svelte": "./src/Sigil.svelte",
+    "./theme.css": "./src/theme.css",
+    "./audio": "./src/audio.ts",
+    "./RuneDropzone.svelte": "./src/RuneDropzone.svelte",
+    "./ABCompare.svelte": "./src/ABCompare.svelte",
+    "./RuneRecorder.svelte": "./src/RuneRecorder.svelte",
+    "./VoiceSigil.svelte": "./src/VoiceSigil.svelte",
+    "./MermaidDiagram.svelte": "./src/MermaidDiagram.svelte",
+    "./mermaid-doc": "./src/mermaid-doc.ts",
+    "./DesignCodex.svelte": "./src/DesignCodex.svelte"
   },
   "peerDependencies": {
     "svelte": "^5.57.1"
+  },
+  "dependencies": {
+    "@fontsource/cinzel": "^5.3.0",
+    "@fontsource/cormorant-garamond": "^5.3.0",
+    "@fontsource/jetbrains-mono": "^5.3.0",
+    "mermaid": "^11"
   }
 }

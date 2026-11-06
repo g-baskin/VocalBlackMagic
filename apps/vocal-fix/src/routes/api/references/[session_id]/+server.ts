@@ -23,9 +23,11 @@ export const GET: RequestHandler = async ({ params, fetch }) => {
     return upstreamUnavailable(error);
   }
 };
-export const DELETE: RequestHandler = async ({ params, fetch }) => {
+export const DELETE: RequestHandler = async ({ params, fetch, request }) => {
   if (process.env.NODE_ENV !== 'development')
     return Response.json({ detail: 'Authentication required.' }, { status: 403 });
+  if (!request.headers.get('x-vbm-intent'))
+    return Response.json({ detail: 'Missing x-vbm-intent header.' }, { status: 415 });
   if (!safePath(params.session_id))
     return Response.json({ detail: 'Invalid session id.' }, { status: 404 });
   try {

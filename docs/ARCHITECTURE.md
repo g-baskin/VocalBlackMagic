@@ -14,7 +14,7 @@ VocalBlackMagic/
 ## Initial runnable scaffold
 - Python 3.11+ with FastAPI, Pydantic, Uvicorn.
 - Separate entrypoints: `apps.vocal_fix.app:app` and `apps.ttb_studio.app:app`.
-- Vocal Fix supports five-file ingestion, metadata and deletion with local disk storage. Processing endpoint is explicitly **not implemented**.
+- The legacy Python Vocal Fix supports five-file ingestion, metadata and deletion with local disk storage; its processing endpoint is **not implemented**. The SvelteKit Vocal Fix app now runs the real pipeline itself (see [ADR 0004](decisions/0004-vocal-fix-pipeline-in-sveltekit.md)).
 - The legacy Python TTB Studio exposes a preset/engine capability catalog and validates generation requests, then explicitly rejects generation. It does **not** pretend to generate music, and the SvelteKit app does not call it. `packages/contracts` `validateGenerationRequest` is the authoritative request validator; the Python model is legacy.
 - Local-only starter: no authentication or hardened tenancy yet. **Do not expose to public traffic** before security phase.
 
@@ -51,8 +51,8 @@ Decision context and trade-offs are in the [decision log](decisions/README.md).
 The earlier FastAPI app entrypoints above are **retained audio prototypes**, not the user-facing web apps. The new SaaS layer is:
 
 ```text
-apps/vocal-fix/             SvelteKit 3 + Bun SaaS UI + protected local API bridge
-apps/ttb-studio/             SvelteKit 3 + Bun modular monolith UI with dev-only hosted provider adapters
+apps/vocal-fix/             SvelteKit 3 + Bun UI + dev-only pipeline (ffmpeg DSP, Replicate inference)
+apps/ttb-studio/             SvelteKit 3 + Bun modular monolith UI with dev-only hosted provider adapters (Replicate, fal, Lyria) and a local song library
 apps/vocal_fix/              legacy Python local reference-ingestion backend
 apps/ttb_studio/             legacy Python local generation-contract backend (unused by apps/ttb-studio)
 packages/{ui,contracts}/    shared frontend components and typed API contracts

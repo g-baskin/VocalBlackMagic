@@ -4,6 +4,7 @@ export interface ProviderConfig {
   falConfigured: boolean;
   lyriaConfigured: boolean;
   generationAllowed: boolean;
+  replicateConfigured?: boolean;
 }
 
 export function buildCapabilities(config: ProviderConfig): TTBCapabilities {
@@ -31,6 +32,8 @@ export function buildCapabilities(config: ProviderConfig): TTBCapabilities {
     ],
     sound_characters: [...soundCharacters],
     premium_studio: { selectable: true, processing_ready: false },
-    generation_ready: config.generationAllowed && (config.falConfigured || config.lyriaConfigured)
+    generation_ready:
+      config.generationAllowed &&
+      (config.falConfigured || config.lyriaConfigured || config.replicateConfigured === true)
   };
 }

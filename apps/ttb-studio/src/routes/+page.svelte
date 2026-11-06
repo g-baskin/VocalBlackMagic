@@ -1,398 +1,507 @@
 <script lang="ts">
   import { onDestroy, onMount } from 'svelte';
-  import BrandHeader from '@vbm/ui/BrandHeader.svelte';
-  import StatusPanel from '@vbm/ui/StatusPanel.svelte';
+  import ArcanePanel from '@vbm/ui/ArcanePanel.svelte';
+  import RuneButton from '@vbm/ui/RuneButton.svelte';
+  import ArcaneInput from '@vbm/ui/ArcaneInput.svelte';
+  import ArcaneTextarea from '@vbm/ui/ArcaneTextarea.svelte';
+  import ArcaneSelect from '@vbm/ui/ArcaneSelect.svelte';
+  import RuneToggle from '@vbm/ui/RuneToggle.svelte';
+  import RitualProgress from '@vbm/ui/RitualProgress.svelte';
+  import SigilLoader from '@vbm/ui/SigilLoader.svelte';
+  import OracleStatus from '@vbm/ui/OracleStatus.svelte';
   import {
     soundCharacters,
     soundCharacterNames,
-    validateGenerationRequest,
-    minSongSeconds,
-    maxSongSeconds,
+    validateCreateSongRequest,
+    type CreateSongRequest,
+    type SongMeta,
     type SoundCharacter,
-    type GenerationEngine,
-    type SongMode,
-    type TTBCapabilities,
-    type GenerationRequest,
-    type GenerationJob,
-    type InlineAudio
+    type StudioEngine,
+    type StudioEngineInfo,
+    type StudioJob
   } from '@vbm/contracts';
+  import { api, sleep } from '../lib/client/api';
+  import SongTake from '../lib/client/SongTake.svelte';
 
-  const vocalUrl = import.meta.env.VITE_VOCAL_FIX_URL || 'http://localhost:5173';
-  let prompt = $state(
-    'Dark 1990s East Coast hip-hop, haunting minor-key piano, hard drums, deep bass and imperfect live-room energy.'
+  type Caps = { allowed: boolean; engines: StudioEngineInfo[]; lyrics_ready: boolean };
+
+  let mode = $state<'simple' | 'custom'>('simple');
+  let description = $state('A haunted gothic synth-pop hymn about lighting candles for the lost');
+  let title = $state('');
+  let stylePrompt = $state(
+    'Dark gothic synth-pop, choir pads, pulsing bass, ethereal female vocal'
   );
+  let tagText = $state('gothic, synth-pop, cinematic');
   let lyrics = $state('');
-  let mode = $state<SongMode>('full-song');
-  let engine = $state<GenerationEngine>('ace-step');
-  let character = $state<SoundCharacter>('raw');
-  let premium = $state(false);
-  let texture = $state(70);
-  let human = $state(65);
-  let mastering = $state(25);
-  let duration = $state(120);
-  let audioSrc = $state<string | null>(null);
-  let audioType = $state('audio/mpeg');
-  let songLyrics = $state<string | null>(null);
-  let run = 0;
+  let instrumental = $state(false);
+  let engine = $state<string>('minimax-music-1.5');
+  let duration = $state('120');
+  let takes = $state('2');
+  let coverArt = $state(true);
+  let sungBy = $state('');
+  let referenceSong = $state('');
+  let voices = $state<{ id: string; performer: string }[]>([]);
+  let librarySongs = $state<SongMeta[]>([]);
+  let character = $state<string>('clean');
+  let caps = $state<Caps | null>(null);
+  let capsError = $state<string | null>(null);
+  let job = $state<StudioJob | null>(null);
+  let songs = $state<SongMeta[]>([]);
+  let error = $state<string | null>(null);
   let busy = $state(false);
-  let message = $state('Checking hosted models…');
-  let tone = $state<'neutral' | 'warning' | 'success'>('neutral');
-  let capabilities = $state<TTBCapabilities | null>(null);
-  type Tone = 'neutral' | 'warning' | 'success';
-  type JobReply = GenerationJob & { detail?: string };
+  let writtenLyrics = $state<string | null>(null);
+  let alive = true;
+  const lyricPlaceholder = ['[Verse]', '…', '[Chorus]', '…'].join('\n');
+
+  const spec = $derived(caps?.engines.find((e) => e.id === engine) ?? null);
+  const engineOptions = $derived(
+    (caps?.engines ?? []).map((e) => ({
+      value: e.id,
+      label: e.name + (e.status === 'ready' ? '' : ' — ' + e.status),
+      hint:
+        (e.vocals ? 'Vocals' : 'Instrumental only') +
+        (e.duration
+          ? ' · ' + e.duration.min + '–' + e.duration.max + ' s'
+          : ' · model picks length') +
+        ' · about $' +
+        e.est_cost_usd.toFixed(3) +
+        ' per take',
+      disabled: e.status !== 'ready' || (instrumental ? !e.instrumental : !e.vocals)
+    }))
+  );
+  const characterOptions = soundCharacters.map((c) => ({
+    value: c,
+    label: soundCharacterNames[c]
+  }));
+  const takeOptions = [
+    { value: '2', label: 'Two takes', hint: 'Like Suno: two variations, double the cost' },
+    { value: '1', label: 'One take' }
+  ];
+  const tags = $derived(
+    tagText
+      .split(',')
+      .map((t) => t.trim())
+      .filter(Boolean)
+      .slice(0, 20)
+  );
+  const voiceSummon = $derived(mode === 'custom' && !!sungBy && !instrumental);
+  const estimate = $derived(
+    voiceSummon
+      ? (0.035 + (coverArt ? 0.003 : 0)) * Number(takes)
+      : spec
+        ? (spec.est_cost_usd + (coverArt ? 0.003 : 0)) * Number(takes)
+        : 0
+  );
+  const sungByOptions = $derived([
+    { value: '', label: "The engine's own voice" },
+    ...voices.map((v) => ({
+      value: v.id,
+      label: v.performer,
+      hint: 'Your forged voice, sung via its Gold Vocal (MiniMax Music-01, ~$0.035, lyrics up to ~380 characters)'
+    }))
+  ]);
+  const referenceOptions = $derived(
+    librarySongs
+      .filter((s) => s.audio && s.kind !== 'stems')
+      .map((s) => ({
+        value: s.id,
+        label: s.title,
+        hint: 'Its music (drums, bass and other stems if split) guides the new song'
+      }))
+  );
+  $effect(() => {
+    if (sungBy && !referenceSong && referenceOptions[0]) referenceSong = referenceOptions[0].value;
+  });
+  const running = $derived(job?.status === 'running' || job?.status === 'queued');
+
+  // Pick a usable engine whenever the instrumental switch changes what is allowed.
+  $effect(() => {
+    const options = engineOptions;
+    if (options.length && options.find((o) => o.value === engine)?.disabled) {
+      const next = options.find((o) => !o.disabled);
+      if (next) engine = next.value;
+    }
+  });
 
   onMount(async () => {
-    try {
-      const response = await fetch('/api/capabilities');
-      if (!response.ok) {
-        message = 'Could not check hosted model availability. The editor remains available.';
-        tone = 'warning';
-        return;
-      }
-      capabilities = (await response.json()) as TTBCapabilities;
-      message = capabilities.generation_ready
-        ? 'Ready. Choose a model and generate a song.'
-        : 'No hosted model is ready. Add FAL_KEY or GEMINI_API_KEY to the server environment.';
-      tone = capabilities.generation_ready ? 'success' : 'neutral';
-    } catch {
-      message = 'Could not check hosted model availability.';
-      tone = 'warning';
-    }
-  });
-
-  onDestroy(() => {
-    run += 1;
-    clearAudio();
-  });
-
-  // Ignore results from a superseded or unmounted request.
-  function report(token: number, text: string, nextTone: Tone = 'warning') {
-    if (token !== run) return;
-    message = text;
-    tone = nextTone;
-  }
-
-  async function readJson<T>(response: Response): Promise<Partial<T>> {
-    try {
-      return (await response.json()) as Partial<T>;
-    } catch {
-      return {};
-    }
-  }
-
-  function clearAudio() {
-    if (audioSrc) URL.revokeObjectURL(audioSrc);
-    audioSrc = null;
-  }
-
-  function showAudio(blob: Blob) {
-    clearAudio();
-    audioType = blob.type || 'audio/mpeg';
-    audioSrc = URL.createObjectURL(blob);
-  }
-
-  function inlineBlob(audio: InlineAudio): Blob {
-    const bytes = Uint8Array.from(atob(audio.data_base64), (char) => char.charCodeAt(0));
-    return new Blob([bytes], { type: audio.content_type });
-  }
-
-  const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
-  const downloadExtensions: Record<string, string> = {
-    'audio/wav': 'wav',
-    'audio/flac': 'flac',
-    'audio/ogg': 'ogg',
-    'audio/mpeg': 'mp3'
-  };
-  const retryable = (status: number) => status === 429 || status >= 500;
-  const maxPollFailures = 3;
-
-  async function loadAudio(url: string, jobId: string, token: number) {
-    report(token, 'Downloading and verifying audio…', 'neutral');
-    try {
-      const audio = await fetch(url);
-      if (!audio.ok) {
-        const body = await readJson<{ detail: string }>(audio);
-        report(
-          token,
-          (body.detail || 'The finished audio could not be verified.') + ' Job id: ' + jobId
-        );
-        return;
-      }
-      const blob = await audio.blob();
-      if (token !== run) return;
-      showAudio(blob);
-      report(token, 'Song ready.', 'success');
-    } catch {
-      report(token, 'The audio download was incomplete. Job id: ' + jobId);
-    }
-  }
-
-  async function pollJob(jobId: string, token: number) {
-    const deadline = Date.now() + 15 * 60_000;
-    let failures = 0;
-    // A paid job keeps running server-side, so transient errors retry and the id is shown on give-up.
-    const giveUp = (text: string) => report(token, text + ' Job id: ' + jobId);
-    while (token === run && Date.now() < deadline) {
-      await sleep(3000 * 2 ** failures);
-      if (token !== run) return;
-      let response: Response;
+    api<{ voices: { id: string; performer: string }[] }>('/api/studio/voices')
+      .then((r) => (voices = r.voices))
+      .catch(() => undefined);
+    api<{ songs: SongMeta[] }>('/api/studio/songs')
+      .then((r) => (librarySongs = r.songs))
+      .catch(() => undefined);
+    const prefill = sessionStorage.getItem('vbm-studio-prefill');
+    if (prefill) {
+      sessionStorage.removeItem('vbm-studio-prefill');
       try {
-        response = await fetch('/api/generations/' + encodeURIComponent(jobId));
+        const data = JSON.parse(prefill) as { title?: string; lyrics?: string; prompt?: string };
+        mode = 'custom';
+        title = data.title ?? '';
+        lyrics = data.lyrics ?? '';
+        if (data.prompt) stylePrompt = data.prompt.slice(0, 300);
       } catch {
-        if (++failures > maxPollFailures) {
-          giveUp('Lost connection while checking the song.');
-          return;
-        }
+        // ignore a malformed hand-off
+      }
+    }
+    try {
+      caps = await api<Caps>('/api/studio/capabilities');
+    } catch (e) {
+      capsError = e instanceof Error ? e.message : 'The studio could not be reached.';
+    }
+  });
+  onDestroy(() => (alive = false));
+
+  function buildRequest(): CreateSongRequest {
+    const custom = mode === 'custom';
+    return {
+      mode,
+      prompt: custom ? stylePrompt : description,
+      title: custom ? title : '',
+      lyrics: custom && !instrumental && lyrics.trim() ? lyrics : null,
+      style_tags: tags,
+      instrumental,
+      engine: engine as StudioEngine,
+      duration_seconds: spec?.duration ? Number(duration) : null,
+      sound_character: character as SoundCharacter,
+      takes: takes === '1' ? 1 : 2,
+      cover: coverArt,
+      voice_id: custom && sungBy ? sungBy : null,
+      reference_song_id: custom && sungBy ? referenceSong : null
+    };
+  }
+
+  async function poll(id: string) {
+    while (alive) {
+      await sleep(4000);
+      try {
+        const reply = await api<{ job: StudioJob }>('/api/studio/jobs/' + id);
+        job = reply.job;
+      } catch (e) {
+        error = (e instanceof Error ? e.message : 'Lost contact with the ritual.') + ' Retrying…';
         continue;
       }
-      const job = await readJson<JobReply>(response);
-      if (!response.ok) {
-        if (retryable(response.status) && ++failures <= maxPollFailures) continue;
-        giveUp(job.detail || 'Could not check the generation job.');
-        return;
-      }
-      failures = 0;
-      if (job.status === 'failed') {
-        report(token, job.detail || 'The provider could not generate this song.');
-        return;
-      }
-      if (job.status === 'completed' && job.audio_url) {
-        await loadAudio(job.audio_url, jobId, token);
-        return;
-      }
-      report(
-        token,
-        job.status === 'queued' ? 'Waiting in the provider queue…' : 'Generating your song…',
-        'neutral'
-      );
+      error = null;
+      if (job.status !== 'running' && job.status !== 'queued') break;
     }
-    if (token === run) giveUp('The song is taking longer than 15 minutes. Try again later.');
+    if (!job) return;
+    if (job.status === 'failed' || job.status === 'canceled')
+      error = job.detail ?? 'The ritual failed.';
+    songs = [];
+    for (const songId of job.song_ids)
+      songs.push((await api<{ song: SongMeta }>('/api/studio/songs/' + songId)).song);
   }
 
-  async function generate(event: SubmitEvent) {
-    event.preventDefault();
-    const payload: GenerationRequest = {
-      prompt,
-      lyrics: lyrics.trim() || null,
-      mode,
-      engine,
-      sound_character: character,
-      premium_studio: premium,
-      texture,
-      human_variation: human,
-      mastering_intensity: mastering,
-      duration_seconds: duration
-    };
-    const error = validateGenerationRequest(payload);
-    if (error) {
-      message = error;
-      tone = 'warning';
+  async function summon() {
+    const request = buildRequest();
+    const invalid = validateCreateSongRequest(request);
+    if (invalid) {
+      error = invalid;
       return;
     }
-    const token = ++run;
     busy = true;
-    const writing = engine === 'ace-step' && mode === 'full-song' && !payload.lyrics;
-    report(
-      token,
-      engine === 'lyria-3.5'
-        ? 'Generating with Lyria. This can take a few minutes…'
-        : writing
-          ? 'Writing lyrics, then submitting your song…'
-          : 'Submitting your song…',
-      'neutral'
-    );
-    songLyrics = null;
-    clearAudio();
+    error = null;
+    songs = [];
+    writtenLyrics = null;
+    job = null;
     try {
-      const response = await fetch('/api/generations', {
-        method: 'POST',
-        headers: { 'content-type': 'application/json' },
-        body: JSON.stringify(payload)
-      });
-      const body = await readJson<JobReply>(response);
-      if (token !== run) return;
-      if (!response.ok) {
-        const detail = body.detail || 'The song request failed (HTTP ' + response.status + ').';
-        if (body.lyrics) {
-          lyrics = body.lyrics;
-          songLyrics = body.lyrics;
-          report(
-            token,
-            detail + ' The written lyrics were put in the lyrics box so a retry reuses them.'
-          );
-        } else report(token, detail);
-        return;
-      }
-      if (body.status === 'completed' && body.audio) {
-        showAudio(inlineBlob(body.audio));
-        songLyrics = body.lyrics ?? null;
-        report(token, 'Song ready.', 'success');
-        return;
-      }
-      if (!body.job_id) {
-        report(token, 'The server returned an unexpected response.');
-        return;
-      }
-      songLyrics = body.lyrics ?? null;
-      report(token, 'Waiting in the provider queue…', 'neutral');
-      await pollJob(body.job_id, token);
-    } catch (error) {
-      report(token, error instanceof Error ? error.message : 'Generation failed.');
+      const reply = await api<{ job: StudioJob; lyrics: string | null; title: string }>(
+        '/api/studio/songs',
+        { method: 'POST', body: JSON.stringify(request) }
+      );
+      job = reply.job;
+      if (!request.lyrics && reply.lyrics) writtenLyrics = reply.lyrics;
+      busy = false;
+      await poll(reply.job.id);
+    } catch (e) {
+      error = e instanceof Error ? e.message : 'The summoning failed.';
     } finally {
-      if (token === run) busy = false;
+      busy = false;
     }
+  }
+
+  async function cancel() {
+    if (!job) return;
+    try {
+      job = (await api<{ job: StudioJob }>('/api/studio/jobs/' + job.id, { method: 'DELETE' })).job;
+    } catch (e) {
+      error = e instanceof Error ? e.message : 'Could not cancel.';
+    }
+  }
+
+  function insertTag(tag: string) {
+    lyrics = (lyrics.trimEnd() ? lyrics.trimEnd() + '\n\n' : '') + '[' + tag + ']\n';
   }
 </script>
 
-<BrandHeader product="TTB Studio" sisterUrl={vocalUrl} sisterName="Vocal Fix" />
-<main>
-  <span class="eyebrow">Application 02 / Text-to-beat and complete songs</span>
-  <h1>Make music<br />with <em>character.</em></h1>
-  <p class="lead">
-    A Suno-style studio designed for expression instead of automatic polish. Control the raw feel,
-    compare generation models and choose Premium Studio only when the recording needs it.
-  </p>
-  <div class="panels">
-    <form class="panel" onsubmit={generate}>
-      <div class="field">
-        <label for="prompt">What should the music feel like?</label>
-        <textarea id="prompt" bind:value={prompt} minlength="5" maxlength="3000" required
-        ></textarea>
-      </div>
-      <div class="field">
-        <label for="lyrics">Original lyrics (optional)</label>
-        <textarea
-          id="lyrics"
-          bind:value={lyrics}
-          maxlength="15000"
-          placeholder="Paste your lyrics, or leave empty to have original lyrics written for you…"
-        ></textarea>
-      </div>
-      <div class="duo">
-        <div class="field">
-          <label for="mode">Output</label>
-          <select id="mode" bind:value={mode}>
-            <option value="full-song">Complete song</option>
-            <option value="instrumental">Beat / instrumental</option>
-          </select>
-        </div>
-        <div class="field">
-          <label for="engine">Generation model</label>
-          <select id="engine" bind:value={engine}>
-            <option value="ace-step">ACE-Step 1.5 via fal</option>
-            <option value="lyria-3.5">Google Lyria 3.5</option>
-            <option value="heartmula">HeartMuLa</option>
-            <option value="external-v2">External V2 (verify provider)</option>
-          </select>
-        </div>
-      </div>
-      <div class="field">
-        <div class="meter">
-          <label for="duration">Song length</label><span class="value">{duration} s</span>
-        </div>
-        <input
-          class="slider"
-          id="duration"
-          type="range"
-          min={minSongSeconds}
-          max={maxSongSeconds}
-          step="10"
-          bind:value={duration}
-        />
-      </div>
-      <div class="field">
-        <label>Sound character</label>
-        <div class="presets">
-          {#each soundCharacters as id (id)}
-            <button
-              class="preset"
-              class:selected={character === id}
-              type="button"
-              onclick={() => (character = id)}
-              aria-pressed={character === id}
-            >
-              {soundCharacterNames[id]}
-            </button>
-          {/each}
-        </div>
-      </div>
-      <label class="checkbox">
-        <input type="checkbox" bind:checked={premium} />
-        <span
-          ><strong>Premium Studio finishing</strong><small
-            >Optional, separate from sound character. When implemented, it will preserve the
-            original unmastered recording.</small
-          ></span
-        >
-      </label>
-      <button class="primary" type="submit" disabled={busy || prompt.trim().length < 5}>
-        {busy ? 'Generating…' : 'Generate song'}
-      </button>
-    </form>
-    <aside class="panel">
-      <span class="badge">Production controls</span>
-      <h2>Make it yours.</h2>
-      <p>
-        These represent future model/DSP controls and are only effective when supported by the
-        selected engine.
-      </p>
-      <div class="meter">
-        <label for="texture">Rawness / texture</label><span class="value">{texture}%</span>
-      </div>
-      <input
-        class="slider"
-        id="texture"
-        type="range"
-        min="0"
-        max="100"
-        step="1"
-        bind:value={texture}
-      />
-      <div class="meter">
-        <label for="human">Human variation</label><span class="value">{human}%</span>
-      </div>
-      <input class="slider" id="human" type="range" min="0" max="100" step="1" bind:value={human} />
-      <div class="meter">
-        <label for="master">Mastering intensity</label><span class="value">{mastering}%</span>
-      </div>
-      <input
-        class="slider"
-        id="master"
-        type="range"
-        min="0"
-        max="100"
-        step="1"
-        bind:value={mastering}
-      />
-      <div style="margin:25px 0"><StatusPanel title="Generation status" {message} {tone} /></div>
-      {#if audioSrc}
-        <audio controls src={audioSrc} aria-label="Generated song"></audio>
-        <p>
-          <a
-            href={audioSrc}
-            rel="external"
-            download={'song.' + (downloadExtensions[audioType] ?? 'mp3')}>Download song</a
+<svelte:head><title>The Studio · Vocal Black Magic</title></svelte:head>
+
+<div class="page">
+  <header class="page-title">
+    <h1>The Studio</h1>
+    <p>
+      Speak a description into the circle, or write every line yourself. Each take is bound to your
+      library.
+    </p>
+  </header>
+
+  {#if capsError}
+    <OracleStatus tone="danger">{capsError}</OracleStatus>
+  {:else if caps && !caps.allowed}
+    <OracleStatus tone="warning">Summoning is sealed outside development mode.</OracleStatus>
+  {/if}
+
+  <div class="altar">
+    <ArcanePanel
+      eyebrow="Incantation"
+      title={mode === 'simple' ? 'Simple summoning' : 'Custom ritual'}
+    >
+      {#snippet actions()}
+        <div class="modes" role="radiogroup" aria-label="Creation mode">
+          <button
+            role="radio"
+            aria-checked={mode === 'simple'}
+            class:on={mode === 'simple'}
+            onclick={() => (mode = 'simple')}>Simple</button
           >
-        </p>
-      {/if}
-      {#if songLyrics}
-        <details>
-          <summary>Lyrics and structure</summary>
-          <pre>{songLyrics}</pre>
+          <button
+            role="radio"
+            aria-checked={mode === 'custom'}
+            class:on={mode === 'custom'}
+            onclick={() => (mode = 'custom')}>Custom</button
+          >
+        </div>
+      {/snippet}
+      <div class="fields">
+        {#if mode === 'simple'}
+          <ArcaneTextarea
+            label="Describe the song"
+            bind:value={description}
+            rows={4}
+            maxlength={3000}
+            placeholder="A song about…"
+          />
+          <p class="aside">The oracle writes the lyrics and a title, then the engine sings them.</p>
+        {:else}
+          <ArcaneInput
+            label="Title (optional)"
+            bind:value={title}
+            maxlength={120}
+            placeholder="Untitled spell"
+          />
+          <ArcaneTextarea
+            label="Style of music"
+            bind:value={stylePrompt}
+            rows={3}
+            maxlength={spec?.max_prompt ?? 3000}
+          />
+          {#if !instrumental}
+            <ArcaneTextarea
+              label="Lyrics (leave empty and the oracle writes them)"
+              bind:value={lyrics}
+              rows={10}
+              maxlength={spec?.max_lyrics ?? 15000}
+              placeholder={lyricPlaceholder}
+            />
+            <div class="tagbar" aria-label="Insert section tag">
+              {#each ['Intro', 'Verse', 'Pre-Chorus', 'Chorus', 'Bridge', 'Outro'] as tag (tag)}
+                <button type="button" onclick={() => insertTag(tag)}>[{tag}]</button>
+              {/each}
+            </div>
+          {/if}
+        {/if}
+        <ArcaneInput label="Style tags (comma separated)" bind:value={tagText} maxlength={400} />
+        {#if tags.length}
+          <ul class="chips" aria-label="Style tags">
+            {#each tags as tag (tag)}<li>{tag}</li>{/each}
+          </ul>
+        {/if}
+      </div>
+    </ArcanePanel>
+
+    <ArcanePanel eyebrow="Vessel" title="Engine & form" glow="ember">
+      <div class="fields">
+        <RuneToggle
+          label="Instrumental"
+          bind:checked={instrumental}
+          hint="No vocals. Some engines only make instrumentals."
+        />
+        {#if mode === 'custom' && !instrumental}
+          <ArcaneSelect label="Sung by" bind:value={sungBy} options={sungByOptions} />
+          {#if sungBy}
+            {#if referenceOptions.length}
+              <ArcaneSelect
+                label="Music reference"
+                bind:value={referenceSong}
+                options={referenceOptions}
+              />
+            {:else}
+              <p class="aside">
+                Summon a song first: a voice summon needs a library song as its music reference.
+              </p>
+            {/if}
+          {:else if !voices.length}
+            <p class="aside">
+              Forge your own voice in Vocal Fix's Voice Forge to sing with it here.
+            </p>
+          {/if}
+        {/if}
+        {#if voiceSummon}
+          <p class="aside">Engine: MiniMax Music-01 with your voice's Gold Vocal as reference.</p>
+        {:else if caps}
+          <ArcaneSelect label="Engine" bind:value={engine} options={engineOptions} />
+        {:else if !capsError}
+          <SigilLoader label="Reading the engines…" size={40} />
+        {/if}
+        {#if spec?.duration}
+          <ArcaneInput
+            label={'Length in seconds (' + spec.duration.min + '–' + spec.duration.max + ')'}
+            type="number"
+            bind:value={duration}
+          />
+        {:else if spec}
+          <p class="aside">This engine chooses the song length itself.</p>
+        {/if}
+        <ArcaneSelect label="Sound character" bind:value={character} options={characterOptions} />
+        <RuneToggle
+          label="Conjure cover art"
+          bind:checked={coverArt}
+          hint="An arcane cover per take with FLUX Schnell, about $0.003 each."
+        />
+        <ArcaneSelect label="Takes" bind:value={takes} options={takeOptions} />
+        <p class="price">Estimated cost: <strong>${estimate.toFixed(3)}</strong></p>
+        <div class="summon">
+          <RuneButton
+            onclick={summon}
+            busy={busy || running}
+            disabled={!caps?.allowed || !spec || spec.status !== 'ready'}
+          >
+            Summon the song
+          </RuneButton>
+          {#if running}<RuneButton variant="ghost" onclick={cancel}>Banish</RuneButton>{/if}
+        </div>
+      </div>
+    </ArcanePanel>
+  </div>
+
+  {#if error}<OracleStatus tone="danger">{error}</OracleStatus>{/if}
+
+  {#if job}
+    <ArcanePanel eyebrow="Ritual" title="The summoning" glow="teal">
+      <div class="ritual">
+        {#if running}<SigilLoader label="The engine is singing…" />{/if}
+        <RitualProgress stages={job.stages} detail={job.detail} />
+      </div>
+      {#if writtenLyrics}
+        <details class="written">
+          <summary>Lyrics written by the oracle</summary>
+          <pre>{writtenLyrics}</pre>
         </details>
       {/if}
-      <h2>Engine availability</h2>
-      {#if capabilities}
-        {#each capabilities.engines as item (item.id)}
-          <p><strong>{item.name}</strong> · {item.status}</p>
-        {/each}
-      {:else}
-        <p class="note">Checking hosted model availability…</p>
-      {/if}
-      <p class="note">
-        Songs are generated by hosted providers, not on this computer. Audio is verified before
-        playback and is not saved yet. Premium Studio, storage and billing are later phases.
-      </p>
-    </aside>
-  </div>
-</main>
+    </ArcanePanel>
+  {/if}
+
+  {#if songs.length}
+    <section class="takes" aria-label="Summoned takes">
+      {#each songs as song (song.id)}
+        <ArcanePanel eyebrow={'Take ' + (song.params.take ?? 1)} title={song.title} glow="violet">
+          <SongTake {song} />
+        </ArcanePanel>
+      {/each}
+    </section>
+  {/if}
+</div>
+
+<style>
+  .altar {
+    display: grid;
+    grid-template-columns: minmax(0, 1.6fr) minmax(0, 1fr);
+    gap: 1.5rem;
+  }
+  .fields {
+    display: grid;
+    gap: 1rem;
+  }
+  .modes {
+    display: inline-flex;
+    border: 1px solid var(--vbm-violet-deep);
+    border-radius: 999px;
+    overflow: hidden;
+  }
+  .modes button,
+  .tagbar button {
+    background: transparent;
+    color: inherit;
+    border: 0;
+    padding: 0.4rem 0.9rem;
+    font-family: var(--vbm-font-display);
+    letter-spacing: 0.1em;
+    cursor: pointer;
+  }
+  .modes button.on {
+    background: var(--vbm-violet-deep);
+    color: #fff;
+  }
+  .tagbar {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+  }
+  .tagbar button {
+    border: 1px dashed var(--vbm-violet);
+    border-radius: 4px;
+    font-family: var(--vbm-font-mono);
+    font-size: 0.8rem;
+    padding: 0.25rem 0.5rem;
+  }
+  .chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+    list-style: none;
+    padding: 0;
+    margin: 0;
+  }
+  .chips li {
+    border: 1px solid var(--vbm-teal-deep);
+    color: var(--vbm-teal);
+    padding: 0.15rem 0.6rem;
+    border-radius: 999px;
+    font-size: 0.85rem;
+  }
+  .aside {
+    margin: 0;
+    opacity: 0.72;
+    font-style: italic;
+  }
+  .price {
+    margin: 0;
+    font-family: var(--vbm-font-mono);
+    font-size: 0.85rem;
+  }
+  .summon {
+    display: flex;
+    gap: 0.75rem;
+    flex-wrap: wrap;
+  }
+  .ritual {
+    display: flex;
+    gap: 1.5rem;
+    align-items: center;
+    flex-wrap: wrap;
+  }
+  .written pre {
+    white-space: pre-wrap;
+    font-family: var(--vbm-font-body);
+    font-size: 1.05rem;
+  }
+  .takes {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 420px), 1fr));
+    gap: 1.5rem;
+  }
+  @media (max-width: 820px) {
+    .altar {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>
