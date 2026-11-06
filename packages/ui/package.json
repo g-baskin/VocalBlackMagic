@@ -18,6 +18,8 @@
     "./OracleStatus.svelte": "./src/OracleStatus.svelte",
     "./RuneMeter.svelte": "./src/RuneMeter.svelte",
     "./Waveform.svelte": "./src/Waveform.svelte",
+    "./RegionSelect.svelte": "./src/RegionSelect.svelte",
+    "./region": "./src/region.ts",
     "./Spectrogram.svelte": "./src/Spectrogram.svelte",
     "./PitchTrace.svelte": "./src/PitchTrace.svelte",
     "./SummoningCircle.svelte": "./src/SummoningCircle.svelte",

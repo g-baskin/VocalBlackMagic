@@ -52,7 +52,7 @@ export function buildFalSubmission(
   };
 }
 
-function headers(apiKey: string): Record<string, string> {
+export function falHeaders(apiKey: string): Record<string, string> {
   return {
     authorization: 'Key ' + apiKey,
     'content-type': 'application/json',
@@ -60,7 +60,7 @@ function headers(apiKey: string): Record<string, string> {
   };
 }
 
-async function failure(response: Response, action: string): Promise<ProviderError> {
+export async function falFailure(response: Response, action: string): Promise<ProviderError> {
   const text = (await response.text().catch(() => '')).slice(0, 300);
   const detail = 'fal ' + action + ' failed with ' + response.status + ': ' + text;
   if (response.status === 401 || response.status === 403)
@@ -84,11 +84,11 @@ export async function submitFal(
   const { endpoint, body } = buildFalSubmission(request, lyrics);
   const response = await deps.fetch(queueBase + '/' + endpoint, {
     method: 'POST',
-    headers: headers(deps.apiKey),
+    headers: falHeaders(deps.apiKey),
     body: JSON.stringify(body),
     signal: AbortSignal.timeout(15_000)
   });
-  if (!response.ok) throw await failure(response, 'submit');
+  if (!response.ok) throw await falFailure(response, 'submit');
   const data: unknown = await response.json();
   const id =
     typeof data === 'object' && data !== null
@@ -105,13 +105,14 @@ export async function submitFal(
 
 export async function falStatus(
   deps: FalDeps,
-  id: string
+  id: string,
+  app: string = falApp
 ): Promise<{ status: GenerationJobStatus; detail?: string }> {
-  const response = await deps.fetch(queueBase + '/' + falApp + '/requests/' + id + '/status', {
-    headers: headers(deps.apiKey),
+  const response = await deps.fetch(queueBase + '/' + app + '/requests/' + id + '/status', {
+    headers: falHeaders(deps.apiKey),
     signal: AbortSignal.timeout(10_000)
   });
-  if (!response.ok) throw await failure(response, 'status');
+  if (!response.ok) throw await falFailure(response, 'status');
   const data = (await response.json()) as { status?: unknown; error?: unknown };
   if (data.status === 'IN_QUEUE') return { status: 'queued' };
   if (data.status === 'IN_PROGRESS') return { status: 'running' };
@@ -142,12 +143,16 @@ export function isAllowedFalMediaUrl(raw: string): boolean {
   return host === 'storage.googleapis.com' && url.pathname.startsWith('/falserverless/');
 }
 
-export async function falAudioUrl(deps: FalDeps, id: string): Promise<string> {
-  const response = await deps.fetch(queueBase + '/' + falApp + '/requests/' + id, {
-    headers: headers(deps.apiKey),
+export async function falAudioUrl(
+  deps: FalDeps,
+  id: string,
+  app: string = falApp
+): Promise<string> {
+  const response = await deps.fetch(queueBase + '/' + app + '/requests/' + id, {
+    headers: falHeaders(deps.apiKey),
     signal: AbortSignal.timeout(15_000)
   });
-  if (!response.ok) throw await failure(response, 'result');
+  if (!response.ok) throw await falFailure(response, 'result');
   const data = (await response.json()) as { audio?: { url?: unknown } };
   const url = data.audio?.url;
   if (typeof url !== 'string' || !isAllowedFalMediaUrl(url))

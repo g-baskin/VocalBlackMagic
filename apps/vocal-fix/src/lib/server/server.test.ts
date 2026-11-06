@@ -537,14 +537,26 @@ describe('job runner: limits and restart', () => {
     const b = await r.start('', 's', 'forge', [], work);
     const c = await r.start('', 's', 'repair', [], work);
     const d = await r.start('', 's', 'repair', [], work);
-    await Bun.sleep(30);
     const st = async () =>
       Promise.all([a, b, c, d].map(async (j) => (await r.get('', j.id)).status));
-    expect(await st()).toEqual(['running', 'queued', 'running', 'queued']);
+    // Poll for the expected state instead of sleeping a fixed time: slow CI runners
+    // can take longer than a few milliseconds to start the next queued job.
+    const until = async (ok: (s: string[]) => boolean) => {
+      for (let i = 0; i < 200 && !ok(await st()); i++) await Bun.sleep(10);
+      return st();
+    };
+    expect(await until((s) => s[0] === 'running' && s[2] === 'running')).toEqual([
+      'running',
+      'queued',
+      'running',
+      'queued'
+    ]);
     gates.shift()?.();
-    await Bun.sleep(30);
-    expect((await st())[0]).toBe('completed');
-    expect((await st()).filter((x) => x === 'running').length).toBe(2);
+    const after = await until(
+      (s) => s[0] === 'completed' && s.filter((x) => x === 'running').length === 2
+    );
+    expect(after[0]).toBe('completed');
+    expect(after.filter((x) => x === 'running').length).toBe(2);
     while (gates.length) gates.shift()?.();
     await Bun.sleep(30);
     while (gates.length) gates.shift()?.();

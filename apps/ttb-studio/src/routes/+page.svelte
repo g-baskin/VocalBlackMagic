@@ -18,12 +18,21 @@
     type SoundCharacter,
     type StudioEngine,
     type StudioEngineInfo,
-    type StudioJob
+    type StudioJob,
+    type StudioModel,
+    type StudioModelInfo,
+    studioModels
   } from '@vbm/contracts';
   import { api, sleep } from '../lib/client/api';
   import SongTake from '../lib/client/SongTake.svelte';
+  import ModelPicker, { type PickerItem } from '../lib/client/ModelPicker.svelte';
 
-  type Caps = { allowed: boolean; engines: StudioEngineInfo[]; lyrics_ready: boolean };
+  type Caps = {
+    allowed: boolean;
+    engines: StudioEngineInfo[];
+    models?: StudioModelInfo[];
+    lyrics_ready: boolean;
+  };
 
   let mode = $state<'simple' | 'custom'>('simple');
   let description = $state('A haunted gothic synth-pop hymn about lighting candles for the lost');
@@ -53,22 +62,93 @@
   let alive = true;
   const lyricPlaceholder = ['[Verse]', '…', '[Chorus]', '…'].join('\n');
 
-  const spec = $derived(caps?.engines.find((e) => e.id === engine) ?? null);
-  const engineOptions = $derived(
-    (caps?.engines ?? []).map((e) => ({
+  const isModel = (id: string): id is StudioModel =>
+    (studioModels as readonly string[]).includes(id);
+  const picked = $derived(
+    isModel(engine) ? (caps?.models?.find((m) => m.id === engine) ?? null) : null
+  );
+  const legacy = $derived(caps?.engines.find((e) => e.id === engine) ?? null);
+  // Routed models share one shape with legacy engines so the rest of the form stays the same.
+  const spec = $derived(
+    picked
+      ? {
+          status: picked.active_runner ? 'ready' : 'unavailable',
+          duration: { min: 10, max: 240 },
+          est_cost_usd: picked.est_cost_usd,
+          max_prompt: 2000,
+          max_lyrics: 4096 as number | null
+        }
+      : legacy
+  );
+  const pickerItems = $derived<PickerItem[]>([
+    ...(caps?.models ?? []).map((m) => {
+      const run = m.runners.find((r) => r.kind === m.active_runner) ?? m.runners[0];
+      const fits = instrumental ? m.instrumental : m.vocals;
+      return {
+        value: m.id,
+        name: m.name,
+        group: m.open ? ('open' as const) : ('hosted' as const),
+        runner: m.active_runner,
+        license: run.license,
+        commercial: run.commercial,
+        detail:
+          (m.vocals
+            ? m.instrumental
+              ? 'Vocals or instrumental'
+              : 'Vocals'
+            : 'Instrumental only') +
+          ' · ' +
+          run.model_version +
+          ' · about $' +
+          m.est_cost_usd.toFixed(2) +
+          ' per take' +
+          m.runners
+            .filter((r) => !r.commercial && r !== run)
+            .map((r) => ' · ' + r.model_version + ' is Non-commercial (' + r.license + ')')
+            .join(''),
+        reason: !m.active_runner
+          ? 'Unavailable: ' + m.runners.map((r) => r.status).join('; ')
+          : !fits
+            ? instrumental
+              ? 'Cannot make instrumentals.'
+              : 'Instrumental only.'
+            : null,
+        disabled: !m.active_runner || !fits
+      };
+    }),
+    ...(caps?.engines ?? []).map((e) => ({
       value: e.id,
-      label: e.name + (e.status === 'ready' ? '' : ' — ' + e.status),
-      hint:
-        (e.vocals ? 'Vocals' : 'Instrumental only') +
-        (e.duration
-          ? ' · ' + e.duration.min + '–' + e.duration.max + ' s'
-          : ' · model picks length') +
-        ' · about $' +
-        e.est_cost_usd.toFixed(3) +
-        ' per take',
+      name: e.name.split(' (')[0].split(' —')[0],
+      group: 'hosted' as const,
+      runner:
+        e.status === 'ready'
+          ? e.id.startsWith('fal')
+            ? 'fal'
+            : e.id === 'lyria-3.5'
+              ? 'gemini'
+              : 'replicate'
+          : null,
+      license: legacyLicense[e.id] ?? 'Hosted API',
+      commercial: true,
+      detail: e.name,
+      reason:
+        e.status !== 'ready'
+          ? 'Unavailable: ' + e.status
+          : (instrumental ? !e.instrumental : !e.vocals)
+            ? instrumental
+              ? 'Cannot make instrumentals.'
+              : 'Instrumental only.'
+            : null,
       disabled: e.status !== 'ready' || (instrumental ? !e.instrumental : !e.vocals)
     }))
-  );
+  ]);
+  // Weights licence for the open models behind the older engine ids; hosted APIs fall
+  // back to 'Hosted API' (their terms, not an open licence). ACE-Step v1: Apache-2.0
+  // (github.com/ace-step/ACE-Step); ACE-Step 1.5: MIT (huggingface.co/ACE-Step/Ace-Step1.5).
+  const legacyLicense: Record<string, string> = {
+    'ace-step-replicate': 'Apache-2.0',
+    'fal-ace-step': 'MIT'
+  };
   const characterOptions = soundCharacters.map((c) => ({
     value: c,
     label: soundCharacterNames[c]
@@ -116,7 +196,7 @@
 
   // Pick a usable engine whenever the instrumental switch changes what is allowed.
   $effect(() => {
-    const options = engineOptions;
+    const options = pickerItems;
     if (options.length && options.find((o) => o.value === engine)?.disabled) {
       const next = options.find((o) => !o.disabled);
       if (next) engine = next.value;
@@ -160,7 +240,8 @@
       lyrics: custom && !instrumental && lyrics.trim() ? lyrics : null,
       style_tags: tags,
       instrumental,
-      engine: engine as StudioEngine,
+      engine: (isModel(engine) ? 'minimax-music-1.5' : engine) as StudioEngine,
+      model: isModel(engine) ? engine : null,
       duration_seconds: spec?.duration ? Number(duration) : null,
       sound_character: character as SoundCharacter,
       takes: takes === '1' ? 1 : 2,
@@ -318,7 +399,7 @@
       </div>
     </ArcanePanel>
 
-    <ArcanePanel eyebrow="Vessel" title="Engine & form" glow="ember">
+    <ArcanePanel eyebrow="Vessel" title="Model & form" glow="ember">
       <div class="fields">
         <RuneToggle
           label="Instrumental"
@@ -348,7 +429,7 @@
         {#if voiceSummon}
           <p class="aside">Engine: MiniMax Music-01 with your voice's Gold Vocal as reference.</p>
         {:else if caps}
-          <ArcaneSelect label="Engine" bind:value={engine} options={engineOptions} />
+          <ModelPicker items={pickerItems} bind:value={engine} />
         {:else if !capsError}
           <SigilLoader label="Reading the engines…" size={40} />
         {/if}

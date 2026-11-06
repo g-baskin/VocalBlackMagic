@@ -1,5 +1,13 @@
 import { ProviderError } from '../../music/errors';
+import type { EngineHealth } from '@vbm/contracts';
 import { engineHealth, engineModelReason, RunnerRefused, type EngineDeps } from './engine';
+
+/** One engine health read per request, shared by every runner check (a failure is shared too). */
+export type HealthCache = { read?: Promise<EngineHealth> };
+export function sharedHealth(engine: EngineDeps, cache: HealthCache): Promise<EngineHealth> {
+  cache.read ??= engineHealth(engine);
+  return cache.read;
+}
 import { runnerKeys, type ModelSpec, type RunnerKind, type RunnerSpec } from './models';
 
 /** Which runners have credentials; the engine also needs its health to say the model is ready. */
@@ -22,13 +30,14 @@ export interface RunnerAttempt {
 /** Plain reason a runner cannot take this model right now, or null when it can. */
 export async function runnerUnavailable(
   runner: RunnerSpec,
-  keys: RunnerKeys
+  keys: RunnerKeys,
+  cache: HealthCache = {}
 ): Promise<string | null> {
   if (runner.pending) return runner.pending;
   if (runner.kind === 'engine') {
     if (!keys.engine) return 'needs ' + runnerKeys.engine;
     try {
-      return engineModelReason(await engineHealth(keys.engine), runner.engine_model!);
+      return engineModelReason(await sharedHealth(keys.engine, cache), runner.engine_model!);
     } catch (error) {
       return error instanceof ProviderError ? error.publicMessage : 'engine unreachable';
     }
@@ -69,10 +78,11 @@ export async function route<T>(
   only?: RunnerKind
 ): Promise<Routed<T>> {
   const attempts: RunnerAttempt[] = [];
+  const cache: HealthCache = {};
   let lastStatus = 503;
   for (const runner of model.runners) {
     if (only && runner.kind !== only) continue;
-    const reason = await runnerUnavailable(runner, keys);
+    const reason = await runnerUnavailable(runner, keys, cache);
     if (reason) {
       attempts.push({ runner: runner.kind, model_version: runner.model_version, outcome: reason });
       continue;

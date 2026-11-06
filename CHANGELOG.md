@@ -4,6 +4,14 @@ This log describes repository changes, not verified public releases. No release 
 
 ## Unreleased
 
+### Added (Studio: models, editing, Séance)
+- Song creation runs through the models-by-runners router (`model` field); the Create page has a model picker grouped into self-hostable open models and hosted ones, with runner, licence (Non-commercial marked) and price.
+- Lyrics chain: Anthropic `claude-haiku-5-5`, then OpenAI `gpt-6-luna`, then Gemini `gemini-3.5-flash-lite`, then Replicate.
+- Suno-style editing: Extend, Replace section (drag-select with the new `RegionSelect`) and Restyle, each producing a new child song; runs on the self-hosted engine or fal ACE-Step v1 edit endpoints.
+- The Séance: a blind comparison of 2 to 4 models on one prompt, ranked before the reveal, with a leaderboard; takes stay sealed in the Library until revealed.
+- Engine packaging: CUDA Dockerfile, Modal app and RunPod notes; CI runs the engine's tests, ruff and mypy.
+- Mock-tested only so far: direct MiniMax, ElevenLabs and Lyria 3 Pro, the three lyricists, fal routing and edits, and the self-hosted engine runner.
+
 ### Added (self-hosted engine and provider routing, in progress)
 - `services/audio-engine`: a self-hosted music engine (FastAPI) speaking the VBM Engine protocol v1 (`docs/ENGINE_PROTOCOL.md`, types in `packages/contracts/src/engine.ts`). Token always required, localhost Host check, GPU-slot queue with idempotency, cancel and restart recovery, honest per-model health, and a disk-checked weight downloader. Backends for ACE-Step 1.5 (MIT; text2music, repaint, cover, extend), HeartMuLa (Apache-2.0), DiffRhythm 2 (Apache-2.0) and YuE2 (CC BY-NC 4.0, marked non-commercial). None has yet run on real model weights; ACE-Step 1.5 cannot run on Intel Macs.
 - TTB Studio: a models-by-runners registry and router (self-hosted engine, then the provider's own API, then Replicate), falling back only when a runner refuses before a job exists. New Replicate entries for ACE-Step 1.5, HeartMuLa, DiffRhythm, YuE, MiniMax Music 2.6, Lyria 3 Pro and ElevenLabs Music, and direct MiniMax, ElevenLabs and Gemini Lyria 3 Pro adapters (tested with mocked responses only). Song creation does not use the router yet.

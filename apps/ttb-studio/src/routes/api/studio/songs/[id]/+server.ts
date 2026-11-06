@@ -6,18 +6,20 @@ import {
   studioContext,
   studioError
 } from '../../../../../lib/server/studio/context';
+import { sealSongs } from '../../../../../lib/server/studio/seal';
 
 export const GET: RequestHandler = async ({ request, params, fetch }) => {
   const blocked = guard(request, false);
   if (blocked) return blocked;
   try {
     const library = studioContext(fetch).library;
-    const song = await library.get(params.id);
+    const [song] = await sealSongs(library.root, [await library.get(params.id)]);
     const all = await library.list();
-    return Response.json(
-      { song, children: all.filter((s) => s.parent_id === song.id) },
-      { headers: noStore }
+    const children = await sealSongs(
+      library.root,
+      all.filter((s) => s.parent_id === song.id)
     );
+    return Response.json({ song, children }, { headers: noStore });
   } catch (error) {
     return studioError(error);
   }
@@ -37,10 +39,13 @@ export const PATCH: RequestHandler = async ({ request, params, fetch }) => {
       { status: 422 }
     );
   try {
-    const song = await studioContext(fetch).library.update(params.id, {
-      title: body.title as string | undefined,
-      favourite: body.favourite as boolean | undefined
-    });
+    const library = studioContext(fetch).library;
+    const [song] = await sealSongs(library.root, [
+      await library.update(params.id, {
+        title: body.title as string | undefined,
+        favourite: body.favourite as boolean | undefined
+      })
+    ]);
     return Response.json({ song }, { headers: noStore });
   } catch (error) {
     return studioError(error);

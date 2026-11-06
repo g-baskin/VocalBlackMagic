@@ -19,6 +19,7 @@
     <a href={resolve('/')}>ᛟ Summon</a>
     <a href={resolve('/library')}>ᚱ Library</a>
     <a href={resolve('/lyrics')}>ᛚ Lyrics</a>
+    <a href={resolve('/seance')}>ᛞ Séance</a>
     <a href={resolve('/arcana')}>ᛉ Arcana</a>
   </nav>
   {@render children()}

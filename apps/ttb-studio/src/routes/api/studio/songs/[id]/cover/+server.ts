@@ -6,6 +6,7 @@ import {
   studioError
 } from '../../../../../../lib/server/studio/context';
 import { conjureCover } from '../../../../../../lib/server/studio/cover';
+import { sealSongs } from '../../../../../../lib/server/studio/seal';
 import { fileResponse } from '../../../../../../lib/server/studio/range';
 
 export const GET: RequestHandler = async ({ request, params, fetch }) => {
@@ -27,7 +28,9 @@ export const POST: RequestHandler = async ({ request, params, fetch }) => {
   if (!ctx.replicate)
     return Response.json({ detail: 'Cover art needs REPLICATE_API_TOKEN.' }, { status: 503 });
   try {
-    const song = await conjureCover(ctx.library, ctx.replicate, params.id);
+    const [song] = await sealSongs(ctx.library.root, [
+      await conjureCover(ctx.library, ctx.replicate, params.id)
+    ]);
     return Response.json({ song }, { status: 201, headers: noStore });
   } catch (error) {
     return studioError(error);

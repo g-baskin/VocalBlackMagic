@@ -12,6 +12,9 @@ import {
 } from './engines';
 import {
   assertJobCapacity,
+  maybeCover,
+  maxActiveJobs,
+  seanceMaxActiveJobs,
   publicJob,
   recordFinishedJob,
   recordJob,
@@ -21,11 +24,34 @@ import {
   type JobTask,
   type SongPlan
 } from './jobs';
-import { runLyricist } from './lyrics';
+import { modelSpec } from './runners/models';
+import { modelCosts, modelRequestError, submitRouted } from './runners/routed';
+import { runLyricistChain, type LyricistChain } from './lyrics';
+import type { EngineDeps } from './runners/engine';
 import { findVoice, submitVoiceSummon } from './voicesummon';
 
 export interface CreateDeps extends JobContext {
   gemini: { apiKey: string; fetch: typeof fetch } | null;
+  /** Direct providers and the self-hosted engine; absent in older tests means none configured. */
+  direct?: DirectKeys;
+}
+
+export interface DirectKeys {
+  anthropic: string | null;
+  openai: string | null;
+  minimax: string | null;
+  elevenlabs: string | null;
+  engine: EngineDeps | null;
+}
+
+export function lyricistChain(deps: CreateDeps): LyricistChain {
+  return {
+    anthropic: deps.direct?.anthropic ?? null,
+    openai: deps.direct?.openai ?? null,
+    gemini: deps.gemini?.apiKey ?? null,
+    replicate: deps.replicate,
+    fetch: deps.fetch
+  };
 }
 
 export interface CreateResult {
@@ -68,38 +94,48 @@ export function legacyRequest(
   };
 }
 
+export interface CreateOptions {
+  /** Set only by the séance: tags the takes and allows up to 4 active jobs instead of 3. */
+  seanceId?: string;
+}
+
 export async function createSongs(
   deps: CreateDeps,
-  request: CreateSongRequest
+  request: CreateSongRequest,
+  options: CreateOptions = {}
 ): Promise<CreateResult> {
   const spec = engineSpec(request.engine);
+  const model = request.model ? modelSpec(request.model) : undefined;
+  if (request.model && !model) throw new ProviderError(422, 'Unknown model.');
   const voice =
     request.voice_id && !request.instrumental && deps.replicate
       ? await findVoice(deps.library.root, request.voice_id)
       : null;
   if (request.voice_id && !deps.replicate)
     throw new ProviderError(503, 'Singing in a forged voice needs REPLICATE_API_TOKEN.');
-  if (spec.needs === 'replicate' && !deps.replicate)
+  if (!model && spec.needs === 'replicate' && !deps.replicate)
     throw new ProviderError(
       503,
       spec.name.split(' —')[0] + ' needs REPLICATE_API_TOKEN in apps/ttb-studio/.env.'
     );
-  if (spec.needs === 'fal' && !deps.fal)
+  if (!model && spec.needs === 'fal' && !deps.fal)
     throw new ProviderError(503, 'ACE-Step via fal needs FAL_KEY.');
-  if (spec.needs === 'gemini' && !deps.gemini)
+  if (!model && spec.needs === 'gemini' && !deps.gemini)
     throw new ProviderError(503, 'Lyria 3.5 needs GEMINI_API_KEY.');
 
-  await assertJobCapacity(deps);
+  await assertJobCapacity(deps, options.seanceId ? seanceMaxActiveJobs : maxActiveJobs);
   let lyrics = request.instrumental ? null : request.lyrics?.trim() || null;
   let title = request.title.trim();
   // Lyria 3.5 writes its own lyrics; the other vocal engines need them written first.
-  if (!request.instrumental && !lyrics && request.engine !== 'lyria-3.5') {
-    if (!deps.replicate)
+  const writesOwnLyrics = model ? model.id === 'lyria-3-pro' : request.engine === 'lyria-3.5';
+  if (!request.instrumental && !lyrics && !writesOwnLyrics) {
+    const chain = lyricistChain(deps);
+    if (!chain.anthropic && !chain.openai && !chain.gemini && !chain.replicate)
       throw new ProviderError(
         503,
-        'Writing lyrics needs REPLICATE_API_TOKEN. Paste your own lyrics instead.'
+        'Writing lyrics needs ANTHROPIC_API_KEY, OPENAI_API_KEY, GEMINI_API_KEY or REPLICATE_API_TOKEN. Paste your own lyrics instead.'
       );
-    const written = await runLyricist(deps.replicate, {
+    const written = await runLyricistChain(chain, {
       action: 'write',
       description:
         request.prompt +
@@ -114,7 +150,11 @@ export async function createSongs(
     if (!title && written.title) title = written.title;
   }
   if (!title) title = fallbackTitle(request.prompt);
-  const invalid = voice ? null : engineRequestError(request, lyrics);
+  const invalid = voice
+    ? null
+    : model
+      ? modelRequestError(model, request)
+      : engineRequestError(request, lyrics);
   if (invalid) throw new ProviderError(422, invalid);
 
   const plan: SongPlan = {
@@ -122,19 +162,21 @@ export async function createSongs(
     prompt: stylePrompt(request),
     style_tags: request.style_tags,
     lyrics,
-    engine: request.engine,
+    engine: request.model ?? request.engine,
     params: {
       mode: request.mode,
       instrumental: request.instrumental,
-      duration_seconds: spec.duration ? (request.duration_seconds ?? 120) : null,
+      duration_seconds: model || spec.duration ? (request.duration_seconds ?? 120) : null,
       sound_character: request.sound_character,
       lyrics_written_by_ai: !request.lyrics?.trim() && !request.instrumental,
       cover: request.cover !== false && !!deps.replicate
     },
     parent_id: null,
     kind: 'original',
+    ...(options.seanceId ? { seance_id: options.seanceId } : {}),
     est_cost_usd:
-      spec.est_cost_usd + (request.lyrics?.trim() || request.instrumental ? 0 : derivedCosts.lyrics)
+      (request.model ? modelCosts[request.model] : spec.est_cost_usd) +
+      (request.lyrics?.trim() || request.instrumental ? 0 : derivedCosts.lyrics)
   };
   const takes = Array.from({ length: request.takes }, (_, i) => i);
 
@@ -143,6 +185,58 @@ export async function createSongs(
     return {
       job: publicJob(await recordJob(deps, 'create', summon.plan, summon.tasks)),
       lyrics: summon.plan.lyrics,
+      title
+    };
+  }
+  if (request.model) {
+    const { submitted, record } = await submitRouted(
+      {
+        engine: deps.direct?.engine ?? null,
+        fal: deps.fal,
+        replicate: deps.replicate,
+        gemini: deps.gemini,
+        minimax: deps.direct?.minimax ?? null,
+        elevenlabs: deps.direct?.elevenlabs ?? null,
+        fetch: deps.fetch
+      },
+      request.model,
+      {
+        prompt: plan.prompt,
+        lyrics,
+        instrumental: request.instrumental,
+        duration_seconds: request.duration_seconds ?? 120
+      },
+      request.takes
+    );
+    const routedPlan: SongPlan = {
+      ...plan,
+      runner: record,
+      params: { ...plan.params, runner: record.runner, model_version: record.model_version }
+    };
+    if ('tasks' in submitted)
+      return {
+        job: publicJob(await recordJob(deps, 'create', routedPlan, submitted.tasks)),
+        lyrics,
+        title
+      };
+    const ids: string[] = [];
+    for (const [i, result] of submitted.results.entries())
+      ids.push(
+        (
+          await storeSong(
+            deps,
+            { ...routedPlan, lyrics: result.lyrics ?? lyrics },
+            i + 1,
+            result.audio
+          )
+        ).id
+      );
+    const finished = await recordFinishedJob(deps, 'create', routedPlan, ids);
+    // Synchronous runners (MiniMax, ElevenLabs, Lyria 3 Pro direct) never pass through advanceJob.
+    for (const songId of ids) await maybeCover(deps, finished, songId);
+    return {
+      job: publicJob(finished),
+      lyrics,
       title
     };
   }
@@ -162,7 +256,9 @@ export async function createSongs(
       );
       ids.push(meta.id);
     }
-    return { job: publicJob(await recordFinishedJob(deps, 'create', plan, ids)), lyrics, title };
+    const finished = await recordFinishedJob(deps, 'create', plan, ids);
+    for (const songId of ids) await maybeCover(deps, finished, songId);
+    return { job: publicJob(finished), lyrics, title };
   }
   let tasks: JobTask[];
   if (request.engine === 'fal-ace-step' && deps.fal) {

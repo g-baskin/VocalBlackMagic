@@ -37,3 +37,20 @@ jobs:
       - run: python -m ruff format --check apps tests
       - run: python -m mypy
       - run: pytest -q
+  audio-engine:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: services/audio-engine
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: python -m pip install --upgrade pip
+      # Base and dev only: no torch or model code; the tests use a fake sine-wave backend.
+      - run: pip install -r requirements-base.txt -r requirements-dev.txt
+      - run: python -m pytest -q
+      - run: python -m ruff check .
+      - run: python -m ruff format --check .
+      - run: python -m mypy
