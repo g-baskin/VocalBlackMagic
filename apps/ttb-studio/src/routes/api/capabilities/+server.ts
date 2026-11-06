@@ -1,0 +1,10 @@
+import type { RequestHandler } from './$types';
+import { passthrough, upstreamUnavailable, upstreamUrl } from '../../../lib/server/backend';
+export const GET: RequestHandler = async ({ fetch }) => {
+  try {
+    const result = await fetch(upstreamUrl('/api/capabilities'), {
+      signal: AbortSignal.timeout(3000), cache: 'no-store'
+    });
+    return passthrough(result);
+  } catch (error) { return upstreamUnavailable(error); }
+};
