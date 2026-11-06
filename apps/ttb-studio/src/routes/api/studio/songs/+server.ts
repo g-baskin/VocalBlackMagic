@@ -8,11 +8,16 @@ import {
   studioError
 } from '../../../../lib/server/studio/context';
 import { createSongs } from '../../../../lib/server/studio/create';
+import { sealSongs } from '../../../../lib/server/studio/seal';
 
 export const GET: RequestHandler = async ({ request, fetch }) => {
   const blocked = guard(request, false);
   if (blocked) return blocked;
-  return Response.json({ songs: await studioContext(fetch).library.list() }, { headers: noStore });
+  const library = studioContext(fetch).library;
+  return Response.json(
+    { songs: await sealSongs(library.root, await library.list()) },
+    { headers: noStore }
+  );
 };
 
 export const POST: RequestHandler = async ({ request, fetch }) => {

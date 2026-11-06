@@ -8,8 +8,10 @@ import {
   type StemName,
   type StoredAudio,
   type StudioJob,
-  type StudioJobKind
+  type StudioJobKind,
+  type StudioRunnerRecord
 } from '@vbm/contracts';
+import { cancelEngineJob, engineAudio, getEngineJob, type EngineDeps } from './runners/engine';
 import { verifiedAudioResponse } from '../music/audio';
 import { ProviderError } from '../music/errors';
 import { falAudioUrl, falStatus, type FalDeps } from '../music/fal';
@@ -37,11 +39,15 @@ export interface SongPlan {
   kind: SongKind;
   est_cost_usd: number;
   voice?: SongMeta['voice'];
+  runner?: StudioRunnerRecord;
+  seance_id?: string;
 }
 
 export interface JobTask {
-  provider: 'replicate' | 'fal';
+  provider: 'replicate' | 'fal' | 'engine';
   prediction_id: string;
+  /** fal app (owner/app) for status and result when it is not the default ACE-Step 1.5 app. */
+  app?: string;
   take: number;
   status: 'running' | 'stored' | 'failed' | 'canceled';
   song_id?: string;
@@ -58,6 +64,8 @@ export interface JobContext {
   library: SongLibrary;
   replicate: ReplicateDeps | null;
   fal: FalDeps | null;
+  /** Self-hosted engine (protocol v1); absent means not configured. */
+  engine?: EngineDeps | null;
   fetch: typeof fetch;
   now: () => Date;
 }
@@ -87,6 +95,11 @@ const stageLabels: Record<StudioJobKind, [string, string][]> = {
     ['upload', 'Offering the song'],
     ['summon', 'Splitting into stems'],
     ['bind', 'Binding stems to the library']
+  ],
+  edit: [
+    ['upload', 'Offering the song'],
+    ['summon', 'Reworking the song'],
+    ['bind', 'Binding audio to the library']
   ],
   voice: [
     ['upload', 'Offering the song'],
@@ -135,9 +148,14 @@ export function publicJob(job: JobRecord): StudioJob {
 }
 
 export const maxActiveJobs = 3;
+/** A séance compares up to 4 models at once: its takes alone may raise the cap to 4. */
+export const seanceMaxActiveJobs = 4;
 
 /** Paid work is refused while too many jobs are still running (a runaway-spend guard). */
-export async function assertJobCapacity(ctx: JobContext): Promise<void> {
+export async function assertJobCapacity(
+  ctx: JobContext,
+  limit: number = maxActiveJobs
+): Promise<void> {
   let names: string[];
   try {
     names = await readdir(jobsDir(ctx));
@@ -155,7 +173,7 @@ export async function assertJobCapacity(ctx: JobContext): Promise<void> {
       // unreadable job files do not count
     }
   }
-  if (active >= maxActiveJobs)
+  if (active >= limit)
     throw new ProviderError(
       429,
       'Already ' + active + ' rituals in progress. Wait for one to finish before starting another.'
@@ -277,6 +295,8 @@ export async function storeSong(
       audio,
       ...(stored.length ? { stems: stored } : {}),
       ...(plan.voice ? { voice: plan.voice } : {}),
+      ...(plan.runner ? { runner: plan.runner } : {}),
+      ...(plan.seance_id ? { seance_id: plan.seance_id } : {}),
       ...(cover ? { cover } : {}),
       est_cost_usd: plan.est_cost_usd
     };
@@ -316,6 +336,27 @@ async function storeReplicateOutput(
 }
 
 async function advanceTask(ctx: JobContext, job: JobRecord, task: JobTask): Promise<void> {
+  if (task.provider === 'engine') {
+    if (!ctx.engine)
+      throw new ProviderError(503, 'VBM_ENGINE_URL / VBM_ENGINE_TOKEN are not configured.');
+    const engineJob = await getEngineJob(ctx.engine, task.prediction_id);
+    if (engineJob.status === 'succeeded') {
+      job.stages = stages(job.kind, 'bind');
+      const meta = await storeSong(
+        ctx,
+        job.plan,
+        task.take,
+        await engineAudio(ctx.engine, engineJob)
+      );
+      task.status = 'stored';
+      task.song_id = meta.id;
+      await maybeCover(ctx, job, meta.id);
+    } else if (engineJob.status === 'failed' || engineJob.status === 'cancelled') {
+      task.status = engineJob.status === 'failed' ? 'failed' : 'canceled';
+      task.error = engineJob.error ?? 'The engine could not finish.';
+    }
+    return;
+  }
   if (task.provider === 'replicate') {
     if (!ctx.replicate) throw new ProviderError(503, 'REPLICATE_API_TOKEN is not configured.');
     const prediction = await getPrediction(ctx.replicate, task.prediction_id);
@@ -333,12 +374,12 @@ async function advanceTask(ctx: JobContext, job: JobRecord, task: JobTask): Prom
     return;
   }
   if (!ctx.fal) throw new ProviderError(503, 'FAL_KEY is not configured.');
-  const { status, detail } = await falStatus(ctx.fal, task.prediction_id);
+  const { status, detail } = await falStatus(ctx.fal, task.prediction_id, task.app);
   if (status === 'failed') {
     task.status = 'failed';
     task.error = detail ?? 'The provider could not generate this song.';
   } else if (status === 'completed') {
-    const url = await falAudioUrl(ctx.fal, task.prediction_id);
+    const url = await falAudioUrl(ctx.fal, task.prediction_id, task.app);
     const meta = await storeSong(
       ctx,
       job.plan,
@@ -438,6 +479,8 @@ export async function advanceJob(ctx: JobContext, id: string): Promise<StudioJob
       for (const task of job.tasks.filter((t) => t.status === 'running')) {
         if (task.provider === 'replicate' && ctx.replicate)
           await cancelPrediction(ctx.replicate, task.prediction_id).catch(() => undefined);
+        if (task.provider === 'engine' && ctx.engine)
+          await cancelEngineJob(ctx.engine, task.prediction_id).catch(() => undefined);
         task.status = 'failed';
         task.error = 'Timed out after 20 minutes.';
       }
@@ -457,6 +500,8 @@ export async function cancelJob(ctx: JobContext, id: string): Promise<StudioJob>
     for (const task of job.tasks.filter((t) => t.status === 'running')) {
       if (task.provider === 'replicate' && ctx.replicate)
         await cancelPrediction(ctx.replicate, task.prediction_id);
+      if (task.provider === 'engine' && ctx.engine)
+        await cancelEngineJob(ctx.engine, task.prediction_id);
       task.status = 'canceled';
       task.error = 'Canceled.';
     }

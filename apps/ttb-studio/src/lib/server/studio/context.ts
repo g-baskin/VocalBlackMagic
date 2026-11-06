@@ -1,7 +1,18 @@
-import { FAL_KEY, GEMINI_API_KEY, REPLICATE_API_TOKEN } from '$app/env/private';
+import {
+  ANTHROPIC_API_KEY,
+  ELEVENLABS_API_KEY,
+  FAL_KEY,
+  GEMINI_API_KEY,
+  MINIMAX_API_KEY,
+  OPENAI_API_KEY,
+  REPLICATE_API_TOKEN,
+  VBM_ENGINE_TOKEN,
+  VBM_ENGINE_URL
+} from '$app/env/private';
 import { errorResponse } from '../music/errors';
 import { configuredKey, generationDisabledResponse, isJsonRequest } from '../music/gate';
 import type { CreateDeps } from './create';
+import type { EngineDeps } from './runners/engine';
 import { LibraryError, SongLibrary } from './library';
 import { dataDir, isLocalHost } from './paths';
 
@@ -14,9 +25,24 @@ export function studioContext(fetcher: typeof fetch): CreateDeps {
     replicate: replicate ? { token: replicate, fetch: fetcher } : null,
     fal: fal ? { apiKey: fal, fetch: fetcher } : null,
     gemini: gemini ? { apiKey: gemini, fetch: fetcher } : null,
+    direct: {
+      anthropic: configuredKey(ANTHROPIC_API_KEY),
+      openai: configuredKey(OPENAI_API_KEY),
+      minimax: configuredKey(MINIMAX_API_KEY),
+      elevenlabs: configuredKey(ELEVENLABS_API_KEY),
+      engine: engineDeps(fetcher)
+    },
+    engine: engineDeps(fetcher),
     fetch: fetcher,
     now: () => new Date()
   };
+}
+
+function engineDeps(fetcher: typeof fetch): EngineDeps | null {
+  const url = VBM_ENGINE_URL?.trim();
+  const token = configuredKey(VBM_ENGINE_TOKEN);
+  // Protocol v1: the engine always requires a token.
+  return url && token ? { url, token, fetch: fetcher } : null;
 }
 
 export const noStore = { 'cache-control': 'no-store' };

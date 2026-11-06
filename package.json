@@ -27,7 +27,10 @@
     "format:web": "prettier --write \"apps/**/*.{ts,js,svelte,css,html,json}\" \"packages/**/*.{ts,js,svelte,css,json}\" package.json eslint.config.mjs .prettierrc.json",
     "format:python": "python -m ruff format apps tests",
     "check:python": "python -m mypy",
-    "test:python": "python -m pytest -q"
+    "test:python": "python -m pytest -q",
+    "test:engine": "cd services/audio-engine && .venv/bin/python -m pytest -q",
+    "lint:engine": "cd services/audio-engine && .venv/bin/python -m ruff check . && .venv/bin/python -m ruff format --check .",
+    "check:engine": "cd services/audio-engine && .venv/bin/python -m mypy"
   },
   "devDependencies": {
     "@eslint/js": "9.39.5",

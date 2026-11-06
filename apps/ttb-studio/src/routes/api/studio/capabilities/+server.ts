@@ -4,6 +4,7 @@ import { generationAllowed } from '../../../../lib/server/music/gate';
 import { studioContext, noStore } from '../../../../lib/server/studio/context';
 import { engineInfos } from '../../../../lib/server/studio/engines';
 import { ffmpegPath } from '../../../../lib/server/studio/master';
+import { modelInfos } from '../../../../lib/server/studio/runners/capabilities';
 import { usableVoices } from '../../../../lib/server/studio/voices';
 
 export const GET: RequestHandler = async ({ fetch }) => {
@@ -18,7 +19,19 @@ export const GET: RequestHandler = async ({ fetch }) => {
         gemini: !!ctx.gemini,
         allowed
       }),
-      lyrics_ready: allowed && !!ctx.replicate,
+      models: await modelInfos(
+        {
+          engine: ctx.direct?.engine ?? null,
+          fal: !!ctx.fal,
+          minimax: !!ctx.direct?.minimax,
+          elevenlabs: !!ctx.direct?.elevenlabs,
+          gemini: !!ctx.gemini,
+          replicate: !!ctx.replicate
+        },
+        allowed
+      ),
+      lyrics_ready:
+        allowed && !!(ctx.replicate || ctx.gemini || ctx.direct?.anthropic || ctx.direct?.openai),
       master_ready: allowed && existsSync(ffmpegPath),
       voices_ready: allowed ? (await usableVoices(ctx.library.root)).length : 0
     },

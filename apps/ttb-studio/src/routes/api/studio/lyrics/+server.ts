@@ -7,7 +7,8 @@ import {
   studioContext,
   studioError
 } from '../../../../lib/server/studio/context';
-import { runLyricist } from '../../../../lib/server/studio/lyrics';
+import { lyricistChain } from '../../../../lib/server/studio/create';
+import { runLyricistChain } from '../../../../lib/server/studio/lyrics';
 
 export const POST: RequestHandler = async ({ request, fetch }) => {
   const blocked = guard(request, true);
@@ -16,10 +17,8 @@ export const POST: RequestHandler = async ({ request, fetch }) => {
   const invalid = validateLyricsRequest(body);
   if (invalid) return Response.json({ detail: invalid }, { status: 422 });
   const ctx = studioContext(fetch);
-  if (!ctx.replicate)
-    return Response.json({ detail: 'The lyricist needs REPLICATE_API_TOKEN.' }, { status: 503 });
   try {
-    return Response.json(await runLyricist(ctx.replicate, body as LyricsRequest), {
+    return Response.json(await runLyricistChain(lyricistChain(ctx), body as LyricsRequest), {
       headers: noStore
     });
   } catch (error) {

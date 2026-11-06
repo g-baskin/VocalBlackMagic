@@ -11,8 +11,10 @@
   import PitchTrace from '@vbm/ui/PitchTrace.svelte';
   import ArcaneSelect from '@vbm/ui/ArcaneSelect.svelte';
   import ArcaneTextarea from '@vbm/ui/ArcaneTextarea.svelte';
+  import RegionSelect from '@vbm/ui/RegionSelect.svelte';
+  import ArcaneInput from '@vbm/ui/ArcaneInput.svelte';
   import { decodeAudioFromUrl } from '@vbm/ui/audio';
-  import type { SongMeta, StudioJob } from '@vbm/contracts';
+  import type { EditAction, SongMeta, StudioEditInfo, StudioJob } from '@vbm/contracts';
   import { api, audioUrl, coverUrl } from '../../../lib/client/api';
   import { followJob } from '../../../lib/client/jobs';
   import AbPlayer from '../../../lib/client/AbPlayer.svelte';
@@ -31,6 +33,17 @@
   let reimagineLyrics = $state('');
   let ritual = $state<{ name: string; job: StudioJob | null; error: string | null } | null>(null);
   let mastering = $state(false);
+  let edits = $state<StudioEditInfo[] | null>(null);
+  let editsError = $state<string | null>(null);
+  let extendBefore = $state('0');
+  let extendAfter = $state('30');
+  let extendLyrics = $state('');
+  let regionStart = $state(0);
+  let regionEnd = $state(0);
+  let repaintLyrics = $state('');
+  let repaintStyle = $state('');
+  let restyleStyle = $state('');
+  let restyleStrength = $state('0.5');
   let alive = true;
   onDestroy(() => (alive = false));
 
@@ -63,7 +76,14 @@
     song = null;
     buffer = null;
     ritual = null;
+    edits = null;
+    editsError = null;
+    regionStart = 0;
+    regionEnd = 0;
     void load(songId);
+    api<{ edits: StudioEditInfo[] }>('/api/studio/songs/' + encodeURIComponent(songId) + '/edit')
+      .then((r) => (edits = r.edits))
+      .catch((e) => (editsError = e instanceof Error ? e.message : 'Edits are unavailable.'));
     api<{ voices: Voice[] }>('/api/studio/voices')
       .then((r) => {
         voices = r.voices;
@@ -142,6 +162,36 @@
     } finally {
       conjuring = false;
     }
+  }
+
+  const editInfo = (action: EditAction) => edits?.find((e) => e.action === action) ?? null;
+  const runnerLabel = (info: StudioEditInfo | null) =>
+    info?.model_version ? 'via ' + info.model_version : '';
+  const extendTotal = $derived(Number(extendBefore) + Number(extendAfter));
+  const extendInvalid = $derived(
+    !(Number(extendBefore) >= 0 && Number(extendAfter) >= 0) ||
+      extendTotal <= 0 ||
+      extendTotal > 240
+  );
+  const strength = $derived(Math.min(1, Math.max(0, Number(restyleStrength) || 0)));
+
+  function startExtend() {
+    void startRitual('Extend', 'edit', {
+      action: 'extend',
+      extend: { before_seconds: Number(extendBefore), after_seconds: Number(extendAfter) },
+      ...(extendLyrics.trim() ? { lyrics: extendLyrics } : {})
+    });
+  }
+  function startRepaint() {
+    void startRitual('Replace section', 'edit', {
+      action: 'repaint',
+      repaint: { start_seconds: regionStart, end_seconds: regionEnd },
+      ...(repaintLyrics.trim() ? { lyrics: repaintLyrics } : {}),
+      ...(repaintStyle.trim() ? { prompt: repaintStyle } : {})
+    });
+  }
+  function startRestyle() {
+    void startRitual('Restyle', 'edit', { action: 'cover', prompt: restyleStyle, strength });
   }
 
   const masterChild = $derived(children.find((c) => c.kind === 'master'));
@@ -223,6 +273,94 @@
     </ArcanePanel>
 
     {#if song.audio}
+      <ArcanePanel eyebrow="Transmutation" title="Alter the song" glow="ember">
+        <p class="note">
+          Each alteration makes a new song in the bloodline; this one is untouched.
+        </p>
+        {#if editsError}
+          <OracleStatus tone="danger">{editsError}</OracleStatus>
+        {:else if !edits}
+          <SigilLoader size={32} label="Asking which rituals are possible…" />
+        {:else}
+          <div class="alter">
+            <section class="wide">
+              <h3>ᚱ Replace section</h3>
+              {#if editInfo('repaint')?.available}
+                <p>
+                  Select a range; only that part is sung again. {runnerLabel(editInfo('repaint'))}
+                </p>
+                <RegionSelect
+                  {buffer}
+                  bind:start={regionStart}
+                  bind:end={regionEnd}
+                  label="Section to replace"
+                />
+                <div class="pair">
+                  <ArcaneTextarea
+                    label="New lyrics for this section (optional)"
+                    bind:value={repaintLyrics}
+                    rows={3}
+                    maxlength={6000}
+                  />
+                  <ArcaneInput
+                    label="Style for this section (optional)"
+                    bind:value={repaintStyle}
+                  />
+                </div>
+                <RuneButton
+                  disabled={busy || !buffer || regionEnd - regionStart < 1}
+                  onclick={startRepaint}>Replace section</RuneButton
+                >
+              {:else}
+                <p class="why">Unavailable: {editInfo('repaint')?.reason}</p>
+              {/if}
+            </section>
+            <section>
+              <h3>ᛖ Extend</h3>
+              {#if editInfo('extend')?.available}
+                <p>
+                  Add music before and/or after (240 s in total at most). {runnerLabel(
+                    editInfo('extend')
+                  )}
+                </p>
+                <div class="pair">
+                  <ArcaneInput label="Seconds before" type="number" bind:value={extendBefore} />
+                  <ArcaneInput label="Seconds after" type="number" bind:value={extendAfter} />
+                </div>
+                <ArcaneTextarea
+                  label="Lyrics for the new part (optional)"
+                  bind:value={extendLyrics}
+                  rows={3}
+                  maxlength={6000}
+                />
+                {#if extendInvalid}<p class="why">Add 1 to 240 seconds in total.</p>{/if}
+                <RuneButton disabled={busy || extendInvalid} onclick={startExtend}
+                  >Extend</RuneButton
+                >
+              {:else}
+                <p class="why">Unavailable: {editInfo('extend')?.reason}</p>
+              {/if}
+            </section>
+            <section>
+              <h3>ᛟ Restyle</h3>
+              {#if editInfo('cover')?.available}
+                <p>Same structure, a new style. {runnerLabel(editInfo('cover'))}</p>
+                <ArcaneInput label="New style" bind:value={restyleStyle} />
+                <label class="strength">
+                  <span>Strength {strength.toFixed(2)} (0 keeps it, 1 ignores the original)</span>
+                  <input type="range" min="0" max="1" step="0.05" bind:value={restyleStrength} />
+                </label>
+                <RuneButton disabled={busy || !restyleStyle.trim()} onclick={startRestyle}
+                  >Restyle</RuneButton
+                >
+              {:else}
+                <p class="why">Unavailable: {editInfo('cover')?.reason}</p>
+              {/if}
+            </section>
+          </div>
+        {/if}
+      </ArcanePanel>
+
       <ArcanePanel eyebrow="Rituals" title="Derive" glow="violet">
         <div class="rituals">
           <section>
@@ -320,6 +458,52 @@
 </div>
 
 <style>
+  .alter {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 1.25rem;
+    margin-top: 0.75rem;
+  }
+  .alter section {
+    display: grid;
+    gap: 0.6rem;
+    align-content: start;
+  }
+  .alter .wide {
+    grid-column: 1 / -1;
+  }
+  .alter h3 {
+    margin: 0;
+  }
+  .alter p {
+    margin: 0;
+  }
+  .pair {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.75rem;
+    align-items: start;
+  }
+  .why {
+    font-style: italic;
+    color: #ffb08a;
+    font-size: 0.88rem;
+  }
+  .strength {
+    display: grid;
+    gap: 0.3rem;
+    font-family: var(--vbm-font-mono);
+    font-size: 0.78rem;
+  }
+  .strength input {
+    accent-color: var(--vbm-ember);
+  }
+  @media (max-width: 720px) {
+    .alter,
+    .pair {
+      grid-template-columns: 1fr;
+    }
+  }
   .tags {
     font-family: var(--vbm-font-mono);
     font-size: 0.8rem;

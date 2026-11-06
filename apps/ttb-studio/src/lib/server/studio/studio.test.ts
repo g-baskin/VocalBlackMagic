@@ -665,3 +665,107 @@ describe('summon in my voice', () => {
     );
   });
 });
+
+describe('createSongs through the models x runners router', () => {
+  const engineUrl = 'http://engine.test';
+  const health = (ready: boolean) => ({
+    ok: true,
+    protocol: 1,
+    version: 't',
+    device: 'cpu',
+    concurrency: 1,
+    queued: 0,
+    running: 0,
+    models: [
+      {
+        id: 'heartmula',
+        license: 'Apache-2.0',
+        commercial: true,
+        installed: true,
+        ready,
+        tasks: ['text2music'],
+        max_duration_seconds: 240
+      }
+    ]
+  });
+  const routedDeps = (fetch: typeof fetch): CreateDeps =>
+    ({
+      ...deps(fetch),
+      engine: { url: engineUrl, token: 'et', fetch },
+      direct: {
+        anthropic: null,
+        openai: null,
+        minimax: null,
+        elevenlabs: null,
+        engine: { url: engineUrl, token: 'et', fetch }
+      }
+    }) as CreateDeps;
+  const heart: CreateSongRequest = { ...request, model: 'heartmula', cover: false };
+
+  test('a refusal before any job falls back to the next runner and is recorded', async () => {
+    const { fetch, calls } = fakeFetch((url) => {
+      if (url === engineUrl + '/v1/health') return Response.json(health(true));
+      if (url === engineUrl + '/v1/jobs')
+        return Response.json({ detail: 'queue full', code: 'queue_full' }, { status: 429 });
+      if (url.endsWith('/predictions'))
+        return Response.json({ id: pid, status: 'starting' }, { status: 201 });
+      if (url.endsWith('/predictions/' + pid))
+        return Response.json({
+          id: pid,
+          status: 'succeeded',
+          output: 'https://replicate.delivery/h.mp3'
+        });
+      if (url === 'https://replicate.delivery/h.mp3')
+        return new Response(mp3(), { headers: { 'content-type': 'audio/mpeg' } });
+      throw new Error('unexpected ' + url);
+    });
+    const ctx = routedDeps(fetch);
+    const { job } = await createSongs(ctx, heart);
+    const record = await loadJob(ctx, job.id);
+    expect(record.tasks[0].provider).toBe('replicate');
+    expect(record.plan.runner?.attempts.map((a) => a.runner)).toEqual(['engine', 'replicate']);
+    expect(record.plan.runner?.attempts[0].outcome).toContain('refused');
+    expect(calls.filter((c) => c.url.endsWith('/predictions'))).toHaveLength(1);
+    const done = await advanceJob(ctx, job.id);
+    const song = await ctx.library.get(done.song_ids[0]);
+    expect(song.engine).toBe('heartmula');
+    expect(song.runner?.runner).toBe('replicate');
+    expect(song.runner?.model_version).toContain('heart_mula');
+  });
+
+  test('an accepted engine job never falls back, even when polling fails', async () => {
+    const { fetch, calls } = fakeFetch((url) => {
+      if (url === engineUrl + '/v1/health') return Response.json(health(true));
+      if (url === engineUrl + '/v1/jobs')
+        return Response.json(
+          {
+            id: 'j1',
+            status: 'queued',
+            model: 'heartmula',
+            task: 'text2music',
+            created_at: 'x'
+          },
+          { status: 202 }
+        );
+      if (url === engineUrl + '/v1/jobs/j1')
+        return Response.json({ detail: 'boom', code: 'internal' }, { status: 500 });
+      throw new Error('unexpected ' + url);
+    });
+    const ctx = routedDeps(fetch);
+    const { job } = await createSongs(ctx, heart);
+    const record = await loadJob(ctx, job.id);
+    expect(record.tasks[0]).toMatchObject({ provider: 'engine', prediction_id: 'j1' });
+    await advanceJob(ctx, job.id);
+    expect(calls.some((c) => c.url.includes('replicate'))).toBe(false);
+  });
+
+  test('a timeout at create time is ambiguous and does not fall back', async () => {
+    const { fetch, calls } = fakeFetch((url) => {
+      if (url === engineUrl + '/v1/health') return Response.json(health(true));
+      if (url === engineUrl + '/v1/jobs') throw new DOMException('slow', 'TimeoutError');
+      throw new Error('unexpected ' + url);
+    });
+    await expect(createSongs(routedDeps(fetch), heart)).rejects.toThrow();
+    expect(calls.some((c) => c.url.includes('replicate'))).toBe(false);
+  });
+});
