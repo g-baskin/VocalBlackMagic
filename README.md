@@ -21,18 +21,18 @@ Vocal Fix is the reference-intake side; TTB Studio is the song-planning side. Th
 
 ## Run locally without Docker
 
-Requires [Bun 1.4+](https://bun.com/) and **no container runtime**.
+Requires [Node.js 22.17+ (22.x)](https://nodejs.org/) and npm 11.6.2 and **no container runtime**.
 
 ```bash
 git clone https://github.com/g-baskin/VocalBlackMagic.git
 cd VocalBlackMagic
-bun install --frozen-lockfile
+npm ci
 
 # Terminal A: Vocal Fix
-bun run dev:vocal
+npm run dev:vocal
 
 # Terminal B: TTB Studio
-bun run dev:ttb
+npm run dev:ttb
 ```
 
 The SvelteKit user interfaces run independently even when the Python audio services are offline. To enable **local development only** of reference upload and backend-capability discovery, use Python 3.11+ (the example uses 3.11):
@@ -56,8 +56,8 @@ uvicorn apps.ttb_studio.app:app --host 127.0.0.1 --port 8002
 Use these instead of the default dev commands, one per terminal from the repository root. The URL overrides keep the sister-app links aligned with the new ports; `--strictPort` prevents silent fallback to another port.
 
 ```bash
-(cd apps/vocal-fix && VITE_TTB_STUDIO_URL=http://127.0.0.1:5414 bun run dev --port 5413 --strictPort)
-(cd apps/ttb-studio && VITE_VOCAL_FIX_URL=http://127.0.0.1:5413 bun run dev --port 5414 --strictPort)
+(cd apps/vocal-fix && VITE_TTB_STUDIO_URL=http://127.0.0.1:5414 npm run dev -- --port 5413 --strictPort)
+(cd apps/ttb-studio && VITE_VOCAL_FIX_URL=http://127.0.0.1:5413 npm run dev -- --port 5414 --strictPort)
 ```
 
 Open http://127.0.0.1:5413 and http://127.0.0.1:5414. If those ports are already in use, choose another pair and update both URL overrides. Do not stop another project's server to free a port.
@@ -65,19 +65,20 @@ Open http://127.0.0.1:5413 and http://127.0.0.1:5414. If those ports are already
 ## Build and test
 
 ```bash
-bun test packages
-bun run check
-bun run build
+npm test
+npm run check
+npm run build
+npm run test:production
 python -m pytest -q
 ```
 
-On a Linux host, run each production build with Bun and manage it with systemd (sample units in [infra/systemd](infra/systemd)). See [SaaS stack and deployment](docs/SAAS_STACK.md). Docker is optional legacy convenience only; not required by the new applications.
+On a Linux host, run each production build with Node.js and manage it with systemd (sample units in [infra/systemd](infra/systemd)). See [SaaS stack and deployment](docs/SAAS_STACK.md). Docker is optional legacy convenience only; not required by the new applications.
 
 > **Current functional limits:** This is a SaaS UI and API-boundary scaffold, not a production-ready music platform. Vocal source upload is available only in local development; Gold Vocal separation, voice conditioning, real song inference, Premium Studio DSP, payments, database persistence and public user authentication are not implemented. Never represent a request as generated audio without a verified model result.
 
 ## Architecture and contributing
 
-The two Svelte 5 + SvelteKit 3 apps build independently in a Bun workspace. TTB remains a modular monolith. Shared packages hold contracts and UI; auth, database and billing packages are interfaces rather than working integrations. Python APIs are local prototypes, with GPU inference planned separately.
+The two Svelte 5 + SvelteKit 3 apps build independently in an npm workspace. TTB remains a modular monolith. Shared packages hold contracts and UI; auth, database and billing packages are interfaces rather than working integrations. Python APIs are local prototypes, with GPU inference planned separately.
 
 Before contributing, read the [agent handoff](AGENTS.md) and the relevant specification below. Keep implemented behavior distinct from planned capabilities, and preserve the two independent apps.
 

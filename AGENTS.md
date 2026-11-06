@@ -3,7 +3,7 @@
 Read `README.md`, `docs/SAAS_STACK.md`, `docs/ROADMAP.md`, `docs/RIGHTS_AND_SAFETY.md` before modifying the repo.
 
 ## Non-negotiable boundaries
-- Preserve **two independent apps**: `apps/vocal-fix` and `apps/ttb-studio`. Each uses Svelte 5 + SvelteKit 3 + Bun; no Docker runtime requirement.
+- Preserve **two independent apps**: `apps/vocal-fix` and `apps/ttb-studio`. Each uses Svelte 5 + SvelteKit 3 + Node.js; no Docker runtime requirement.
 - TTB Studio is a **modular monolith**. Python model inference can be an out-of-process GPU worker. Do not invent a microservice per feature.
 - Preserve original raw source audio and create versioned derived mixes.
 - Premium Studio is an **opt-in**, non-destructive processing mode separate from sound character.
@@ -26,7 +26,7 @@ Production-ready means **all** of: licensed model, verified output, user auth, t
 ## Implemented state
 Vocal Black Magic currently stores authorized vocal references and offers a music-request editor; it does not process vocals or generate songs.
 
-- Hyphenated app directories are SvelteKit/Bun frontends; underscored Python directories own local filesystem intake and unconfigured generation endpoints. Docker Compose runs only the Python prototypes, not the frontends.
+- Hyphenated app directories are SvelteKit/Node.js frontends; underscored Python directories own local filesystem intake and unconfigured generation endpoints. Docker Compose runs only the Python prototypes, not the frontends.
 - `packages/auth`, `database` and `billing` are contracts, not integrated services. `assertAuthenticated` checks a supplied object; it does not establish a verified session.
 
 ## Integration traps
@@ -37,5 +37,5 @@ Vocal Black Magic currently stores authorized vocal references and offers a musi
 - `VFM_DATA_DIR` defaults relative to the Python process working directory. Changing cwd without an explicit data path makes existing sessions appear missing.
 - Sister-app URLs use build-time `VITE_VOCAL_FIX_URL` / `VITE_TTB_STUDIO_URL`; Python backend URLs use runtime `VOCAL_FIX_API_URL` / `TTB_STUDIO_API_URL`. Changing runtime environment alone will not repair links in an existing frontend build.
 - Keep the SvelteKit 3 `$app/tsconfig` inheritance and adapter configuration in Vite; the earlier `.svelte-kit/tsconfig.json` template was corrected in commit `4f1d435`.
-- Python tests need their own environment (CI uses Python 3.11), independently of Bun dependencies. `pytest.ini` supplies root imports; run `python -m pytest -q` from the repository root. These are contract tests, not GPU or browser tests.
+- Python tests need their own environment (CI uses Python 3.11), independently of npm dependencies. `pytest.ini` supplies root imports; run `python -m pytest -q` from the repository root. These are contract tests, not GPU or browser tests.
 <!-- gg:init:end -->

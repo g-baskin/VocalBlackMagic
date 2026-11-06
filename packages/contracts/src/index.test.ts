@@ -1,5 +1,6 @@
-import { expect, test } from 'bun:test';
-import { soundCharacters, validateGenerationRequest, type GenerationRequest } from './index';
+import assert from 'node:assert/strict';
+import { test } from 'node:test';
+import { soundCharacters, validateGenerationRequest, type GenerationRequest } from './index.ts';
 const base: GenerationRequest = {
   prompt: 'Warm analog hip hop with live-room drums',
   lyrics: null,
@@ -11,7 +12,7 @@ const base: GenerationRequest = {
   human_variation: 65,
   mastering_intensity: 25
 };
-test('five sound characters are selectable', () => expect(soundCharacters).toHaveLength(5));
-test('valid request passes', () => expect(validateGenerationRequest(base)).toBeNull());
-test('out-of-range intensity fails', () => expect(validateGenerationRequest({ ...base, mastering_intensity: 101 })).not.toBeNull());
-test('too-short prompts fail', () => expect(validateGenerationRequest({ ...base, prompt: 'x' })).not.toBeNull());
+test('five sound characters are selectable', () => assert.equal(soundCharacters.length, 5));
+test('valid request passes', () => assert.equal(validateGenerationRequest(base), null));
+test('out-of-range intensity fails', () => assert.notEqual(validateGenerationRequest({ ...base, mastering_intensity: 101 }), null));
+test('too-short prompts fail', () => assert.notEqual(validateGenerationRequest({ ...base, prompt: 'x' }), null));

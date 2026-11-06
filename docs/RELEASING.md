@@ -7,18 +7,19 @@ Releases are manual. CI verifies changes but does not publish releases or deploy
 - The root `package.json` version identifies the repository release; use a matching `vX.Y.Z` tag. App and shared-package versions are independent and need not match the root.
 - Before the first release, confirm the intended version with the maintainer. The current 0.2.0 changelog entry describes repository history, not a prior published release.
 - Use a patch increment for compatible fixes, a minor increment for new functionality, and explicitly document breaking changes. While below 1.0, use a minor increment for breaking changes.
-- In a reviewed change, update the root version and any changed component versions that are being released. If workspace metadata changes, regenerate and review `bun.lock` using the pinned Bun version.
+- In a reviewed change, update the root version and any changed component versions that are being released. If workspace metadata changes, regenerate and review `package-lock.json` using the pinned npm version.
 - Update `CHANGELOG.md` with user-visible changes, limitations and upgrade instructions. At publication, date the matching entry and remove its unpublished qualifier; keep an Unreleased section for later changes.
 
 ## Verify the exact release candidate
 
-Use a clean checkout of the reviewed candidate commit, Bun 1.4.0, Node 22.17.0 and Python 3.11, matching `.github/workflows/ci.yml`. Do not use an existing working directory containing user recordings as the build workspace.
+Use a clean checkout of the reviewed candidate commit, npm 11.6.2, Node 22.17.0 and Python 3.11, matching `.github/workflows/ci.yml`. Do not use an existing working directory containing user recordings as the build workspace.
 
 ```bash
-bun install --minimum-release-age=172800 --frozen-lockfile
-bun test packages
-bun run check
-bun run build
+npm ci --before="$(node -p 'new Date(Date.now() - 172800000).toISOString()')"
+npm test
+npm run check
+npm run build
+npm run test:production
 python3 -m venv .venv
 . .venv/bin/activate
 python -m pip install -r requirements.txt

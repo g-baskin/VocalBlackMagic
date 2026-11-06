@@ -2,19 +2,24 @@
   "name": "vocal-black-magic",
   "private": true,
   "version": "0.2.0",
-  "packageManager": "bun@1.4.0",
+  "packageManager": "npm@11.6.2",
   "workspaces": [
     "apps/vocal-fix",
     "apps/ttb-studio",
     "packages/*"
   ],
   "scripts": {
-    "dev:vocal": "bun run --filter @vbm/vocal-fix dev",
-    "dev:ttb": "bun run --filter @vbm/ttb-studio dev",
-    "build": "bun run build:vocal && bun run build:ttb",
-    "build:vocal": "bun run --filter @vbm/vocal-fix build",
-    "build:ttb": "bun run --filter @vbm/ttb-studio build",
-    "check": "bun run --filter @vbm/vocal-fix check && bun run --filter @vbm/ttb-studio check",
-    "test": "bun test packages"
+    "dev:vocal": "npm run dev --workspace=@vbm/vocal-fix",
+    "dev:ttb": "npm run dev --workspace=@vbm/ttb-studio",
+    "build": "npm run build:vocal && npm run build:ttb",
+    "build:vocal": "npm run build --workspace=@vbm/vocal-fix",
+    "build:ttb": "npm run build --workspace=@vbm/ttb-studio",
+    "check": "npm run check --workspace=@vbm/vocal-fix && npm run check --workspace=@vbm/ttb-studio",
+    "test": "node --experimental-strip-types --test packages/contracts/src/index.test.ts",
+    "test:production": "node --test tests/production.test.mjs"
+  },
+  "engines": {
+    "node": ">=22.17.0 <23",
+    "npm": ">=11.6.2 <12"
   }
 }
