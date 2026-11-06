@@ -1,0 +1,27 @@
+[project]
+name = "vbm-engine"
+version = "0.1.0"
+description = "Vocal Black Magic self-hosted music engine (VBM Engine protocol v1)"
+requires-python = ">=3.11,<3.13"
+
+[tool.ruff]
+target-version = "py311"
+line-length = 100
+extend-exclude = [".cache", "data"]
+
+[tool.ruff.lint]
+select = ["E4", "E7", "E9", "F", "I"]
+
+[tool.mypy]
+python_version = "3.11"
+strict = true
+files = ["vbm_engine", "tests"]
+exclude = ["\\.cache/", "\\.venv/"]
+
+[[tool.mypy.overrides]]
+module = ["soundfile", "torch", "torch.*", "acestep", "acestep.*", "huggingface_hub", "huggingface_hub.*", "heartlib", "heartlib.*", "yue2", "yue2.*"]
+ignore_missing_imports = true
+
+[tool.pytest.ini_options]
+pythonpath = ["."]
+testpaths = ["tests"]

@@ -1,0 +1,635 @@
+{
+  "description": "Shared cases for validateEngineJobRequest (TS) and validate_engine_job_request (Python). 'pad' keys expand a field to N repetitions of a character before validation.",
+  "cases": [
+    {
+      "name": "minimal text2music",
+      "body": {
+        "model": "ace-step-1.5",
+        "task": "text2music",
+        "prompt": "lofi piano"
+      },
+      "expected": null
+    },
+    {
+      "name": "full text2music",
+      "body": {
+        "model": "yue2",
+        "task": "text2music",
+        "prompt": "rock",
+        "lyrics": "[Verse]\nhi",
+        "instrumental": false,
+        "duration_seconds": 120,
+        "seed": 7,
+        "options": {
+          "steps": 8
+        }
+      },
+      "expected": null
+    },
+    {
+      "name": "not an object",
+      "body": "hello",
+      "expected": "Body must be a JSON object."
+    },
+    {
+      "name": "null body",
+      "body": null,
+      "expected": "Body must be a JSON object."
+    },
+    {
+      "name": "unknown model",
+      "body": {
+        "model": "suno",
+        "task": "text2music",
+        "prompt": "x"
+      },
+      "expected": "Unknown model."
+    },
+    {
+      "name": "unknown task",
+      "body": {
+        "model": "heartmula",
+        "task": "remix",
+        "prompt": "x"
+      },
+      "expected": "Unknown task."
+    },
+    {
+      "name": "blank prompt",
+      "body": {
+        "model": "heartmula",
+        "task": "text2music",
+        "prompt": "   "
+      },
+      "expected": "prompt must be 1 to 2000 characters."
+    },
+    {
+      "name": "prompt not string",
+      "body": {
+        "model": "heartmula",
+        "task": "text2music",
+        "prompt": 5
+      },
+      "expected": "prompt must be 1 to 2000 characters."
+    },
+    {
+      "name": "prompt at max",
+      "body": {
+        "model": "heartmula",
+        "task": "text2music"
+      },
+      "pad": {
+        "prompt": ["a", 2000]
+      },
+      "expected": null
+    },
+    {
+      "name": "prompt too long",
+      "body": {
+        "model": "heartmula",
+        "task": "text2music"
+      },
+      "pad": {
+        "prompt": ["a", 2001]
+      },
+      "expected": "prompt must be 1 to 2000 characters."
+    },
+    {
+      "name": "lyrics too long",
+      "body": {
+        "model": "heartmula",
+        "task": "text2music",
+        "prompt": "x"
+      },
+      "pad": {
+        "lyrics": ["b", 6001]
+      },
+      "expected": "lyrics must be at most 6000 characters."
+    },
+    {
+      "name": "lyrics null",
+      "body": {
+        "model": "heartmula",
+        "task": "text2music",
+        "prompt": "x",
+        "lyrics": null
+      },
+      "expected": "lyrics must be at most 6000 characters."
+    },
+    {
+      "name": "empty lyrics ok",
+      "body": {
+        "model": "heartmula",
+        "task": "text2music",
+        "prompt": "x",
+        "lyrics": ""
+      },
+      "expected": null
+    },
+    {
+      "name": "duration too short",
+      "body": {
+        "model": "diffrhythm-2",
+        "task": "text2music",
+        "prompt": "x",
+        "duration_seconds": 4.9
+      },
+      "expected": "duration_seconds must be 5 to 600."
+    },
+    {
+      "name": "duration too long",
+      "body": {
+        "model": "diffrhythm-2",
+        "task": "text2music",
+        "prompt": "x",
+        "duration_seconds": 601
+      },
+      "expected": "duration_seconds must be 5 to 600."
+    },
+    {
+      "name": "duration string",
+      "body": {
+        "model": "diffrhythm-2",
+        "task": "text2music",
+        "prompt": "x",
+        "duration_seconds": "30"
+      },
+      "expected": "duration_seconds must be 5 to 600."
+    },
+    {
+      "name": "duration bounds ok",
+      "body": {
+        "model": "diffrhythm-2",
+        "task": "text2music",
+        "prompt": "x",
+        "duration_seconds": 600
+      },
+      "expected": null
+    },
+    {
+      "name": "cover without source",
+      "body": {
+        "model": "ace-step-1.5",
+        "task": "cover",
+        "prompt": "x",
+        "cover": {
+          "strength": 0.5
+        }
+      },
+      "expected": "cover needs source_audio."
+    },
+    {
+      "name": "source empty data",
+      "body": {
+        "model": "ace-step-1.5",
+        "task": "cover",
+        "prompt": "x",
+        "source_audio": {
+          "data_b64": "",
+          "format": "wav"
+        },
+        "cover": {
+          "strength": 0.5
+        }
+      },
+      "expected": "cover needs source_audio."
+    },
+    {
+      "name": "source bad format",
+      "body": {
+        "model": "ace-step-1.5",
+        "task": "cover",
+        "prompt": "x",
+        "source_audio": {
+          "data_b64": "AAAA",
+          "format": "ogg"
+        },
+        "cover": {
+          "strength": 0.5
+        }
+      },
+      "expected": "source_audio.format must be wav, flac or mp3."
+    },
+    {
+      "name": "cover ok",
+      "body": {
+        "model": "ace-step-1.5",
+        "task": "cover",
+        "prompt": "x",
+        "source_audio": {
+          "data_b64": "AAAA",
+          "format": "mp3"
+        },
+        "cover": {
+          "strength": 0
+        }
+      },
+      "expected": null
+    },
+    {
+      "name": "cover strength high",
+      "body": {
+        "model": "ace-step-1.5",
+        "task": "cover",
+        "prompt": "x",
+        "source_audio": {
+          "data_b64": "AAAA",
+          "format": "mp3"
+        },
+        "cover": {
+          "strength": 1.01
+        }
+      },
+      "expected": "cover.strength must be 0 to 1."
+    },
+    {
+      "name": "cover missing",
+      "body": {
+        "model": "ace-step-1.5",
+        "task": "cover",
+        "prompt": "x",
+        "source_audio": {
+          "data_b64": "AAAA",
+          "format": "mp3"
+        }
+      },
+      "expected": "cover.strength must be 0 to 1."
+    },
+    {
+      "name": "repaint ok",
+      "body": {
+        "model": "ace-step-1.5",
+        "task": "repaint",
+        "prompt": "x",
+        "source_audio": {
+          "data_b64": "AAAA",
+          "format": "wav"
+        },
+        "repaint": {
+          "start_seconds": 0,
+          "end_seconds": 10
+        }
+      },
+      "expected": null
+    },
+    {
+      "name": "repaint reversed",
+      "body": {
+        "model": "ace-step-1.5",
+        "task": "repaint",
+        "prompt": "x",
+        "source_audio": {
+          "data_b64": "AAAA",
+          "format": "wav"
+        },
+        "repaint": {
+          "start_seconds": 10,
+          "end_seconds": 10
+        }
+      },
+      "expected": "repaint needs 0 <= start_seconds < end_seconds."
+    },
+    {
+      "name": "repaint negative",
+      "body": {
+        "model": "ace-step-1.5",
+        "task": "repaint",
+        "prompt": "x",
+        "source_audio": {
+          "data_b64": "AAAA",
+          "format": "wav"
+        },
+        "repaint": {
+          "start_seconds": -1,
+          "end_seconds": 10
+        }
+      },
+      "expected": "repaint needs 0 <= start_seconds < end_seconds."
+    },
+    {
+      "name": "repaint missing end",
+      "body": {
+        "model": "ace-step-1.5",
+        "task": "repaint",
+        "prompt": "x",
+        "source_audio": {
+          "data_b64": "AAAA",
+          "format": "wav"
+        },
+        "repaint": {
+          "start_seconds": 1
+        }
+      },
+      "expected": "repaint needs 0 <= start_seconds < end_seconds."
+    },
+    {
+      "name": "extend after ok",
+      "body": {
+        "model": "heartmula",
+        "task": "extend",
+        "prompt": "x",
+        "source_audio": {
+          "data_b64": "AAAA",
+          "format": "flac"
+        },
+        "extend": {
+          "after_seconds": 30
+        }
+      },
+      "expected": null
+    },
+    {
+      "name": "extend total max",
+      "body": {
+        "model": "heartmula",
+        "task": "extend",
+        "prompt": "x",
+        "source_audio": {
+          "data_b64": "AAAA",
+          "format": "flac"
+        },
+        "extend": {
+          "before_seconds": 120,
+          "after_seconds": 120
+        }
+      },
+      "expected": null
+    },
+    {
+      "name": "extend over max",
+      "body": {
+        "model": "heartmula",
+        "task": "extend",
+        "prompt": "x",
+        "source_audio": {
+          "data_b64": "AAAA",
+          "format": "flac"
+        },
+        "extend": {
+          "before_seconds": 120,
+          "after_seconds": 121
+        }
+      },
+      "expected": "extend needs before_seconds and/or after_seconds, 240 s in total at most."
+    },
+    {
+      "name": "extend zero",
+      "body": {
+        "model": "heartmula",
+        "task": "extend",
+        "prompt": "x",
+        "source_audio": {
+          "data_b64": "AAAA",
+          "format": "flac"
+        },
+        "extend": {}
+      },
+      "expected": "extend needs before_seconds and/or after_seconds, 240 s in total at most."
+    },
+    {
+      "name": "extend missing",
+      "body": {
+        "model": "heartmula",
+        "task": "extend",
+        "prompt": "x",
+        "source_audio": {
+          "data_b64": "AAAA",
+          "format": "flac"
+        }
+      },
+      "expected": "extend needs before_seconds and/or after_seconds, 240 s in total at most."
+    },
+    {
+      "name": "extend null before",
+      "body": {
+        "model": "heartmula",
+        "task": "extend",
+        "prompt": "x",
+        "source_audio": {
+          "data_b64": "AAAA",
+          "format": "flac"
+        },
+        "extend": {
+          "before_seconds": null,
+          "after_seconds": 5
+        }
+      },
+      "expected": null
+    },
+    {
+      "name": "extend negative",
+      "body": {
+        "model": "heartmula",
+        "task": "extend",
+        "prompt": "x",
+        "source_audio": {
+          "data_b64": "AAAA",
+          "format": "flac"
+        },
+        "extend": {
+          "before_seconds": -5,
+          "after_seconds": 10
+        }
+      },
+      "expected": "extend needs before_seconds and/or after_seconds, 240 s in total at most."
+    },
+    {
+      "name": "duration '5' string",
+      "body": {
+        "model": "ace-step-1.5",
+        "task": "text2music",
+        "prompt": "x",
+        "duration_seconds": "5"
+      },
+      "expected": "duration_seconds must be 5 to 600."
+    },
+    {
+      "name": "duration boolean",
+      "body": {
+        "model": "ace-step-1.5",
+        "task": "text2music",
+        "prompt": "x",
+        "duration_seconds": true
+      },
+      "expected": "duration_seconds must be 5 to 600."
+    },
+    {
+      "name": "seed ok zero",
+      "body": {
+        "model": "ace-step-1.5",
+        "task": "text2music",
+        "prompt": "x",
+        "seed": 0
+      },
+      "expected": null
+    },
+    {
+      "name": "seed negative",
+      "body": {
+        "model": "ace-step-1.5",
+        "task": "text2music",
+        "prompt": "x",
+        "seed": -1
+      },
+      "expected": "seed must be a non-negative integer."
+    },
+    {
+      "name": "seed float",
+      "body": {
+        "model": "ace-step-1.5",
+        "task": "text2music",
+        "prompt": "x",
+        "seed": 1.5
+      },
+      "expected": "seed must be a non-negative integer."
+    },
+    {
+      "name": "seed string",
+      "body": {
+        "model": "ace-step-1.5",
+        "task": "text2music",
+        "prompt": "x",
+        "seed": "5"
+      },
+      "expected": "seed must be a non-negative integer."
+    },
+    {
+      "name": "seed boolean",
+      "body": {
+        "model": "ace-step-1.5",
+        "task": "text2music",
+        "prompt": "x",
+        "seed": true
+      },
+      "expected": "seed must be a non-negative integer."
+    },
+    {
+      "name": "seed null",
+      "body": {
+        "model": "ace-step-1.5",
+        "task": "text2music",
+        "prompt": "x",
+        "seed": null
+      },
+      "expected": "seed must be a non-negative integer."
+    },
+    {
+      "name": "instrumental string",
+      "body": {
+        "model": "ace-step-1.5",
+        "task": "text2music",
+        "prompt": "x",
+        "instrumental": "true"
+      },
+      "expected": "instrumental must be true or false."
+    },
+    {
+      "name": "instrumental number",
+      "body": {
+        "model": "ace-step-1.5",
+        "task": "text2music",
+        "prompt": "x",
+        "instrumental": 1
+      },
+      "expected": "instrumental must be true or false."
+    },
+    {
+      "name": "repaint '5' strings",
+      "body": {
+        "model": "ace-step-1.5",
+        "task": "repaint",
+        "prompt": "x",
+        "source_audio": {
+          "data_b64": "AAAA",
+          "format": "wav"
+        },
+        "repaint": {
+          "start_seconds": "0",
+          "end_seconds": "5"
+        }
+      },
+      "expected": "repaint needs 0 <= start_seconds < end_seconds."
+    },
+    {
+      "name": "repaint boolean",
+      "body": {
+        "model": "ace-step-1.5",
+        "task": "repaint",
+        "prompt": "x",
+        "source_audio": {
+          "data_b64": "AAAA",
+          "format": "wav"
+        },
+        "repaint": {
+          "start_seconds": false,
+          "end_seconds": 5
+        }
+      },
+      "expected": "repaint needs 0 <= start_seconds < end_seconds."
+    },
+    {
+      "name": "extend '5' string",
+      "body": {
+        "model": "ace-step-1.5",
+        "task": "extend",
+        "prompt": "x",
+        "source_audio": {
+          "data_b64": "AAAA",
+          "format": "wav"
+        },
+        "extend": {
+          "after_seconds": "5"
+        }
+      },
+      "expected": "extend needs before_seconds and/or after_seconds, 240 s in total at most."
+    },
+    {
+      "name": "extend boolean",
+      "body": {
+        "model": "ace-step-1.5",
+        "task": "extend",
+        "prompt": "x",
+        "source_audio": {
+          "data_b64": "AAAA",
+          "format": "wav"
+        },
+        "extend": {
+          "after_seconds": true
+        }
+      },
+      "expected": "extend needs before_seconds and/or after_seconds, 240 s in total at most."
+    },
+    {
+      "name": "cover '0.5' string",
+      "body": {
+        "model": "ace-step-1.5",
+        "task": "cover",
+        "prompt": "x",
+        "source_audio": {
+          "data_b64": "AAAA",
+          "format": "wav"
+        },
+        "cover": {
+          "strength": "0.5"
+        }
+      },
+      "expected": "cover.strength must be 0 to 1."
+    },
+    {
+      "name": "cover boolean",
+      "body": {
+        "model": "ace-step-1.5",
+        "task": "cover",
+        "prompt": "x",
+        "source_audio": {
+          "data_b64": "AAAA",
+          "format": "wav"
+        },
+        "cover": {
+          "strength": true
+        }
+      },
+      "expected": "cover.strength must be 0 to 1."
+    }
+  ]
+}

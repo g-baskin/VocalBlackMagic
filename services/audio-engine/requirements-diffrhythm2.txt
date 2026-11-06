@@ -1,0 +1,5 @@
+# DiffRhythm 2 (Apache-2.0). Not a pip package: `python -m vbm_engine.download diffrhythm-2` clones
+# ASLP-lab/DiffRhythm2 at 7804f821b797b4f276090e1a9dcd37e97d9915d5 into the cache; then install
+#   pip install -r $VBM_ENGINE_CACHE/diffrhythm-2/src/requirements.txt
+# and the system package espeak-ng (apt-get install espeak-ng). NVIDIA GPU, about 12 GB.
+torch

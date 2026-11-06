@@ -1,0 +1,4 @@
+# ACE-Step 1.5 (MIT), official upstream pinned to a commit. Needs CUDA (Linux/Windows) or Apple Silicon.
+# Upstream pins its own torch (2.10.0+cu128 on Linux x86_64); install on a GPU host:
+#   pip install -r requirements-base.txt -r requirements-ace-step.txt --extra-index-url https://download.pytorch.org/whl/cu128
+ace-step @ git+https://github.com/ace-step/ACE-Step-1.5@ca1e85fe9430179831e6bc6be790c332190a3866

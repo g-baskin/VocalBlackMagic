@@ -1,0 +1,2 @@
+# HeartMuLa via heartlib (Apache-2.0), pinned commit. NVIDIA GPU, about 16 GB (bf16; use lazy loading on smaller cards).
+heartlib @ git+https://github.com/HeartMuLa/heartlib@5858ca8f1ffe58d62be7c007ea55f1033c5ca456

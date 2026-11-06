@@ -74,7 +74,8 @@ export function parseLyriaInteraction(data: unknown): {
 
 export async function generateLyria(
   deps: LyriaDeps,
-  request: GenerationRequest
+  request: GenerationRequest,
+  model: string = lyriaModel
 ): Promise<{ audio: InlineAudio; lyrics: string | null }> {
   const response = await deps.fetch(interactionsUrl, {
     method: 'POST',
@@ -83,7 +84,7 @@ export async function generateLyria(
       'x-goog-api-key': deps.apiKey,
       'api-revision': lyriaApiRevision
     },
-    body: JSON.stringify({ model: lyriaModel, input: buildLyriaPrompt(request) }),
+    body: JSON.stringify({ model, input: buildLyriaPrompt(request) }),
     signal: AbortSignal.timeout(300_000)
   });
   if (!response.ok) {
