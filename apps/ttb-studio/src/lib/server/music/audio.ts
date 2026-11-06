@@ -9,10 +9,12 @@ function ascii(bytes: Uint8Array, offset: number, length: number): string {
 }
 
 function sniffBare(head: Uint8Array): AudioKind | null {
-  if (head.length >= 12 && ascii(head, 0, 4) === 'RIFF' && ascii(head, 8, 4) === 'WAVE') return 'audio/wav';
+  if (head.length >= 12 && ascii(head, 0, 4) === 'RIFF' && ascii(head, 8, 4) === 'WAVE')
+    return 'audio/wav';
   if (head.length >= 3 && ascii(head, 0, 3) === 'ID3') return 'audio/mpeg';
   // MPEG audio frame sync with a non-reserved layer (rejects AAC ADTS, whose layer bits are 00).
-  if (head.length >= 2 && head[0] === 0xff && (head[1] & 0xe0) === 0xe0 && (head[1] & 0x06) !== 0) return 'audio/mpeg';
+  if (head.length >= 2 && head[0] === 0xff && (head[1] & 0xe0) === 0xe0 && (head[1] & 0x06) !== 0)
+    return 'audio/mpeg';
   if (head.length >= 4 && ascii(head, 0, 4) === 'fLaC') return 'audio/flac';
   if (head.length >= 4 && ascii(head, 0, 4) === 'OggS') return 'audio/ogg';
   return null;
@@ -22,13 +24,18 @@ const maxId3Bytes = 4 * 1024 * 1024;
 
 function id3Length(head: Uint8Array): number {
   if (head.length < 10 || ascii(head, 0, 3) !== 'ID3') return 0;
-  const size = ((head[6] & 0x7f) << 21) | ((head[7] & 0x7f) << 14) | ((head[8] & 0x7f) << 7) | (head[9] & 0x7f);
+  const size =
+    ((head[6] & 0x7f) << 21) |
+    ((head[7] & 0x7f) << 14) |
+    ((head[8] & 0x7f) << 7) |
+    (head[9] & 0x7f);
   return 10 + size + (head[5] & 0x10 ? 10 : 0);
 }
 
 // Bytes needed before sniffAudio can decide; an ID3 tag can prefix FLAC as well as MP3.
 export function sniffNeeds(head: Uint8Array): number {
-  if (head.length >= 3 && ascii(head, 0, 3) === 'ID3') return head.length < 10 ? 10 : Math.min(id3Length(head), maxId3Bytes) + 12;
+  if (head.length >= 3 && ascii(head, 0, 3) === 'ID3')
+    return head.length < 10 ? 10 : Math.min(id3Length(head), maxId3Bytes) + 12;
   return 12;
 }
 
@@ -47,20 +54,26 @@ export function inspectBase64Audio(data: string): { kind: AudioKind; bytes: numb
     throw new ProviderError(502, 'The provider returned malformed audio data.');
   const padding = data.endsWith('==') ? 2 : data.endsWith('=') ? 1 : 0;
   const bytes = (data.length / 4) * 3 - padding;
-  if (bytes < minAudioBytes) throw new ProviderError(502, 'The provider returned an empty or truncated audio file.');
-  if (bytes > maxAudioBytes) throw new ProviderError(502, 'The provider returned an audio file that is too large.');
+  if (bytes < minAudioBytes)
+    throw new ProviderError(502, 'The provider returned an empty or truncated audio file.');
+  if (bytes > maxAudioBytes)
+    throw new ProviderError(502, 'The provider returned an audio file that is too large.');
   const decode = (text: string) => Uint8Array.from(atob(text), (char) => char.charCodeAt(0));
   const needed = sniffNeeds(decode(data.slice(0, 16)));
   const head = decode(data.slice(0, Math.ceil(needed / 3) * 4));
   const kind = sniffAudio(head);
-  if (!kind) throw new ProviderError(502, 'The provider returned a file that is not recognisable audio.');
+  if (!kind)
+    throw new ProviderError(502, 'The provider returned a file that is not recognisable audio.');
   return { kind, bytes };
 }
 
 function join(chunks: Uint8Array[], size: number): Uint8Array {
   const out = new Uint8Array(size);
   let offset = 0;
-  for (const chunk of chunks) { out.set(chunk, offset); offset += chunk.length; }
+  for (const chunk of chunks) {
+    out.set(chunk, offset);
+    offset += chunk.length;
+  }
   return out;
 }
 
@@ -84,7 +97,11 @@ async function readHead(reader: ReadableStreamDefaultReader<Uint8Array>): Promis
 
 export async function verifiedAudioResponse(upstream: Response): Promise<Response> {
   if (!upstream.ok || !upstream.body)
-    throw new ProviderError(502, 'The audio file could not be retrieved from the provider.', 'audio fetch status ' + upstream.status);
+    throw new ProviderError(
+      502,
+      'The audio file could not be retrieved from the provider.',
+      'audio fetch status ' + upstream.status
+    );
   const declared = Number(upstream.headers.get('content-length'));
   const hasLength = upstream.headers.has('content-length') && Number.isFinite(declared);
   if (hasLength && (declared < minAudioBytes || declared > maxAudioBytes)) {
@@ -100,7 +117,9 @@ export async function verifiedAudioResponse(upstream: Response): Promise<Respons
   }
   let total = head.length;
   const body = new ReadableStream<Uint8Array>({
-    start(controller) { controller.enqueue(head); },
+    start(controller) {
+      controller.enqueue(head);
+    },
     async pull(controller) {
       const { done, value } = await reader.read();
       if (done) {
@@ -116,7 +135,9 @@ export async function verifiedAudioResponse(upstream: Response): Promise<Respons
       }
       controller.enqueue(value);
     },
-    cancel(reason) { return reader.cancel(reason); }
+    cancel(reason) {
+      return reader.cancel(reason);
+    }
   });
   const headers: Record<string, string> = {
     'content-type': kind,

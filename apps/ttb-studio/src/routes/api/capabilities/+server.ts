@@ -4,8 +4,12 @@ import type { RequestHandler } from './$types';
 import { buildCapabilities } from '../../../lib/server/music/capabilities';
 import { configuredKey, generationAllowed } from '../../../lib/server/music/gate';
 
-export const GET: RequestHandler = () => json(buildCapabilities({
-  falConfigured: configuredKey(FAL_KEY) !== null,
-  lyriaConfigured: configuredKey(GEMINI_API_KEY) !== null,
-  generationAllowed: generationAllowed()
-}), { headers: { 'cache-control': 'no-store' } });
+export const GET: RequestHandler = () =>
+  json(
+    buildCapabilities({
+      falConfigured: configuredKey(FAL_KEY) !== null,
+      lyriaConfigured: configuredKey(GEMINI_API_KEY) !== null,
+      generationAllowed: generationAllowed()
+    }),
+    { headers: { 'cache-control': 'no-store' } }
+  );

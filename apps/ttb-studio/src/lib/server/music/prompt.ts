@@ -1,7 +1,12 @@
 import { soundCharacterNames, type GenerationRequest } from '@vbm/contracts';
 
 export function styleDescription(request: GenerationRequest): string {
-  return request.prompt.trim() + '\nSound character: ' + soundCharacterNames[request.sound_character] + '.';
+  return (
+    request.prompt.trim() +
+    '\nSound character: ' +
+    soundCharacterNames[request.sound_character] +
+    '.'
+  );
 }
 
 export function sungLyrics(request: GenerationRequest): string | null {

@@ -13,11 +13,17 @@ export const GET: RequestHandler = async ({ params, fetch }) => {
   if (!parsed || parsed.provider !== 'fal' || !isFalRequestId(parsed.requestId))
     return Response.json({ detail: 'Generation audio not found.' }, { status: 404 });
   const apiKey = configuredKey(FAL_KEY);
-  if (!apiKey) return Response.json({ detail: 'ACE-Step is not configured. Set FAL_KEY in the server environment.' }, { status: 503 });
+  if (!apiKey)
+    return Response.json(
+      { detail: 'ACE-Step is not configured. Set FAL_KEY in the server environment.' },
+      { status: 503 }
+    );
   try {
     const url = await falAudioUrl({ apiKey, fetch }, parsed.requestId);
     // The key is never sent to the media host, and redirects are refused so the allow-list cannot be bypassed.
     const upstream = await fetch(url, { redirect: 'error', signal: AbortSignal.timeout(120_000) });
     return await verifiedAudioResponse(upstream);
-  } catch (failure) { return errorResponse(failure); }
+  } catch (failure) {
+    return errorResponse(failure);
+  }
 };

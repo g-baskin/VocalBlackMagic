@@ -20,13 +20,25 @@ export function isFalRequestId(id: string): boolean {
 
 export function aceStepRequestError(request: GenerationRequest): string | null {
   const overflow = styleDescription(request).length - aceStepMaxPrompt;
-  if (overflow > 0) return 'ACE-Step 1.5 accepts shorter style descriptions. Remove about ' + overflow + ' characters.';
-  if ((sungLyrics(request)?.length ?? 0) > aceStepMaxLyrics) return 'ACE-Step 1.5 accepts up to ' + aceStepMaxLyrics + ' characters of lyrics.';
+  if (overflow > 0)
+    return (
+      'ACE-Step 1.5 accepts shorter style descriptions. Remove about ' + overflow + ' characters.'
+    );
+  if ((sungLyrics(request)?.length ?? 0) > aceStepMaxLyrics)
+    return 'ACE-Step 1.5 accepts up to ' + aceStepMaxLyrics + ' characters of lyrics.';
   return null;
 }
 
-export function buildFalSubmission(request: GenerationRequest, lyrics: string | null): { endpoint: string; body: Record<string, unknown> } {
-  if (request.mode === 'full-song' && !lyrics) throw new ProviderError(500, 'Lyrics are required for a complete song.', 'fal submission without lyrics');
+export function buildFalSubmission(
+  request: GenerationRequest,
+  lyrics: string | null
+): { endpoint: string; body: Record<string, unknown> } {
+  if (request.mode === 'full-song' && !lyrics)
+    throw new ProviderError(
+      500,
+      'Lyrics are required for a complete song.',
+      'fal submission without lyrics'
+    );
   return {
     endpoint: falApp,
     body: {
@@ -41,7 +53,11 @@ export function buildFalSubmission(request: GenerationRequest, lyrics: string | 
 }
 
 function headers(apiKey: string): Record<string, string> {
-  return { authorization: 'Key ' + apiKey, 'content-type': 'application/json', accept: 'application/json' };
+  return {
+    authorization: 'Key ' + apiKey,
+    'content-type': 'application/json',
+    accept: 'application/json'
+  };
 }
 
 async function failure(response: Response, action: string): Promise<ProviderError> {
@@ -49,29 +65,51 @@ async function failure(response: Response, action: string): Promise<ProviderErro
   const detail = 'fal ' + action + ' failed with ' + response.status + ': ' + text;
   if (response.status === 401 || response.status === 403)
     return new ProviderError(502, 'fal rejected the API key. Check FAL_KEY.', detail);
-  if (response.status === 402) return new ProviderError(402, 'The fal account has no remaining credit.', detail);
-  if (response.status === 429) return new ProviderError(429, 'fal is rate limiting requests. Try again shortly.', detail);
-  if (action === 'submit' && response.status === 422) return new ProviderError(422, 'fal rejected the song request.', detail);
-  if (action !== 'submit' && response.status === 404) return new ProviderError(404, 'Generation job not found.', detail);
+  if (response.status === 402)
+    return new ProviderError(402, 'The fal account has no remaining credit.', detail);
+  if (response.status === 429)
+    return new ProviderError(429, 'fal is rate limiting requests. Try again shortly.', detail);
+  if (action === 'submit' && response.status === 422)
+    return new ProviderError(422, 'fal rejected the song request.', detail);
+  if (action !== 'submit' && response.status === 404)
+    return new ProviderError(404, 'Generation job not found.', detail);
   return new ProviderError(502, 'fal could not process the request.', detail);
 }
 
-export async function submitFal(deps: FalDeps, request: GenerationRequest, lyrics: string | null): Promise<string> {
+export async function submitFal(
+  deps: FalDeps,
+  request: GenerationRequest,
+  lyrics: string | null
+): Promise<string> {
   const { endpoint, body } = buildFalSubmission(request, lyrics);
   const response = await deps.fetch(queueBase + '/' + endpoint, {
-    method: 'POST', headers: headers(deps.apiKey), body: JSON.stringify(body), signal: AbortSignal.timeout(15_000)
+    method: 'POST',
+    headers: headers(deps.apiKey),
+    body: JSON.stringify(body),
+    signal: AbortSignal.timeout(15_000)
   });
   if (!response.ok) throw await failure(response, 'submit');
   const data: unknown = await response.json();
-  const id = typeof data === 'object' && data !== null ? (data as { request_id?: unknown }).request_id : undefined;
+  const id =
+    typeof data === 'object' && data !== null
+      ? (data as { request_id?: unknown }).request_id
+      : undefined;
   if (typeof id !== 'string' || !isFalRequestId(id))
-    throw new ProviderError(502, 'fal returned an unexpected response.', 'fal submit response missing request_id');
+    throw new ProviderError(
+      502,
+      'fal returned an unexpected response.',
+      'fal submit response missing request_id'
+    );
   return id.toLowerCase();
 }
 
-export async function falStatus(deps: FalDeps, id: string): Promise<{ status: GenerationJobStatus; detail?: string }> {
+export async function falStatus(
+  deps: FalDeps,
+  id: string
+): Promise<{ status: GenerationJobStatus; detail?: string }> {
   const response = await deps.fetch(queueBase + '/' + falApp + '/requests/' + id + '/status', {
-    headers: headers(deps.apiKey), signal: AbortSignal.timeout(10_000)
+    headers: headers(deps.apiKey),
+    signal: AbortSignal.timeout(10_000)
   });
   if (!response.ok) throw await failure(response, 'status');
   const data = (await response.json()) as { status?: unknown; error?: unknown };
@@ -84,12 +122,20 @@ export async function falStatus(deps: FalDeps, id: string): Promise<{ status: Ge
     }
     return { status: 'completed' };
   }
-  throw new ProviderError(502, 'fal returned an unknown job status.', 'fal status ' + String(data.status));
+  throw new ProviderError(
+    502,
+    'fal returned an unknown job status.',
+    'fal status ' + String(data.status)
+  );
 }
 
 export function isAllowedFalMediaUrl(raw: string): boolean {
   let url: URL;
-  try { url = new URL(raw); } catch { return false; }
+  try {
+    url = new URL(raw);
+  } catch {
+    return false;
+  }
   if (url.protocol !== 'https:' || url.username || url.password || url.port) return false;
   const host = url.hostname.toLowerCase();
   if (host === 'fal.media' || host.endsWith('.fal.media')) return true;
@@ -98,12 +144,17 @@ export function isAllowedFalMediaUrl(raw: string): boolean {
 
 export async function falAudioUrl(deps: FalDeps, id: string): Promise<string> {
   const response = await deps.fetch(queueBase + '/' + falApp + '/requests/' + id, {
-    headers: headers(deps.apiKey), signal: AbortSignal.timeout(15_000)
+    headers: headers(deps.apiKey),
+    signal: AbortSignal.timeout(15_000)
   });
   if (!response.ok) throw await failure(response, 'result');
   const data = (await response.json()) as { audio?: { url?: unknown } };
   const url = data.audio?.url;
   if (typeof url !== 'string' || !isAllowedFalMediaUrl(url))
-    throw new ProviderError(502, 'fal returned an unexpected audio location.', 'fal audio url rejected');
+    throw new ProviderError(
+      502,
+      'fal returned an unexpected audio location.',
+      'fal audio url rejected'
+    );
   return url;
 }

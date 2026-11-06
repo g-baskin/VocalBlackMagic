@@ -64,6 +64,12 @@ Open http://127.0.0.1:5413 and http://127.0.0.1:5414. If those ports are already
 
 ## Build and test
 
+For lint, formatting and strict Python typing, activate the Python environment
+and install `pip install -r requirements-dev.txt` in addition to `bun install --frozen-lockfile`.
+Run `bun run lint`, `bun run format:check` and `bun run check:python`.
+`bun run format` applies the formatters; check commands do not rewrite source.
+TypeScript/Svelte checks remain `bun run check`. Python checks cover both APIs and tests.
+
 ```bash
 bun test packages
 bun run check
@@ -87,6 +93,8 @@ Before contributing, read the [agent handoff](AGENTS.md) and the relevant specif
 - [Release procedure](docs/RELEASING.md)
 - [Product specification](docs/PRODUCT_SPEC.md)
 - [Architecture](docs/ARCHITECTURE.md)
+- [Shared vocabulary](docs/GLOSSARY.md)
+- [Architecture decision log](docs/decisions/README.md)
 - [Implementation roadmap](docs/ROADMAP.md)
 - [Audio models and Gold Vocal pipeline](docs/MODELS_AND_AUDIO.md)
 - [Rights, authorization and privacy](docs/RIGHTS_AND_SAFETY.md)
