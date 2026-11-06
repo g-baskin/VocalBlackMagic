@@ -17,6 +17,8 @@ jobs:
           bun-version: '1.4.0'
       # The generated bun.lock must be committed after the first verified install.
       - run: bun install
+      - run: bun run lint:web
+      - run: bun run format:check:web
       - run: bun test packages
       - run: bun run check
       - run: bun run build
@@ -28,5 +30,8 @@ jobs:
         with:
           python-version: '3.11'
       - run: python -m pip install --upgrade pip
-      - run: pip install -r requirements.txt
+      - run: pip install -r requirements-dev.txt
+      - run: python -m ruff check apps tests
+      - run: python -m ruff format --check apps tests
+      - run: python -m mypy
       - run: pytest -q

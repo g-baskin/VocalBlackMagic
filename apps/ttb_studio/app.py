@@ -2,14 +2,15 @@
 
 No generative model is installed or invoked by this starter.
 """
+
 from __future__ import annotations
 
+from pathlib import Path
 from typing import Literal
 
 from fastapi import FastAPI, HTTPException
 from fastapi.responses import FileResponse
 from pydantic import BaseModel, Field
-from pathlib import Path
 
 app = FastAPI(title="Vocal Black Magic — TTB Studio", version="0.1.0")
 HERE = Path(__file__).resolve().parent
@@ -32,23 +33,27 @@ class GenerationRequest(BaseModel):
 
 
 @app.get("/")
-def homepage():
+def homepage() -> FileResponse:
     return FileResponse(HERE / "index.html")
 
 
 @app.get("/api/health")
-def health():
+def health() -> dict[str, str]:
     return {"status": "ok", "app": "ttb-studio", "version": "0.1.0"}
 
 
 @app.get("/api/capabilities")
-def capabilities():
+def capabilities() -> dict[str, object]:
     return {
         "architecture": "modular-monolith",
         "engines": [
             {"id": "ace-step", "name": "ACE-Step 1.5", "status": "not-configured"},
             {"id": "heartmula", "name": "HeartMuLa", "status": "not-configured"},
-            {"id": "external-v2", "name": "External V2 (provider to verify)", "status": "not-configured"},
+            {
+                "id": "external-v2",
+                "name": "External V2 (provider to verify)",
+                "status": "not-configured",
+            },
         ],
         "sound_characters": ["raw", "vintage", "live", "clean", "custom"],
         "premium_studio": {"selectable": True, "processing_ready": False},
@@ -57,7 +62,7 @@ def capabilities():
 
 
 @app.post("/api/generations")
-def create_generation(request: GenerationRequest):
+def create_generation(request: GenerationRequest) -> None:
     # Validation occurs through Pydantic. We must never return fake audio.
     raise HTTPException(
         status_code=503,

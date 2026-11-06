@@ -70,6 +70,45 @@
         "Not checked: fresh install, servers, deployment, Python tests, lint/typecheck/build (generated-file writes avoided); no security or licensing audit.",
         "Skill loaded: none, as requested. Initial rg unavailable; used grep instead."
       ]
+    },
+    "naming": {
+      "checkedAt": "2026-11-06T02:37:13.043Z",
+      "commit": "dc28cd0",
+      "uncommittedChanges": true,
+      "result": "pass",
+      "summary": "Both recorded documentation findings fixed: linked shared glossary with code mappings and three retrospective architecture decision records. Documentation checks pass; limited re-check only.",
+      "findings": [],
+      "evidence": [
+        "Scope: Re-check only missing shared glossary/mappings and missing decision context for two apps, modular monolith and runtime selection.",
+        "docs/GLOSSARY.md defines canonical terms, SoundPreset/SoundCharacter and ReferenceRecording/UploadedRecording mappings, plus implemented versus planned state.",
+        "docs/decisions/0001-independent-apps.md, 0002-modular-monolith.md and 0003-runtime-boundary.md capture existing choices, consequences and alternatives.",
+        "ADRs label retrospective analysis and unknown historical rationale; docs/decisions/README.md provides index and supersession rules.",
+        "README.md and docs/ARCHITECTURE.md link glossary and decision log.",
+        "python3 -B documentation assertions passed: local links resolve, all 3 ADRs contain required sections, mappings and state distinctions exist.",
+        "git diff --check: passed. Documentation-only changes; application tests not rerun for this re-check.",
+        "Skill loaded: adr-writing-stinger; read guides/01-nygard-format.md.",
+        "Not checked: broader naming audit, runtime behavior, deployment, security, media processing or typecheck/build. No code, dependencies or existing API names changed."
+      ]
+    },
+    "quality-tools": {
+      "checkedAt": "2026-11-06T03:26:19.918Z",
+      "commit": "dc28cd0",
+      "uncommittedChanges": true,
+      "result": "pass",
+      "summary": "All three recorded tooling gaps fixed: pinned linters, formatters and strict Python typing configured with scripts and CI steps. Local checks and 10 tests pass; Svelte and Python dependency warnings remain.",
+      "findings": [],
+      "evidence": [
+        "Scope: Re-check only the three recorded lint, formatting and Python type-check setup findings; no new health audit.",
+        "Added eslint.config.mjs, .prettierrc.json, .prettierignore, pyproject.toml and requirements-dev.txt; pinned installed tooling and updated bun.lock.",
+        "Added package scripts, README setup instructions and CI check steps; formatted source and annotated Python APIs/tests without disabling diagnostics.",
+        "PATH with project .venv: bun run lint passed ESLint and Ruff; bun run format:check passed Prettier and Ruff format.",
+        "bun run check:python: strict mypy passed for all 6 Python source/test files; local interpreter Python 3.12.13, configured target 3.11.",
+        "npm run check passed both apps: 0 errors; existing TTB unassociated-label warning remains at +page.svelte:137.",
+        "npm run test: 4 passed. bun run test:python: 6 passed, one Starlette/httpx deprecation warning. git diff --check passed.",
+        "Initial Ruff 0.17.4 install blocked by release cooldown; resolved and pinned available 0.17.3. No cooldown bypass.",
+        "Not checked: remote CI, production build/deployment, browser behavior or standalone shared-package typing. Earlier docs edits and .gg artifacts preserved.",
+        "Skill loaded for CI wiring: ci-release-stinger; read principles and SvelteKit job guide. No release, deployment, commit or push performed."
+      ]
     }
   }
 }

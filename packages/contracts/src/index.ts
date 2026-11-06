@@ -51,13 +51,15 @@ export interface VocalReferenceSession {
   note: string;
 }
 export function validateGenerationRequest(request: GenerationRequest): string | null {
-  if (request.prompt.trim().length < 5 || request.prompt.length > 3000) return 'Prompt must be 5–3000 characters.';
+  if (request.prompt.trim().length < 5 || request.prompt.length > 3000)
+    return 'Prompt must be 5–3000 characters.';
   if (request.lyrics && request.lyrics.length > 15000) return 'Lyrics exceed 15,000 characters.';
   if (!generationEngines.includes(request.engine)) return 'Unknown generation engine.';
   if (!soundCharacters.includes(request.sound_character)) return 'Unknown sound character.';
   if (request.mode !== 'full-song' && request.mode !== 'instrumental') return 'Unknown song mode.';
-  for (const field of ['texture','human_variation','mastering_intensity'] as const) {
-    if (!Number.isInteger(request[field]) || request[field] < 0 || request[field] > 100) return field + ' must be an integer from 0 to 100.';
+  for (const field of ['texture', 'human_variation', 'mastering_intensity'] as const) {
+    if (!Number.isInteger(request[field]) || request[field] < 0 || request[field] > 100)
+      return field + ' must be an integer from 0 to 100.';
   }
   return null;
 }

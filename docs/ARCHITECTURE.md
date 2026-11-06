@@ -25,6 +25,10 @@ VocalBlackMagic/
 - Separate permissions and storage scopes for two apps; no implicit cross-product transfer of user voice data.
 
 ## Data entities
+
+Canonical terms and planned-to-code mappings are in the [shared glossary](GLOSSARY.md).
+Decision context and trade-offs are in the [decision log](decisions/README.md).
+
 - User, Project, Track, GenerationJob, ModelRun, PromptVersion, SoundPreset, AudioAsset, StemAsset, MixVersion, ExportJob.
 - VocalReferenceSession, ReferenceRecording (5), VocalSegment, GoldVocal, VocalProfile, VoiceAuthorization, VoiceDeletionRequest, AssetProvenance.
 - Store engine/version/parameters/seed and input hashes; do not store secrets in projects.

@@ -3,8 +3,11 @@ import { passthrough, upstreamUnavailable, upstreamUrl } from '../../../lib/serv
 export const GET: RequestHandler = async ({ fetch }) => {
   try {
     const result = await fetch(upstreamUrl('/api/capabilities'), {
-      signal: AbortSignal.timeout(3000), cache: 'no-store'
+      signal: AbortSignal.timeout(3000),
+      cache: 'no-store'
     });
     return passthrough(result);
-  } catch (error) { return upstreamUnavailable(error); }
+  } catch (error) {
+    return upstreamUnavailable(error);
+  }
 };

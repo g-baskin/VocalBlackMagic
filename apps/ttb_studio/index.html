@@ -1,26 +1,303 @@
 <!doctype html>
-<html lang="en"><head><meta charset="utf-8"/><meta name="viewport" content="width=device-width,initial-scale=1"/>
-<title>TTB Studio | Vocal Black Magic</title>
-<style>
-:root{font-family:Inter,system-ui,-apple-system,sans-serif;background:#181c1b;color:#f6f2ed}*{box-sizing:border-box}body{margin:0}header{border-bottom:1px solid #3d4541;padding:22px max(5%,calc((100vw - 1150px)/2))}nav{display:flex;align-items:center;justify-content:space-between;gap:20px}.brand{font-size:12px;font-weight:800;letter-spacing:.16em;text-transform:uppercase}a{color:#d8ba9c}main{max-width:1150px;padding:45px 24px;margin:auto}h1{font-size:clamp(42px,6vw,78px);font-family:Georgia,serif;font-weight:400;letter-spacing:-.045em;margin:12px 0}p{color:#aab6b0;line-height:1.6}.eyebrow{font-size:12px;letter-spacing:.16em;text-transform:uppercase;color:#e9a778}.layout{display:grid;grid-template-columns:1.3fr 1fr;gap:24px;margin-top:32px}.panel{border:1px solid #454d48;border-radius:12px;background:#212725;padding:24px}label{display:block;font-size:13px;font-weight:650;margin:16px 0 8px}textarea,select{display:block;width:100%;border:1px solid #647168;background:#171d1a;color:white;border-radius:6px;padding:12px;font:inherit}textarea{min-height:126px;resize:vertical}.profiles{display:grid;grid-template-columns:1fr 1fr;gap:8px}.profile{display:block;border:1px solid #58645d;background:#303b35;color:#ede9e3;border-radius:7px;padding:13px;font-size:13px;cursor:pointer}.profile.active{background:#d3a47c;color:#161b17;border-color:#d3a47c;font-weight:750}.switch{display:flex;align-items:center;gap:10px;padding:14px;border:1px solid #58645d;border-radius:7px}.switch label{margin:0}.slider{width:100%;accent-color:#d3a47c}button.submit{width:100%;padding:15px;background:#d3a47c;color:#151915;border:0;border-radius:7px;font-weight:800;cursor:pointer;margin-top:20px}.status{white-space:pre-wrap;background:#121917;border:1px solid #44554c;border-radius:7px;padding:15px;font:13px ui-monospace,monospace;color:#afcdbb}.note{font-size:13px}@media(max-width:800px){.layout{grid-template-columns:1fr}main{padding:24px}}
-</style></head><body><header><nav><div class="brand">Vocal Black Magic / TTB Studio</div><a href="http://localhost:8001">Vocal Fix ↗</a></nav></header>
-<main><div class="eyebrow">Independent application 02 / Song creation</div><h1>Make music with<br/><em>character.</em></h1><p>Song generation, from raw underground textures to optional premium studio finishing. This is the interactive API starter: AI engines and DSP rendering are not yet installed.</p>
-<div class="layout"><section class="panel"><form id="make">
-<label for="prompt">Describe your sound</label><textarea id="prompt" required minlength="5">Dark 1990s East Coast hip-hop, haunting minor-key piano, punchy drums, deep bass, and imperfect live-room energy.</textarea>
-<label for="lyrics">Lyrics (optional)</label><textarea id="lyrics" placeholder="Write or paste original lyrics…"></textarea>
-<label for="engine">Music engine</label><select id="engine"><option value="ace-step">ACE-Step 1.5 (integration pending)</option><option value="heartmula">HeartMuLa (integration pending)</option><option value="external-v2">External V2 (provider verification pending)</option></select>
-<label for="mode">Output type</label><select id="mode"><option value="full-song">Complete song</option><option value="instrumental">Instrumental / Beat</option></select>
-<label>Sound character</label><div class="profiles" id="profiles"><button class="profile active" data-profile="raw" type="button" aria-pressed="true">Raw / Underground</button><button class="profile" data-profile="vintage" type="button" aria-pressed="false">Vintage / Analog</button><button class="profile" data-profile="live" type="button" aria-pressed="false">Live / Organic</button><button class="profile" data-profile="clean" type="button" aria-pressed="false">Studio Clean</button><button class="profile" data-profile="custom" type="button" aria-pressed="false">Custom</button></div>
-<label class="switch" style="margin:18px 0"><input id="premium" type="checkbox"/> <span>Premium Studio finishing <small>(optional; not yet available)</small></span></label>
-<button class="submit" type="submit">Check generation readiness</button></form></section>
-<section class="panel"><h2>Production controls</h2>
-<label for="texture">Texture / Rawness <output id="textureVal">70</output>%</label><input class="slider" type="range" min="0" max="100" value="70" id="texture"/>
-<label for="human">Human variation <output id="humanVal">65</output>%</label><input class="slider" type="range" min="0" max="100" value="65" id="human"/>
-<label for="master">Mastering intensity <output id="masterVal">25</output>%</label><input class="slider" type="range" min="0" max="100" value="25" id="master"/>
-<h2>Engine status</h2><div class="status" id="status" role="status" aria-live="polite">Loading engine capabilities…</div><p class="note">Generation does not run until an actual licensed music model is wired up. Premium Studio will create a new mix rather than overwrite the raw master.</p></section></div></main>
-<script>
-let profile="raw";document.querySelectorAll(".profile").forEach(b=>b.addEventListener("click",()=>{profile=b.dataset.profile;document.querySelectorAll(".profile").forEach(x=>{x.classList.toggle("active",x===b);x.setAttribute("aria-pressed",String(x===b))})}));
-for(const [id,out] of [["texture","textureVal"],["human","humanVal"],["master","masterVal"]])document.getElementById(id).addEventListener("input",e=>document.getElementById(out).textContent=e.target.value);
-const status=document.getElementById("status");fetch("/api/capabilities").then(r=>r.json()).then(data=>status.textContent=data.engines.map(x=>x.name+": "+x.status).join("\n")).catch(e=>status.textContent=e.message);
-document.getElementById("make").addEventListener("submit",async e=>{e.preventDefault();const payload={prompt:document.getElementById("prompt").value,lyrics:document.getElementById("lyrics").value||null,mode:document.getElementById("mode").value,engine:document.getElementById("engine").value,sound_character:profile,premium_studio:document.getElementById("premium").checked,texture:+document.getElementById("texture").value,human_variation:+document.getElementById("human").value,mastering_intensity:+document.getElementById("master").value};status.textContent="Checking…";try{const r=await fetch("/api/generations",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(payload)});const data=await r.json();status.textContent=r.ok?JSON.stringify(data,null,2):"Generation unavailable: "+JSON.stringify(data.detail)}catch(err){status.textContent="Network error: "+err.message}});
-</script></body></html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>TTB Studio | Vocal Black Magic</title>
+    <style>
+      :root {
+        font-family:
+          Inter,
+          system-ui,
+          -apple-system,
+          sans-serif;
+        background: #181c1b;
+        color: #f6f2ed;
+      }
+      * {
+        box-sizing: border-box;
+      }
+      body {
+        margin: 0;
+      }
+      header {
+        border-bottom: 1px solid #3d4541;
+        padding: 22px max(5%, calc((100vw - 1150px) / 2));
+      }
+      nav {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 20px;
+      }
+      .brand {
+        font-size: 12px;
+        font-weight: 800;
+        letter-spacing: 0.16em;
+        text-transform: uppercase;
+      }
+      a {
+        color: #d8ba9c;
+      }
+      main {
+        max-width: 1150px;
+        padding: 45px 24px;
+        margin: auto;
+      }
+      h1 {
+        font-size: clamp(42px, 6vw, 78px);
+        font-family: Georgia, serif;
+        font-weight: 400;
+        letter-spacing: -0.045em;
+        margin: 12px 0;
+      }
+      p {
+        color: #aab6b0;
+        line-height: 1.6;
+      }
+      .eyebrow {
+        font-size: 12px;
+        letter-spacing: 0.16em;
+        text-transform: uppercase;
+        color: #e9a778;
+      }
+      .layout {
+        display: grid;
+        grid-template-columns: 1.3fr 1fr;
+        gap: 24px;
+        margin-top: 32px;
+      }
+      .panel {
+        border: 1px solid #454d48;
+        border-radius: 12px;
+        background: #212725;
+        padding: 24px;
+      }
+      label {
+        display: block;
+        font-size: 13px;
+        font-weight: 650;
+        margin: 16px 0 8px;
+      }
+      textarea,
+      select {
+        display: block;
+        width: 100%;
+        border: 1px solid #647168;
+        background: #171d1a;
+        color: white;
+        border-radius: 6px;
+        padding: 12px;
+        font: inherit;
+      }
+      textarea {
+        min-height: 126px;
+        resize: vertical;
+      }
+      .profiles {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 8px;
+      }
+      .profile {
+        display: block;
+        border: 1px solid #58645d;
+        background: #303b35;
+        color: #ede9e3;
+        border-radius: 7px;
+        padding: 13px;
+        font-size: 13px;
+        cursor: pointer;
+      }
+      .profile.active {
+        background: #d3a47c;
+        color: #161b17;
+        border-color: #d3a47c;
+        font-weight: 750;
+      }
+      .switch {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding: 14px;
+        border: 1px solid #58645d;
+        border-radius: 7px;
+      }
+      .switch label {
+        margin: 0;
+      }
+      .slider {
+        width: 100%;
+        accent-color: #d3a47c;
+      }
+      button.submit {
+        width: 100%;
+        padding: 15px;
+        background: #d3a47c;
+        color: #151915;
+        border: 0;
+        border-radius: 7px;
+        font-weight: 800;
+        cursor: pointer;
+        margin-top: 20px;
+      }
+      .status {
+        white-space: pre-wrap;
+        background: #121917;
+        border: 1px solid #44554c;
+        border-radius: 7px;
+        padding: 15px;
+        font:
+          13px ui-monospace,
+          monospace;
+        color: #afcdbb;
+      }
+      .note {
+        font-size: 13px;
+      }
+      @media (max-width: 800px) {
+        .layout {
+          grid-template-columns: 1fr;
+        }
+        main {
+          padding: 24px;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <header>
+      <nav>
+        <div class="brand">Vocal Black Magic / TTB Studio</div>
+        <a href="http://localhost:8001">Vocal Fix ↗</a>
+      </nav>
+    </header>
+    <main>
+      <div class="eyebrow">Independent application 02 / Song creation</div>
+      <h1>Make music with<br /><em>character.</em></h1>
+      <p>
+        Song generation, from raw underground textures to optional premium studio finishing. This is
+        the interactive API starter: AI engines and DSP rendering are not yet installed.
+      </p>
+      <div class="layout">
+        <section class="panel">
+          <form id="make">
+            <label for="prompt">Describe your sound</label
+            ><textarea id="prompt" required minlength="5">
+Dark 1990s East Coast hip-hop, haunting minor-key piano, punchy drums, deep bass, and imperfect live-room energy.</textarea>
+            <label for="lyrics">Lyrics (optional)</label
+            ><textarea id="lyrics" placeholder="Write or paste original lyrics…"></textarea>
+            <label for="engine">Music engine</label
+            ><select id="engine">
+              <option value="ace-step">ACE-Step 1.5 (integration pending)</option>
+              <option value="heartmula">HeartMuLa (integration pending)</option>
+              <option value="external-v2">External V2 (provider verification pending)</option>
+            </select>
+            <label for="mode">Output type</label
+            ><select id="mode">
+              <option value="full-song">Complete song</option>
+              <option value="instrumental">Instrumental / Beat</option>
+            </select>
+            <label>Sound character</label>
+            <div class="profiles" id="profiles">
+              <button class="profile active" data-profile="raw" type="button" aria-pressed="true">
+                Raw / Underground</button
+              ><button class="profile" data-profile="vintage" type="button" aria-pressed="false">
+                Vintage / Analog</button
+              ><button class="profile" data-profile="live" type="button" aria-pressed="false">
+                Live / Organic</button
+              ><button class="profile" data-profile="clean" type="button" aria-pressed="false">
+                Studio Clean</button
+              ><button class="profile" data-profile="custom" type="button" aria-pressed="false">
+                Custom
+              </button>
+            </div>
+            <label class="switch" style="margin: 18px 0"
+              ><input id="premium" type="checkbox" />
+              <span
+                >Premium Studio finishing <small>(optional; not yet available)</small></span
+              ></label
+            >
+            <button class="submit" type="submit">Check generation readiness</button>
+          </form>
+        </section>
+        <section class="panel">
+          <h2>Production controls</h2>
+          <label for="texture">Texture / Rawness <output id="textureVal">70</output>%</label
+          ><input class="slider" type="range" min="0" max="100" value="70" id="texture" />
+          <label for="human">Human variation <output id="humanVal">65</output>%</label
+          ><input class="slider" type="range" min="0" max="100" value="65" id="human" />
+          <label for="master">Mastering intensity <output id="masterVal">25</output>%</label
+          ><input class="slider" type="range" min="0" max="100" value="25" id="master" />
+          <h2>Engine status</h2>
+          <div class="status" id="status" role="status" aria-live="polite">
+            Loading engine capabilities…
+          </div>
+          <p class="note">
+            Generation does not run until an actual licensed music model is wired up. Premium Studio
+            will create a new mix rather than overwrite the raw master.
+          </p>
+        </section>
+      </div>
+    </main>
+    <script>
+      let profile = 'raw';
+      document.querySelectorAll('.profile').forEach((b) =>
+        b.addEventListener('click', () => {
+          profile = b.dataset.profile;
+          document.querySelectorAll('.profile').forEach((x) => {
+            x.classList.toggle('active', x === b);
+            x.setAttribute('aria-pressed', String(x === b));
+          });
+        })
+      );
+      for (const [id, out] of [
+        ['texture', 'textureVal'],
+        ['human', 'humanVal'],
+        ['master', 'masterVal']
+      ])
+        document
+          .getElementById(id)
+          .addEventListener(
+            'input',
+            (e) => (document.getElementById(out).textContent = e.target.value)
+          );
+      const status = document.getElementById('status');
+      fetch('/api/capabilities')
+        .then((r) => r.json())
+        .then(
+          (data) =>
+            (status.textContent = data.engines.map((x) => x.name + ': ' + x.status).join('\n'))
+        )
+        .catch((e) => (status.textContent = e.message));
+      document.getElementById('make').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const payload = {
+          prompt: document.getElementById('prompt').value,
+          lyrics: document.getElementById('lyrics').value || null,
+          mode: document.getElementById('mode').value,
+          engine: document.getElementById('engine').value,
+          sound_character: profile,
+          premium_studio: document.getElementById('premium').checked,
+          texture: +document.getElementById('texture').value,
+          human_variation: +document.getElementById('human').value,
+          mastering_intensity: +document.getElementById('master').value
+        };
+        status.textContent = 'Checking…';
+        try {
+          const r = await fetch('/api/generations', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
+          });
+          const data = await r.json();
+          status.textContent = r.ok
+            ? JSON.stringify(data, null, 2)
+            : 'Generation unavailable: ' + JSON.stringify(data.detail);
+        } catch (err) {
+          status.textContent = 'Network error: ' + err.message;
+        }
+      });
+    </script>
+  </body>
+</html>
