@@ -19,6 +19,7 @@
     <a href={resolve('/')}>ᛟ Summon</a>
     <a href={resolve('/library')}>ᚱ Library</a>
     <a href={resolve('/lyrics')}>ᛚ Lyrics</a>
+    <a href={resolve('/arcana')}>ᛉ Arcana</a>
   </nav>
   {@render children()}
 </ArcaneShell>
@@ -26,7 +27,8 @@
 <style>
   .studio-nav {
     display: flex;
-    gap: 1.5rem;
+    flex-wrap: wrap;
+    gap: 0.6rem 1.5rem;
     justify-content: center;
     margin: 0 0 1.5rem;
     font-family: var(--vbm-font-display);

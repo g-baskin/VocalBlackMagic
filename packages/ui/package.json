@@ -28,7 +28,10 @@
     "./RuneDropzone.svelte": "./src/RuneDropzone.svelte",
     "./ABCompare.svelte": "./src/ABCompare.svelte",
     "./RuneRecorder.svelte": "./src/RuneRecorder.svelte",
-    "./VoiceSigil.svelte": "./src/VoiceSigil.svelte"
+    "./VoiceSigil.svelte": "./src/VoiceSigil.svelte",
+    "./MermaidDiagram.svelte": "./src/MermaidDiagram.svelte",
+    "./mermaid-doc": "./src/mermaid-doc.ts",
+    "./DesignCodex.svelte": "./src/DesignCodex.svelte"
   },
   "peerDependencies": {
     "svelte": "^5.57.1"
@@ -36,6 +39,7 @@
   "dependencies": {
     "@fontsource/cinzel": "^5.3.0",
     "@fontsource/cormorant-garamond": "^5.3.0",
-    "@fontsource/jetbrains-mono": "^5.3.0"
+    "@fontsource/jetbrains-mono": "^5.3.0",
+    "mermaid": "^11"
   }
 }

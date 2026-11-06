@@ -17,6 +17,7 @@
   <nav class="vf-nav" aria-label="Vocal Fix">
     <a href={resolve('/')}>New rite</a>
     <a href={resolve('/voices')}>Codex of voices</a>
+    <a href={resolve('/arcana')}>Arcana</a>
   </nav>
   {@render children()}
 </ArcaneShell>

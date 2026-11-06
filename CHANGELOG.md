@@ -4,6 +4,9 @@ This log describes repository changes, not verified public releases. No release 
 
 ## Unreleased
 
+### Added (design docs)
+- `docs/DESIGN.md`: Mermaid diagrams of both apps, the request guard, song creation and derivations, the Vocal Fix repair and Voice Forge flows, job states, the data layout and the design system. GitHub renders them, and both apps show the same diagrams in the arcane theme at `/arcana` (shared `MermaidDiagram` and `DesignCodex` components in `@vbm/ui`, Mermaid loaded only on that page).
+
 ### Added (TTB Studio, development only)
 - Replicate provider (create, poll, cancel, file upload, throttle retry) with engines MiniMax Music 1.5, ACE-Step, Stable Audio 2.5 and Lyria 2; `REPLICATE_API_TOKEN` in `apps/ttb-studio/.env`.
 - Persistent song library under `data/studio/songs/<id>/` with list, rename, favourite, delete and Range audio streaming.

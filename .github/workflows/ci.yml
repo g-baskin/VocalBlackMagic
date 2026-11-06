@@ -19,7 +19,9 @@ jobs:
       - run: bun install
       - run: bun run lint:web
       - run: bun run format:check:web
-      - run: bun test packages apps/ttb-studio/src
+      # Vocal Fix tests generate and probe small audio files with ffmpeg/ffprobe.
+      - run: sudo apt-get update && sudo apt-get install -y --no-install-recommends ffmpeg
+      - run: bun run test
       - run: bun run check
       - run: bun run build
   python-audio-prototypes:

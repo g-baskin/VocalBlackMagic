@@ -102,6 +102,7 @@ Before contributing, read the [agent handoff](AGENTS.md) and the relevant specif
 - [Release procedure](docs/RELEASING.md)
 - [Product specification](docs/PRODUCT_SPEC.md)
 - [Architecture](docs/ARCHITECTURE.md)
+- [Design diagrams](docs/DESIGN.md) (Mermaid; also shown in each app at `/arcana`)
 - [Shared vocabulary](docs/GLOSSARY.md)
 - [Architecture decision log](docs/decisions/README.md)
 - [Implementation roadmap](docs/ROADMAP.md)
