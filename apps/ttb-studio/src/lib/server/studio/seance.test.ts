@@ -19,6 +19,7 @@ import {
   SeanceRefused,
   shuffledLabels,
   startSeance,
+  view,
   type SeanceDeps,
   type StoredSeance
 } from './seance';
@@ -194,6 +195,45 @@ describe('startSeance', () => {
       true
     );
     expect(JSON.stringify(s)).not.toContain('heartmula');
+  });
+
+  test('a failed take hides which stage it stopped at until the reveal', async () => {
+    const stored: StoredSeance = {
+      id: crypto.randomUUID(),
+      prompt: 'p',
+      lyrics: null,
+      title: 't',
+      instrumental: false,
+      created_at: '',
+      revealed: false,
+      ranking: null,
+      entries: [
+        {
+          label: 'A',
+          model: 'heartmula',
+          runner: 'replicate',
+          job_id: 'j1',
+          error: null,
+          rank: null
+        }
+      ]
+    };
+    const job: StudioJob = {
+      id: 'j1',
+      kind: 'create',
+      status: 'failed',
+      stages: [
+        { id: 'summon', label: 'Summoning', state: 'done' },
+        { id: 'bind', label: 'Binding', state: 'failed' }
+      ],
+      song_ids: [],
+      created_at: '',
+      updated_at: ''
+    };
+    const sealed = view(stored, new Map([['j1', job]]));
+    expect(sealed.entries[0].stages.map((s) => s.state)).toEqual(['failed', 'failed']);
+    const revealed = view({ ...stored, revealed: true }, new Map([['j1', job]]));
+    expect(revealed.entries[0].stages.map((s) => s.state)).toEqual(['done', 'failed']);
   });
 
   test('refused models are all reported, none dropped, nothing is paid for', async () => {

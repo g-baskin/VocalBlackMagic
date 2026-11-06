@@ -126,13 +126,22 @@
 
   async function follow(id: string, first?: Seance) {
     seance = first ?? null;
+    let misses = 0;
     while (alive) {
       try {
         seance = (await api<{ seance: Seance }>('/api/studio/seances/' + encodeURIComponent(id)))
           .seance;
+        misses = 0;
+        error = null;
       } catch (e) {
-        error = e instanceof Error ? e.message : 'Lost the séance.';
-        return;
+        // A dev-server restart or a dropped connection should not end the séance: retry a few times.
+        misses += 1;
+        if (misses >= 4) {
+          error = e instanceof Error ? e.message : 'Lost the séance.';
+          return;
+        }
+        await sleep(2000 * misses);
+        continue;
       }
       await loadTakes();
       if (!pending) return;

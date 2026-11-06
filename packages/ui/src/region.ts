@@ -6,6 +6,8 @@ export interface Region {
 }
 
 const round = (s: number) => Math.round(s * 100) / 100;
+/** Tolerance for floating-point error in length checks (well below the 0.01 s rounding). */
+export const LENGTH_EPSILON = 1e-6;
 
 /** Keeps 0 <= start < end <= total with end - start >= minLength (and <= maxLength if given). */
 export function clampRegion(
@@ -21,15 +23,15 @@ export function clampRegion(
   let start = Math.min(Math.max(0, region.start), total - min);
   let end = Math.min(Math.max(min, region.end), total);
   if (moved === 'start') {
-    if (end - start < min) start = end - min;
+    if (end - start < min - LENGTH_EPSILON) start = end - min;
     if (end - start > max) start = end - max;
     start = Math.max(0, start);
-    if (end - start < min) end = start + min;
+    if (end - start < min - LENGTH_EPSILON) end = start + min;
   } else {
-    if (end - start < min) end = start + min;
+    if (end - start < min - LENGTH_EPSILON) end = start + min;
     if (end - start > max) end = start + max;
     end = Math.min(total, end);
-    if (end - start < min) start = end - min;
+    if (end - start < min - LENGTH_EPSILON) start = end - min;
   }
   return { start: round(start), end: round(end) };
 }

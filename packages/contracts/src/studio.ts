@@ -397,7 +397,9 @@ export function validateEditRequest(value: unknown, songSeconds: number | null):
     const p = (r.repaint ?? {}) as Record<string, unknown>;
     if (!finite(p.start_seconds) || !finite(p.end_seconds) || p.start_seconds < 0)
       return 'Select the section to replace.';
-    if (p.end_seconds - p.start_seconds < 1) return 'The section must be at least 1 second long.';
+    // Small tolerance so a 1 s region made of rounded floats (e.g. 0.1 + 0.9) is not refused.
+    if (p.end_seconds - p.start_seconds < 1 - 1e-6)
+      return 'The section must be at least 1 second long.';
     if (songSeconds !== null && p.end_seconds > songSeconds + 0.05)
       return 'The section ends after the song does.';
   }

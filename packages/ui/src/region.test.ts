@@ -13,6 +13,16 @@ describe('RegionSelect helpers', () => {
     expect(clampRegion({ start: 10, end: 100 }, 120, 1, 30)).toEqual({ start: 10, end: 40 });
     expect(clampRegion({ start: 1, end: 2 }, 0)).toEqual({ start: 0, end: 0 });
   });
+  test('a region exactly the minimum length, built from floats, is left alone', () => {
+    // 2.3 - 1.3 is 0.9999999999999998 in floating point.
+    expect(2.3 - 1.3 < 1).toBe(true);
+    expect(clampRegion({ start: 1.3, end: 2.3 }, 10)).toEqual({ start: 1.3, end: 2.3 });
+    expect(clampRegion({ start: 1.3, end: 2.3 }, 10, 1, Infinity, 'start')).toEqual({
+      start: 1.3,
+      end: 2.3
+    });
+  });
+
   test('keyboard nudges', () => {
     expect(nudge('ArrowRight', false, 10, 120)).toBeCloseTo(10.1);
     expect(nudge('ArrowLeft', true, 10, 120)).toBe(9);

@@ -4,6 +4,7 @@ import path from 'node:path';
 import {
   seanceLabels,
   type CreateSongRequest,
+  type JobStage,
   type Seance,
   type SeanceEntry,
   type SeanceLabel,
@@ -206,6 +207,15 @@ export async function startSeance(deps: SeanceDeps, request: SeanceRequest): Pro
   return view(seance, new Map());
 }
 
+/**
+ * Before the reveal a failed take shows every stage as failed: which stage a failure stopped at
+ * can differ by runner (how each provider's audio is fetched and stored), so it could hint at
+ * the model.
+ */
+function sealedStages(list: JobStage[]): JobStage[] {
+  return list.map((stage) => ({ ...stage, state: 'failed' }));
+}
+
 /** The public shape: model and runner only once revealed; failure details hidden until then. */
 export function view(seance: StoredSeance, jobs: Map<string, StudioJob>): Seance {
   const entries: SeanceEntry[] = seance.entries.map((e) => {
@@ -214,7 +224,7 @@ export function view(seance: StoredSeance, jobs: Map<string, StudioJob>): Seance
     const out: SeanceEntry = {
       label: e.label,
       status: e.error ? 'failed' : (job?.status ?? 'running'),
-      stages: job?.stages ?? [],
+      stages: seance.revealed || !failed ? (job?.stages ?? []) : sealedStages(job?.stages ?? []),
       song_id: job?.status === 'completed' ? (job.song_ids[0] ?? null) : null,
       rank: e.rank
     };

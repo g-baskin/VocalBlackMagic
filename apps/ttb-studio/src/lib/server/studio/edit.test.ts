@@ -111,6 +111,13 @@ describe('edit validation', () => {
         120
       )
     ).toContain('1 second');
+    // Exactly 1 s, but 2.3 - 1.3 is 0.9999999999999998 in floating point: still accepted.
+    expect(
+      validateEditRequest(
+        { action: 'repaint', repaint: { start_seconds: 1.3, end_seconds: 2.3 } },
+        120
+      )
+    ).toBeNull();
     expect(validateEditRequest({ action: 'cover', strength: 2, prompt: 'jazz' }, 120)).toContain(
       'Strength'
     );

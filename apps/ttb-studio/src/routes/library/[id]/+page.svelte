@@ -81,9 +81,14 @@
     regionStart = 0;
     regionEnd = 0;
     void load(songId);
+    // Ignore a reply for a song the user has already navigated away from.
     api<{ edits: StudioEditInfo[] }>('/api/studio/songs/' + encodeURIComponent(songId) + '/edit')
-      .then((r) => (edits = r.edits))
-      .catch((e) => (editsError = e instanceof Error ? e.message : 'Edits are unavailable.'));
+      .then((r) => {
+        if (id === songId) edits = r.edits;
+      })
+      .catch((e) => {
+        if (id === songId) editsError = e instanceof Error ? e.message : 'Edits are unavailable.';
+      });
     api<{ voices: Voice[] }>('/api/studio/voices')
       .then((r) => {
         voices = r.voices;
