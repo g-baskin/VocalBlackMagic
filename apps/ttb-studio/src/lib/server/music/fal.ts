@@ -4,7 +4,9 @@ import { styleDescription, sungLyrics } from './prompt';
 
 const queueBase = 'https://queue.fal.run';
 // Queue status and result URLs use only owner/app, never the endpoint sub-path.
-const falApp = 'fal-ai/ace-step';
+const falApp = 'fal-ai/ace-step-1.5';
+export const aceStepMaxPrompt = 512;
+export const aceStepMaxLyrics = 4096;
 const requestIdPattern = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
 export interface FalDeps {
@@ -16,14 +18,25 @@ export function isFalRequestId(id: string): boolean {
   return requestIdPattern.test(id);
 }
 
-export function buildFalSubmission(request: GenerationRequest): { endpoint: string; body: Record<string, unknown> } {
-  const style = styleDescription(request);
-  const lyrics = sungLyrics(request);
-  const common = { duration: request.duration_seconds, enable_safety_checker: true };
-  if (lyrics) return { endpoint: 'fal-ai/ace-step', body: { tags: style, lyrics, ...common } };
+export function aceStepRequestError(request: GenerationRequest): string | null {
+  const overflow = styleDescription(request).length - aceStepMaxPrompt;
+  if (overflow > 0) return 'ACE-Step 1.5 accepts shorter style descriptions. Remove about ' + overflow + ' characters.';
+  if ((sungLyrics(request)?.length ?? 0) > aceStepMaxLyrics) return 'ACE-Step 1.5 accepts up to ' + aceStepMaxLyrics + ' characters of lyrics.';
+  return null;
+}
+
+export function buildFalSubmission(request: GenerationRequest, lyrics: string | null): { endpoint: string; body: Record<string, unknown> } {
+  if (request.mode === 'full-song' && !lyrics) throw new ProviderError(500, 'Lyrics are required for a complete song.', 'fal submission without lyrics');
   return {
-    endpoint: 'fal-ai/ace-step/prompt-to-audio',
-    body: { prompt: style, instrumental: request.mode === 'instrumental', ...common }
+    endpoint: falApp,
+    body: {
+      prompt: styleDescription(request),
+      lyrics: request.mode === 'instrumental' ? '[Instrumental]' : lyrics,
+      duration: request.duration_seconds,
+      // ACE-Step 1.5 plans the song with its language model first; it costs 2x but gives clearer vocals.
+      thinking: true,
+      enable_safety_checker: true
+    }
   };
 }
 
@@ -43,8 +56,8 @@ async function failure(response: Response, action: string): Promise<ProviderErro
   return new ProviderError(502, 'fal could not process the request.', detail);
 }
 
-export async function submitFal(deps: FalDeps, request: GenerationRequest): Promise<string> {
-  const { endpoint, body } = buildFalSubmission(request);
+export async function submitFal(deps: FalDeps, request: GenerationRequest, lyrics: string | null): Promise<string> {
+  const { endpoint, body } = buildFalSubmission(request, lyrics);
   const response = await deps.fetch(queueBase + '/' + endpoint, {
     method: 'POST', headers: headers(deps.apiKey), body: JSON.stringify(body), signal: AbortSignal.timeout(15_000)
   });

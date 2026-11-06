@@ -8,7 +8,7 @@ function ascii(bytes: Uint8Array, offset: number, length: number): string {
   return String.fromCharCode(...bytes.subarray(offset, offset + length));
 }
 
-export function sniffAudio(head: Uint8Array): AudioKind | null {
+function sniffBare(head: Uint8Array): AudioKind | null {
   if (head.length >= 12 && ascii(head, 0, 4) === 'RIFF' && ascii(head, 8, 4) === 'WAVE') return 'audio/wav';
   if (head.length >= 3 && ascii(head, 0, 3) === 'ID3') return 'audio/mpeg';
   // MPEG audio frame sync with a non-reserved layer (rejects AAC ADTS, whose layer bits are 00).
@@ -16,6 +16,28 @@ export function sniffAudio(head: Uint8Array): AudioKind | null {
   if (head.length >= 4 && ascii(head, 0, 4) === 'fLaC') return 'audio/flac';
   if (head.length >= 4 && ascii(head, 0, 4) === 'OggS') return 'audio/ogg';
   return null;
+}
+
+const maxId3Bytes = 4 * 1024 * 1024;
+
+function id3Length(head: Uint8Array): number {
+  if (head.length < 10 || ascii(head, 0, 3) !== 'ID3') return 0;
+  const size = ((head[6] & 0x7f) << 21) | ((head[7] & 0x7f) << 14) | ((head[8] & 0x7f) << 7) | (head[9] & 0x7f);
+  return 10 + size + (head[5] & 0x10 ? 10 : 0);
+}
+
+// Bytes needed before sniffAudio can decide; an ID3 tag can prefix FLAC as well as MP3.
+export function sniffNeeds(head: Uint8Array): number {
+  if (head.length >= 3 && ascii(head, 0, 3) === 'ID3') return head.length < 10 ? 10 : Math.min(id3Length(head), maxId3Bytes) + 12;
+  return 12;
+}
+
+export function sniffAudio(head: Uint8Array): AudioKind | null {
+  const skip = id3Length(head);
+  if (skip === 0) return sniffBare(head);
+  // A tag with no data after it (a stream cut off mid-tag) is not audio.
+  if (skip > maxId3Bytes || head.length < skip + 4) return null;
+  return sniffBare(head.subarray(skip)) ?? 'audio/mpeg';
 }
 
 const base64Pattern = /^[A-Za-z0-9+/]+={0,2}$/;
@@ -27,17 +49,37 @@ export function inspectBase64Audio(data: string): { kind: AudioKind; bytes: numb
   const bytes = (data.length / 4) * 3 - padding;
   if (bytes < minAudioBytes) throw new ProviderError(502, 'The provider returned an empty or truncated audio file.');
   if (bytes > maxAudioBytes) throw new ProviderError(502, 'The provider returned an audio file that is too large.');
-  const head = Uint8Array.from(atob(data.slice(0, 16)), (char) => char.charCodeAt(0));
+  const decode = (text: string) => Uint8Array.from(atob(text), (char) => char.charCodeAt(0));
+  const needed = sniffNeeds(decode(data.slice(0, 16)));
+  const head = decode(data.slice(0, Math.ceil(needed / 3) * 4));
   const kind = sniffAudio(head);
   if (!kind) throw new ProviderError(502, 'The provider returned a file that is not recognisable audio.');
   return { kind, bytes };
 }
 
-function concat(a: Uint8Array, b: Uint8Array): Uint8Array {
-  const out = new Uint8Array(a.length + b.length);
-  out.set(a, 0);
-  out.set(b, a.length);
+function join(chunks: Uint8Array[], size: number): Uint8Array {
+  const out = new Uint8Array(size);
+  let offset = 0;
+  for (const chunk of chunks) { out.set(chunk, offset); offset += chunk.length; }
   return out;
+}
+
+async function readHead(reader: ReadableStreamDefaultReader<Uint8Array>): Promise<Uint8Array> {
+  const chunks: Uint8Array[] = [];
+  let size = 0;
+  let need = 10;
+  for (;;) {
+    while (size < need) {
+      const { done, value } = await reader.read();
+      if (done) return join(chunks, size);
+      chunks.push(value);
+      size += value.length;
+    }
+    const head = join(chunks, size);
+    const next = sniffNeeds(head);
+    if (next <= size) return head;
+    need = next;
+  }
 }
 
 export async function verifiedAudioResponse(upstream: Response): Promise<Response> {
@@ -50,12 +92,7 @@ export async function verifiedAudioResponse(upstream: Response): Promise<Respons
     throw new ProviderError(502, 'The provider audio file has an unexpected size.');
   }
   const reader = upstream.body.getReader();
-  let head: Uint8Array = new Uint8Array(0);
-  while (head.length < 12) {
-    const { done, value } = await reader.read();
-    if (done) break;
-    head = concat(head, value);
-  }
+  const head = await readHead(reader);
   const kind = sniffAudio(head);
   if (!kind) {
     await reader.cancel();

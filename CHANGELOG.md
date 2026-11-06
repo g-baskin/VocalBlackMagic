@@ -4,6 +4,11 @@ This log describes repository changes, not verified public releases. No release 
 
 ## Unreleased
 
+### Changed
+- TTB Studio now uses ACE-Step 1.5 on fal with song planning on (about $0.0006 per second). Complete songs without lyrics get original lyrics written by Gemini 3.5 Flash-Lite first, shown under the player, so songs have real sung words instead of wordless vocals. Lyria is also told to write clear lyrics when none are given.
+- Audio that starts with an ID3 tag is now identified by the format inside it, so ACE-Step 1.5's FLAC files play instead of showing 0:00.
+- If fal rejects a song after its lyrics were written, the lyrics are returned and placed in the lyrics box, so a retry does not pay for them again.
+
 ### Added
 - TTB Studio hosted song generation through fal (ACE-Step) and Google Lyria 3.5, with job status polling, audio format verification and in-browser playback. Development only; keys come from `FAL_KEY` and `GEMINI_API_KEY`.
 

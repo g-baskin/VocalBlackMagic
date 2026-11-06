@@ -17,6 +17,7 @@ export function buildLyriaPrompt(request: GenerationRequest): string {
   const lyrics = sungLyrics(request);
   if (request.mode === 'instrumental') parts.push('Instrumental only, no vocals.');
   else if (lyrics) parts.push('Use these lyrics:\n' + lyrics);
+  else parts.push('Write original lyrics and sing them with clear, intelligible words.');
   parts.push('Target length: about ' + request.duration_seconds + ' seconds.');
   return parts.join('\n\n');
 }
