@@ -6,7 +6,7 @@ VocalBlackMagic/
     vocal_fix/        # independent FastAPI ASGI app + browser UI
     ttb_studio/        # independent FastAPI ASGI app + browser UI
     vocal-fix/ ttb-studio/  # SvelteKit 3 + Bun apps (see runtime boundary below)
-  packages/ services/ infra/  # shared contracts, planned worker, systemd units
+  packages/ services/ infra/  # shared contracts and UI, self-hosted audio engine, systemd units
   docs/                # requirements, architecture, workflows and gates
   tests/               # executable API contract tests
 ```
@@ -36,8 +36,11 @@ Decision context and trade-offs are in the [decision log](decisions/README.md).
 - Store engine/version/parameters/seed and input hashes; do not store secrets in projects.
 
 ## Interface contracts
-- Vocal Fix: GET /api/health; GET /api/capabilities; POST /api/references (5 files + consent + owner name); GET/DELETE /api/references/{id}; POST /api/references/{id}/process (501 until implemented).
-- TTB Studio: GET /api/health; GET /api/capabilities; POST /api/generations (development only: 202 queued fal job, 200 completed Lyria job with inline audio, 503 missing key, 501 other engines, 415/422 bad requests; 403 outside development); GET /api/generations/{id} (job status) and GET /api/generations/{id}/audio (verified audio), both also 403 outside development.
+- Vocal Fix (SvelteKit, used by the UI): GET /api/health; GET /api/capabilities; POST /api/sessions (multipart, mode `fix` with 1 file or `forge` with 5, performer, rights attestation); GET/DELETE /api/sessions/{id}; POST /api/sessions/{id}/diagnose, /repair, /gold, /forge; GET/DELETE /api/sessions/{id}/jobs/{job}; GET /api/sessions/{id}/audio/{area}/{file}; GET /api/voices; DELETE /api/voices/{voice_id}. All except health and capabilities return 403 outside development; every /api route refuses a non-localhost Host header.
+- Vocal Fix (legacy, proxied to Python, unused by the UI): POST /api/references (5 files + consent + owner name); GET/DELETE /api/references/{id}; Python POST /api/references/{id}/process returns 501.
+- TTB Studio (used by the UI): GET /api/studio/capabilities; GET/POST /api/studio/songs; GET/PATCH/DELETE /api/studio/songs/{id}; GET /api/studio/songs/{id}/audio; GET/POST /api/studio/songs/{id}/cover; GET/POST /api/studio/songs/{id}/edit; POST /api/studio/songs/{id}/master, /reimagine, /stems, /voice; GET/DELETE /api/studio/jobs/{id}; POST /api/studio/lyrics; GET /api/studio/voices; GET/POST /api/studio/seances; GET /api/studio/seances/{id}; POST /api/studio/seances/{id}/rank; GET /api/studio/seances/leaderboard. All except capabilities are dev-only (403) and localhost-only; writes need JSON (415).
+- TTB Studio (legacy, unused by the UI): GET /api/health; GET /api/capabilities; POST /api/generations (development only: 202 queued fal job, 200 completed Lyria job with inline audio, 503 missing key, 501 other engines, 415/422 bad requests; 403 outside development); GET /api/generations/{id} and GET /api/generations/{id}/audio, both also 403 outside development.
+- Self-hosted engine (`services/audio-engine`): protocol v1 in [ENGINE_PROTOCOL.md](ENGINE_PROTOCOL.md).
 - Health, readiness, config/version endpoints before deploying.
 - Structured job errors: unsupported mode, unlicensed provider, invalid reference, insufficient GPU, quality gate failed, cancellation, timeout and retry exhausted.
 
@@ -52,13 +55,13 @@ The earlier FastAPI app entrypoints above are **retained audio prototypes**, not
 
 ```text
 apps/vocal-fix/             SvelteKit 3 + Bun UI + dev-only pipeline (ffmpeg DSP, Replicate inference)
-apps/ttb-studio/             SvelteKit 3 + Bun modular monolith UI with dev-only hosted provider adapters (Replicate, fal, Lyria) and a local song library
+apps/ttb-studio/             SvelteKit 3 + Bun modular monolith UI with dev-only provider adapters (Replicate, fal, Google, MiniMax, ElevenLabs, Anthropic, OpenAI), a models x runners router and a local song library
 apps/vocal_fix/              legacy Python local reference-ingestion backend
 apps/ttb_studio/             legacy Python local generation-contract backend (unused by apps/ttb-studio)
-packages/{ui,contracts}/    shared frontend components and typed API contracts
+packages/{ui,contracts}/    shared arcane design system, audio graphs and typed API contracts (including engine protocol v1)
 packages/{auth,database,billing}/   explicit future integration boundaries
-services/audio-engine/      planned independent Python GPU audio worker
+services/audio-engine/      optional self-hosted Python music engine (FastAPI, bearer token, protocol v1); tested in CI with a fake backend only
 infra/systemd/              sample no-Docker system services
 ```
 
-The Vocal Fix bridge and TTB Studio generation routes permit calls only during local development. Production upload and generation are denied pending user authentication, tenant ownership, private blob storage and billing safeguards. See `docs/SAAS_STACK.md` for the recommended deployment.
+The Vocal Fix and TTB Studio processing and generation routes permit calls only during local development. Production upload and generation are denied pending user authentication, tenant ownership, private blob storage and billing safeguards. See `docs/SAAS_STACK.md` for the recommended deployment.

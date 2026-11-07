@@ -12,19 +12,20 @@ used_by: []
 last_commit_hash: "0d84c39"
 tested_by: []
 tags:
-  - entity
-  - env-var
-  - config
+  - "entity"
+  - "env-var"
+  - "config"
 related: []
 sources:
   - "infra/systemd/vbm-ttb-studio.service"
+  - "infra/systemd/vbm-vocal-fix.service"
 ---
 
 # HOST
 
 ## Overview
 
-Listen address for the Bun SvelteKit build under systemd.
+Bind address set by both systemd units (`infra/systemd/vbm-ttb-studio.service:11`, `infra/systemd/vbm-vocal-fix.service:11`).
 
 ## Signature / Definition
 
@@ -34,13 +35,16 @@ HOST
 
 ## Behavior
 
-- Both units set `HOST=127.0.0.1` (`infra/systemd/vbm-ttb-studio.service:11`, `infra/systemd/vbm-vocal-fix.service:11`). Consumption by the Bun adapter at runtime is (unverified) from this repository.
+- Readers: no repo code reads it; consumption by the Bun adapter build is (unverified).
+- Default: `127.0.0.1` in both units.
+- Validation: none in repo.
+- Secrecy: not a secret.
 
 ## Connections
 
 - **depends_on:** none found in source
-- **used_by:** no importer or caller found in source
-- **related:** none
+- **used_by:** none found in source
+- **related:** none found in source
 
 ## Tested by
 

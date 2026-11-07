@@ -15,7 +15,6 @@ tags:
   - entity
   - module
   - package
-  - database
 related:
   - "[[concepts/consent-record]]"
 sources:
@@ -37,8 +36,8 @@ export interface AudioAssetRecord { id; tenantId; projectId; storageKey; sha256;
 
 ## Behavior
 
-- `AudioAssetRecord.ownerConsentId` is the only consent link in the contracts and is nullable (`packages/database/src/index.ts:8-15`).
-- The code graph records no importer of this package at 29c84e47.
+- `AudioAssetRecord.ownerConsentId` is the only consent link in these contracts and is nullable (`packages/database/src/index.ts:8-15`).
+- Unchanged since `0d84c39`. Re-verified at HEAD `b58d457`: no source import in `apps/`, `services/` or `packages/` (grep); both apps only declare it as a workspace dependency (`apps/ttb-studio/package.json:13-17`, `apps/vocal-fix/package.json:13-17`).
 
 ## Connections
 

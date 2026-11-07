@@ -12,19 +12,20 @@ used_by: []
 last_commit_hash: "0d84c39"
 tested_by: []
 tags:
-  - entity
-  - env-var
-  - config
+  - "entity"
+  - "env-var"
+  - "config"
 related: []
 sources:
   - "infra/systemd/vbm-ttb-studio.service"
+  - "infra/systemd/vbm-vocal-fix.service"
 ---
 
 # PORT
 
 ## Overview
 
-Listen port for the Bun SvelteKit build under systemd.
+Port set by both systemd units: TTB Studio 3002, Vocal Fix 3001 (`infra/systemd/vbm-ttb-studio.service:12`, `infra/systemd/vbm-vocal-fix.service:12`).
 
 ## Signature / Definition
 
@@ -34,13 +35,16 @@ PORT
 
 ## Behavior
 
-- TTB Studio uses 3002 (`infra/systemd/vbm-ttb-studio.service:12`); Vocal Fix uses 3001 (`infra/systemd/vbm-vocal-fix.service:12`). Consumption by the Bun adapter is (unverified) from this repository.
+- Readers: no repo code reads it; consumption by the Bun adapter is (unverified).
+- Default: per unit.
+- Validation: none in repo.
+- Secrecy: not a secret.
 
 ## Connections
 
 - **depends_on:** none found in source
-- **used_by:** no importer or caller found in source
-- **related:** none
+- **used_by:** none found in source
+- **related:** none found in source
 
 ## Tested by
 

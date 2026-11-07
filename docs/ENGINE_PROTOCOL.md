@@ -6,9 +6,10 @@ The contract between TTB Studio and a **self-hosted music engine** (`services/au
 
 - HTTP + JSON. Base URL in the Studio's `VBM_ENGINE_URL` (for example `http://127.0.0.1:8090` or a cloud URL).
 - Every route except `GET /v1/health` needs `Authorization: Bearer <VBM_ENGINE_TOKEN>`. The engine refuses to start without a token, on any address: a local engine without one could be driven by any web page through DNS rebinding.
-- When bound to localhost, the engine also rejects requests whose `Host` header is not `localhost`, `127.0.0.1` or `[::1]` (any port).
+- When bound to a loopback address, the engine also rejects requests whose `Host` header is not `localhost`, `127.0.0.1` or `[::1]` (any port) with `403`. Bound to any other address (the Dockerfile uses `0.0.0.0`), this check is off and only the token protects it.
+- The Studio accepts an `http:` or `https:` `VBM_ENGINE_URL`. Use HTTPS for a remote engine; over plain HTTP the token travels in clear.
 - Job ids match `^[A-Za-z0-9_-]{1,80}$`. Numeric fields must be JSON numbers (strings such as "5" are rejected) and `seed` must be a non-negative integer.
-- Errors are `{ "detail": string, "code": EngineError["code"] }` with a matching HTTP status (401, 404, 409, 413, 422, 429, 500, 503).
+- Errors are `{ "detail": string, "code": EngineError["code"] }` with a matching HTTP status (401, 403, 404, 409, 413, 422, 429, 500, 503).
 
 ## Routes
 

@@ -46,6 +46,8 @@ export function sungLyrics(request: GenerationRequest): string | null
 - `styleDescription` is the trimmed prompt plus a `Sound character:` line using `soundCharacterNames` (`apps/ttb-studio/src/lib/server/music/prompt.ts:3-10`).
 - `sungLyrics` returns trimmed lyrics only when `mode` is `full-song` and lyrics are non-empty, otherwise null (`apps/ttb-studio/src/lib/server/music/prompt.ts:12-15`).
 
+- Verified unchanged at HEAD `b58d457` (last touched `29c84e4`); no new importer outside the legacy generation routes.
+
 ## Connections
 
 - **depends_on:** [[entities/mod-contracts]], [[entities/contract-generation-request]]

@@ -1,82 +1,92 @@
 # Trust Boundaries
 
-> Category: Security | Version: 1.0 | Date: November 2026 | Status: Active
+> Category: Security | Version: 2.0 | Date: November 2026 | Status: Active
 
-For anyone deploying or extending the apps: every network and trust boundary in the current code, what crosses it, and which guards exist. Pinned to commit 29c84e47. No authentication exists anywhere on this ref.
+For anyone deploying or extending the apps: every network and trust boundary in the current code, what crosses it, and which guards exist. Pinned to commit b58d4574 (version 1.0 was pinned to 29c84e47). No user authentication exists anywhere on this ref.
 
 **Related:**
 - [`../auth/session-and-tenancy-model.md`](../auth/session-and-tenancy-model.md)
+- [`../architecture/song-studio.md`](../architecture/song-studio.md)
+- [`../architecture/vocal-fix-pipeline.md`](../architecture/vocal-fix-pipeline.md)
+- [`../architecture/audio-engine.md`](../architecture/audio-engine.md)
 - [`../architecture/music-generation-pipeline.md`](../architecture/music-generation-pipeline.md)
-- [`../architecture/vocal-reference-storage.md`](../architecture/vocal-reference-storage.md)
-- [`../architecture/test-strategy.md`](../architecture/test-strategy.md)
-- [`../../../../docs/decisions/0003-runtime-boundary.md`](../../../../docs/decisions/0003-runtime-boundary.md)
+- [`../../../../docs/decisions/0004-vocal-fix-pipeline-in-sveltekit.md`](../../../../docs/decisions/0004-vocal-fix-pipeline-in-sveltekit.md)
 
 ---
 
 ## Why this matters
 
-The only thing standing between an anonymous browser and paid provider calls or stored voice recordings is a `NODE_ENV === 'development'` check. Nothing verifies who the caller is. Every boundary below should be read with that in mind.
+Paid provider calls, stored recordings, forged voices and the song library are protected by three checks: `NODE_ENV === 'development'`, a localhost Host header, and a JSON content type or intent header on writes. None of them identifies a caller. Any local process or browser tab that can reach the dev server on a loopback name can act on any id it knows.
 
 ```mermaid
 flowchart TD
     browser[Browser]
-    subgraph host[Single host]
-        vocalSk[Vocal Fix SvelteKit]
+    subgraph host[Developer machine]
+        vfSk[Vocal Fix SvelteKit]
         ttbSk[TTB Studio SvelteKit]
-        vocalPy[Vocal Fix Python API loopback 8001]
-        ttbPy[Legacy TTB Python API loopback 8002]
-        disk[(VFM_DATA_DIR on local disk)]
+        disk[(data/: sessions, jobs, songs, seances, shared/voices)]
+        ffmpegBin[ffmpeg and ffprobe]
+        vfPy[Legacy Python APIs 8001 and 8002]
     end
-    falQueue[queue.fal.run]
-    falMedia[fal media hosts]
-    google[generativelanguage.googleapis.com]
+    engine[Self-hosted engine, local or remote]
+    replicate[Replicate]
+    direct[fal, Google, MiniMax, ElevenLabs, Anthropic, OpenAI]
 
-    browser -->|"B1 HTTP, dev gate"| vocalSk
-    browser -->|"B1 HTTP, dev gate"| ttbSk
-    vocalSk -->|"B2 HTTP proxy, no auth"| vocalPy
-    vocalPy -->|"B3 file writes"| disk
-    ttbSk -->|"B4 HTTPS, FAL_KEY"| falQueue
-    ttbSk -->|"B4 HTTPS, GEMINI_API_KEY"| google
-    ttbSk -->|"B5 HTTPS, no key"| falMedia
+    browser -->|"B1 dev gate, Host guard, JSON or intent"| vfSk
+    browser -->|"B1 dev gate, Host guard, JSON"| ttbSk
+    vfSk -->|"B2 file writes"| disk
+    ttbSk -->|"B2 file reads and writes"| disk
+    vfSk -->|"B3 argv spawn"| ffmpegBin
+    ttbSk -->|"B3 argv spawn"| ffmpegBin
+    vfSk -->|"B4 token, audio uploads"| replicate
+    ttbSk -->|"B4 keys, prompts, lyrics, audio"| replicate
+    ttbSk -->|"B4 keys, prompts, lyrics"| direct
+    ttbSk -->|"B5 bearer token"| engine
+    vfSk -.->|"legacy proxy, unused by UI"| vfPy
 ```
 
-The legacy TTB Python API has no inbound edge from SvelteKit: no TTB route imports `apps/ttb-studio/src/lib/server/backend.ts` (repository grep for `lib/server/backend` matched only Vocal Fix routes), although `compose.yaml:11-15` still starts it.
+## B1: Browser to SvelteKit
 
-## B1: Browser to SvelteKit apps
+**Vocal Fix.** `hooks.server.ts` refuses any `/api/` request whose Host is not `localhost`, `127.0.0.1` or `[::1]` (`apps/vocal-fix/src/hooks.server.ts:5-10`). Mutations also need development mode and either JSON or the `x-vbm-intent` header (`apps/vocal-fix/src/lib/server/gate.ts:35-46`). Reads need development mode only (`gate.ts:6-12`). Capabilities and health are ungated.
 
-Both production systemd units set `NODE_ENV=production` and bind `HOST=127.0.0.1` (`infra/systemd/vbm-vocal-fix.service:10-12`, `infra/systemd/vbm-ttb-studio.service:10-12`), so a reverse proxy would be required for public reach (unverified: no proxy config exists in the repository).
+**TTB Studio.** Studio routes call `guard()`: development gate, Host guard, then JSON for writes (`apps/ttb-studio/src/lib/server/studio/context.ts:49-59`). The legacy `/api/generations` routes keep the development and JSON checks but have no Host guard (`apps/ttb-studio/src/routes/api/generations/+server.ts:23-26`). TTB has no `hooks.server.ts`. `GET /api/studio/capabilities` is ungated. It reveals which providers are configured, but not the keys (`apps/ttb-studio/src/routes/api/studio/capabilities/+server.ts:10-39`).
 
-**TTB Studio guards.** `generationAllowed` returns true only when `NODE_ENV` is `development` (`apps/ttb-studio/src/lib/server/music/gate.ts:1-4`); otherwise `generationDisabledResponse` returns 403 (`gate.ts:6-12`). All three generation routes call it first (`apps/ttb-studio/src/routes/api/generations/+server.ts:23-24`, `[id]/+server.ts:10-11`, `[id]/audio/+server.ts:10-11`). `POST /api/generations` also refuses any content type other than `application/json` with 415 (`+server.ts:25-26`), so a cross-site form or `text/plain` POST cannot spend credit (`gate.ts:19-25`). `GET /api/capabilities` and `GET /api/health` are ungated but expose only booleans and status strings (`apps/ttb-studio/src/routes/api/capabilities/+server.ts:7-15`, `apps/ttb-studio/src/routes/api/health/+server.ts:3-10`).
+**Ids are the only keys.** Session, song, job, séance and voice ids are UUID-pattern checked, but they are not bound to a caller (`apps/vocal-fix/src/lib/server/storage.ts:80-85`, `apps/ttb-studio/src/lib/server/studio/library.ts:17-19`). Production systemd units set `NODE_ENV=production`, so every gated route answers 403 there.
 
-**Vocal Fix guards.** Upload returns 403 outside development (`apps/vocal-fix/src/routes/api/references/+server.ts:7-13`), as do session read and delete (`apps/vocal-fix/src/routes/api/references/[session_id]/+server.ts:7-8`, `:27-28`). `GET /api/capabilities` is ungated and proxies to Python in every environment (`apps/vocal-fix/src/routes/api/capabilities/+server.ts:3-16`).
+## B2: Servers to local disk
 
-**What the gate is not.** Within development, any caller that can reach the dev server can submit, poll or download any job, and read or delete any session whose id it knows. Job and session ids are not bound to a caller (`[id]/+server.ts:12-19`, `[session_id]/+server.ts:9-10`). Dev servers bind to `127.0.0.1` (`apps/ttb-studio/package.json:7`, `apps/vocal-fix/package.json:7`).
+Both apps write under `VBM_DATA_DIR` or `<repo root>/data` (`apps/vocal-fix/src/lib/server/paths.ts:15-18`, `apps/ttb-studio/src/lib/server/studio/paths.ts:4-19`). Paths are resolved and checked against the root (`storage.ts:80-95`). The shared voice registry is the one cross-app channel. Vocal Fix writes it, and TTB reads it, accepting only entries that pass `isVoiceModel` with `own_voice: true` and a safe model filename (`packages/contracts/src/voice.ts:28-57`, `apps/ttb-studio/src/lib/server/studio/voices.ts:5-36`). This file-level sharing crosses the "no implicit cross-product transfer of user voice data" target in `docs/ARCHITECTURE.md`; today only the self-attested consent fields gate it. File modes are not set explicitly (unverified at runtime).
 
-## B2: SvelteKit to Python APIs
+## B3: ffmpeg subprocesses
 
-The Vocal Fix bridge reads its target from `VOCAL_FIX_API_URL`, defaulting to `http://127.0.0.1:8001`, and rejects non-HTTP protocols (`apps/vocal-fix/src/lib/server/backend.ts:2-8`). It forwards the multipart form unchanged with a 60 second timeout (`apps/vocal-fix/src/routes/api/references/+server.ts:38-46`) and rewraps the upstream body as JSON with `cache-control: no-store` (`backend.ts:19-24`). Transport failures become a generic 503 (`backend.ts:9-18`).
+Both apps spawn ffmpeg with argument arrays, never a shell (ADR 0004; `apps/ttb-studio/src/lib/server/studio/master.ts:95`). Vocal Fix bounds input at 100 MB and 600 s with a codec allow-list (`apps/vocal-fix/src/lib/server/media.ts:11-26`). The binaries come from `VBM_FFMPEG`/`VBM_FFPROBE` or `FFMPEG_PATH`, then PATH (`media.ts:6-10`, `master.ts:4-5`), so whoever controls the environment chooses the binary.
 
-The Python APIs perform no authentication. Any process that can reach port 8001 can create, read and delete sessions directly (`apps/vocal_fix/app.py:75-153`). Compose publishes both ports on host loopback only (`compose.yaml:9-10`, `compose.yaml:14-15`), while the container processes listen on `0.0.0.0` (`compose.yaml:4`, `compose.yaml:13`). The Python capability payload itself declares `public_deployment_safe: False` (`apps/vocal_fix/app.py:71`).
+## B4: Servers to hosted providers
 
-## B3: Python to local filesystem
+Keys are server-only environment variables (`apps/ttb-studio/src/env.ts:6-48`, `apps/vocal-fix/src/env.ts:6-11`). These leave the machine:
 
-Vocal Fix writes under `VFM_DATA_DIR`, created with mode `0o700` (`apps/vocal_fix/app.py:28-31`). Session ids must be canonical UUIDs before any path is built (`apps/vocal_fix/app.py:34-41`), and stored filenames never use the uploaded name (`apps/vocal_fix/app.py:109-110`). Detail is in [`vocal-reference-storage.md`](../architecture/vocal-reference-storage.md).
+- Recordings and derived audio go to Replicate for Demucs, enhancement and RVC training.
+- Songs go to Replicate for stems, reimagine and voice.
+- A 30 s Gold Vocal excerpt goes to Replicate for voice summon.
+- Prompts and lyrics go to the selected music and lyric providers.
 
-## B4: SvelteKit to hosted providers
+Provider retention is unknown. Returned audio is sniffed and size-bounded before storage (`apps/ttb-studio/src/lib/server/studio/jobs.ts:245-262`). Spend is limited only by the local job caps (3 or 4 running in TTB, 2 in Vocal Fix), not by any budget.
 
-`FAL_KEY` and `GEMINI_API_KEY` are declared as server-only private variables (`apps/ttb-studio/src/env.ts:6-15`) and imported from `$app/env/private` (`apps/ttb-studio/src/routes/api/generations/+server.ts:1`). The fal key travels as an `authorization` header to `https://queue.fal.run` (`apps/ttb-studio/src/lib/server/music/fal.ts:5`, `fal.ts:55-61`). The Gemini key travels as `x-goog-api-key` to the Interactions endpoint (`lyria.ts:6`, `lyria.ts:79-85`; `lyricist.ts:6`, `lyricist.ts:98-104`). Lyricist requests set `store: false` (`lyricist.ts:108`). User prompt text crosses this boundary; the lyricist strips `<` and `>` and frames the text as data (`lyricist.ts:24-28`).
+## B5: TTB Studio to the self-hosted engine
 
-Provider error bodies are logged server-side only, truncated to 300 characters for fal and Lyria (`fal.ts:64`, `lyria.ts:91`) and reduced to status fields for the lyricist (`lyricist.ts:114-122`). Browsers receive only fixed public messages (`apps/ttb-studio/src/lib/server/music/errors.ts:11-15`).
+The studio sends `Authorization: Bearer VBM_ENGINE_TOKEN` to `VBM_ENGINE_URL`, which may be `http:` (`apps/ttb-studio/src/lib/server/studio/runners/engine.ts:36-50`). The engine refuses to start without a token and compares it in constant time. Its Host guard is active only on a loopback bind; the Dockerfile binds `0.0.0.0` (`services/audio-engine/vbm_engine/app.py:104-144`, `services/audio-engine/Dockerfile:55`). `/v1/health` is unauthenticated and reveals the device and model readiness.
 
-## B5: SvelteKit to fal media hosts
+## Legacy Python
 
-The audio URL returned by fal is accepted only if it is HTTPS with no credentials or port and its host is `fal.media`, a subdomain of it, or `storage.googleapis.com` under `/falserverless/` (`fal.ts:132-143`). The download sends no key and refuses redirects (`apps/ttb-studio/src/routes/api/generations/[id]/audio/+server.ts:23-24`). The bytes are sniffed and size-capped before reaching the browser (`apps/ttb-studio/src/lib/server/music/audio.ts:98-148`).
+The legacy `apps/vocal_fix` and `apps/ttb_studio` APIs are unchanged and still unauthenticated. The Vocal Fix `/api/references` proxy to them now also requires `x-vbm-intent` (`apps/vocal-fix/src/routes/api/references/+server.ts:14-16`). No UI calls it.
 
 ## Data that crosses boundaries
 
 | Data | Crosses | Stored |
 |---|---|---|
-| Five vocal recordings and performer name | B1, B2, B3 | Yes, on local disk |
-| Song prompt and lyrics | B1, B4 | Not by this code; provider retention (unverified) |
-| Generated audio | B5 or B4, then B1 | No; streamed or returned inline |
-| Provider keys | B4 only | Server environment |
+| Recordings, derived takes, Gold Vocal | B1, B2, B4 | Local disk; Replicate retention unknown |
+| Performer name and consent attestations | B1, B2 | `manifest.json` and voice registry |
+| Trained voice model | B4 in, B2 | `shared/voices/<id>.model.zip` |
+| Prompts, lyrics | B1, B4, B5 | `meta.json`; provider retention unknown |
+| Songs, stems, covers | B4 or B5 in, B2 | `data/studio/songs/` |
+| Keys and engine token | B4, B5 | Server environment |

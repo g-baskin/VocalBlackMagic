@@ -16,7 +16,8 @@ tags:
   - entity
   - module
   - test
-related: []
+related:
+  - "[[entities/test-contracts-engine]]"
 sources:
   - "packages/contracts/src/index.test.ts"
 ---
@@ -36,12 +37,13 @@ test suite
 ## Behavior
 
 - Covers five sound characters, a valid request, out-of-range intensity, short prompts, the Lyria engine and song length bounds (`packages/contracts/src/index.test.ts:15-27`).
+- Studio and voice validators have no test in this package; `validateEditRequest` is covered from `apps/ttb-studio/src/lib/server/studio/edit.test.ts:93-124`. Engine request validation is covered by [[entities/test-contracts-engine]].
 
 ## Connections
 
 - **depends_on:** [[entities/mod-contracts]]
 - **used_by:** no importer or caller found in source
-- **related:** none
+- **related:** [[entities/test-contracts-engine]]
 
 ## Tested by
 

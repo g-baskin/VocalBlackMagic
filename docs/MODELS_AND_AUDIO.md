@@ -1,10 +1,12 @@
 # Model selection, sound design and Gold Vocal pipeline
 
 ## Generation adapters
-- **ACE-Step 1.5**: primary candidate for full-song and instrumental generation, reference conditioning and iteration. Confirm actual published API/weight license and runtime requirements before deployment. Currently used through fal hosting, in development only.
+- **ACE-Step 1.5**: primary candidate for full-song and instrumental generation, reference conditioning and iteration. Confirm actual published API/weight license and runtime requirements before deployment. Currently used in development through fal, Replicate or the self-hosted engine (the code labels it MIT). It is the only engine backend that lists extend, repaint and cover edits.
 - **Google Lyria 3.5**: hosted, paid alternative engine, development only.
-- **Gemini 3.5 Flash-Lite**: writes lyrics automatically for ACE-Step complete songs submitted without lyrics; development only.
-- **HeartMuLa**: optional alternate engine, benchmark against ACE-Step for expressive vocals and raw musicality. Verify both repo and **model weights** license separately.
+- **Lyricists**: the legacy `/api/generations` route uses Gemini 3.5 Flash-Lite. The studio tries Anthropic, OpenAI and Gemini direct APIs, then Claude on Replicate, whichever is configured first; development only.
+- **HeartMuLa**: optional alternate engine, benchmark against ACE-Step for expressive vocals and raw musicality. Verify both repo and **model weights** license separately. Runs today via Replicate or the self-hosted engine (labelled Apache-2.0 in code, unverified here).
+- **DiffRhythm 2, YuE2**: self-hosted engine backends (DiffRhythm v1 and YuE v1 also via Replicate). YuE2 weights are CC BY-NC 4.0 and are reported `commercial: false`.
+- **MiniMax Music 1.5 / 2.6 / Music-01, ElevenLabs Music, Stable Audio 2.5, Lyria 2, Lyria 3 Pro**: hosted proprietary models used by the studio in development. Music-01 also reimagines songs and sings in a forged voice.
 - **External V2**: configurable integration slot. 'Music.ai V2', 'MusicAI V2' and 'AISong V2' must NOT be treated as synonymous. Confirm provider identity, API endpoint, license and allowed outputs. Do not hardcode an unverified endpoint.
 - Model selection must be based on listening tests with reproducible prompts, not marketing labels.
 
@@ -33,5 +35,5 @@
 - Input: supported codec, integrity, max duration/size, no malware, consent.
 - Separation: listen for bleed, comb filtering and missing consonants; automated metrics alone are insufficient.
 - Gold Vocal: no clipped peaks, gross loudness inconsistency, poor source attribution or false identity claim.
-- Generated audio: silence detection, clipped peaks, excessive digital artifacts, duration and intelligibility expectations; manual A/B tests. Currently implemented: format sniffing and size bounds (1 KiB to 160 MiB) only.
+- Generated audio: silence detection, clipped peaks, excessive digital artifacts, duration and intelligibility expectations; manual A/B tests. Currently implemented: format sniffing and size bounds (1 KiB to 160 MiB) before a song is stored; the Studio Master reports measured LUFS and true peak. Vocal Fix inputs are decoded and scored for loudness, clipping, noise and silence.
 - Export: correct bit-depth, sample rate, channel count, metadata and no unintended limiter/dither.

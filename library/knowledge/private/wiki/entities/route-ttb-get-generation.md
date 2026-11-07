@@ -15,8 +15,7 @@ depends_on:
   - "[[entities/mod-contracts]]"
   - "[[entities/contract-generation-job]]"
   - "[[entities/env-fal-key]]"
-used_by:
-  - "[[entities/route-ttb-page]]"
+used_by: []
 last_commit_hash: "29c84e4"
 tested_by: []
 route_method: GET
@@ -28,6 +27,9 @@ tags:
   - sveltekit-route
 related:
   - "[[concepts/hosted-generation-flow]]"
+  - "[[concepts/dev-only-generation-gate]]"
+  - "[[concepts/ttb-legacy-generation-api]]"
+  - "[[questions/ttb-retire-legacy-generations-routes]]"
   - "[[codegraph]]"
 sources:
   - "apps/ttb-studio/src/routes/api/generations/[id]/+server.ts"
@@ -35,9 +37,14 @@ sources:
 
 # TTB Studio GET /api/generations/[id]
 
+> [!contradiction]
+> Contract changed between `29c84e4` and `f88cc09` (HEAD `b58d457`).
+> Prior contract: used by [[entities/route-ttb-page]].
+> New contract: no caller in source; the page moved to `/api/studio/*` (`apps/ttb-studio/src/routes/+page.svelte:288-291`). Handler code unchanged since `29c84e4`.
+
 ## Overview
 
-Polls a fal ACE-Step job (`apps/ttb-studio/src/routes/api/generations/[id]/+server.ts:9-41`).
+Legacy poll for a fal generation job (`apps/ttb-studio/src/routes/api/generations/[id]/+server.ts:9-41`).
 
 ## Signature / Definition
 
@@ -47,14 +54,17 @@ export const GET: RequestHandler
 
 ## Behavior
 
-- Gate 403 outside development (`apps/ttb-studio/src/routes/api/generations/[id]/+server.ts:10-11`); `lyria.` ids return 404 because Lyria results are not stored (`apps/ttb-studio/src/routes/api/generations/[id]/+server.ts:13-17`); unknown or non-UUID ids return 404 (`apps/ttb-studio/src/routes/api/generations/[id]/+server.ts:18-19`); 503 without `FAL_KEY` (`apps/ttb-studio/src/routes/api/generations/[id]/+server.ts:20-25`).
-- Maps `falStatus` into a `GenerationJob`; on completion sets `audio_url` to `/api/generations/<job_id>/audio` (`apps/ttb-studio/src/routes/api/generations/[id]/+server.ts:27-37`).
+- Gate 403 (`apps/ttb-studio/src/routes/api/generations/[id]/+server.ts:10-11`); `lyria.` ids 404 (`apps/ttb-studio/src/routes/api/generations/[id]/+server.ts:13-17`); unknown or non-UUID 404 (`apps/ttb-studio/src/routes/api/generations/[id]/+server.ts:18-19`); 503 without `FAL_KEY` (`apps/ttb-studio/src/routes/api/generations/[id]/+server.ts:20-25`).
+- Maps `falStatus` into a `GenerationJob` and on completion sets `audio_url` to `/api/generations/<job_id>/audio` (`apps/ttb-studio/src/routes/api/generations/[id]/+server.ts:27-37`).
+- No browser caller at HEAD: a search of `apps/ttb-studio/src` finds `/api/generations` only in this route family and a test request URL (`apps/ttb-studio/src/lib/server/music/music.test.ts:311`).
+- > [!stale]
+  > Prior claim (wiki built at `29c84e4`), no longer true at `f88cc09`: used_by [[entities/route-ttb-page]].
 
 ## Connections
 
 - **depends_on:** [[entities/mod-music-errors]], [[entities/mod-music-fal]], [[entities/mod-music-gate]], [[entities/mod-music-jobs]], [[entities/mod-contracts]], [[entities/contract-generation-job]], [[entities/env-fal-key]]
-- **used_by:** [[entities/route-ttb-page]]
-- **related:** [[concepts/hosted-generation-flow]], [[codegraph]]
+- **used_by:** no importer or caller found in source
+- **related:** [[concepts/hosted-generation-flow]], [[concepts/dev-only-generation-gate]], [[concepts/ttb-legacy-generation-api]], [[questions/ttb-retire-legacy-generations-routes]], [[codegraph]]
 
 ## Tested by
 

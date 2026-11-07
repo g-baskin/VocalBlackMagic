@@ -12,15 +12,15 @@ sources: []
 
 # Vocal Black Magic wiki
 
-Atomic, cited pages for the code at commit `29c84e47`. Code is the source of truth; every claim cites `path:line`.
+Atomic, cited pages for the code at commit `b58d4574`. Code is the source of truth; every claim cites `path:line`.
 
-- [[entities/_index]]: 72 entity pages
-- [[concepts/_index]]: 7 concept pages
-- [[decisions/_index]]: links to `docs/decisions/` ADRs
-- [[questions/_index]]: 2 open questions
+- [[entities/_index]]: 320 entity pages
+- [[concepts/_index]]: 28 concept pages
+- [[decisions/_index]]: links to `docs/decisions/` ADRs (0001 to 0004)
+- [[questions/_index]]: 14 open questions
 - [[comparisons/_index]]
-- [[meta/_index]]
-- [[codegraph]]: module and route graph (Mermaid)
+- [[meta/_index]]: lint and contradiction reports
+- [[codegraph]]: module, route and endpoint graph (Mermaid)
 - [[log]] and [[hot]]
 
-Related narratives (other owners): `library/knowledge/private/architecture/music-generation-pipeline.md`, `library/knowledge/private/architecture/vocal-reference-storage.md`, `library/knowledge/private/security/trust-boundaries.md`, `library/knowledge/private/auth/session-and-tenancy-model.md`, `library/knowledge/private/architecture/test-strategy.md`.
+Related narratives (other owners): `library/knowledge/private/architecture/song-studio.md`, `library/knowledge/private/architecture/vocal-fix-pipeline.md`, `library/knowledge/private/architecture/audio-engine.md`, `library/knowledge/private/architecture/music-generation-pipeline.md` (legacy path), `library/knowledge/private/architecture/vocal-reference-storage.md` (legacy path), `library/knowledge/private/security/trust-boundaries.md`, `library/knowledge/private/auth/session-and-tenancy-model.md`, `library/knowledge/private/architecture/test-strategy.md`.

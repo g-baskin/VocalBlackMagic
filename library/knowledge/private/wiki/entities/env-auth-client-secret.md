@@ -9,12 +9,12 @@ path: ".env.example"
 language: unknown
 depends_on: []
 used_by: []
-last_commit_hash: "12fb6e8"
+last_commit_hash: "09057ad"
 tested_by: []
 tags:
-  - entity
-  - env-var
-  - config
+  - "entity"
+  - "env-var"
+  - "config"
 related: []
 sources:
   - ".env.example"
@@ -24,7 +24,7 @@ sources:
 
 ## Overview
 
-Commented placeholder for a future production integration (`.env.example:20`).
+Planned production variable listed under "Future production integrations (none configured or active)" (`.env.example:27`, `.env.example:34`).
 
 ## Signature / Definition
 
@@ -34,13 +34,16 @@ AUTH_CLIENT_SECRET
 
 ## Behavior
 
-- Listed under "Future production integrations (none configured or active)" (`.env.example:13`). No source file reads it at 29c84e47 (repository search).
+- Readers: none. No source file in apps/*/src, packages, services, apps/*.py, compose.yaml or infra reads it at HEAD b58d457 (grep).
+- Default: none (commented out).
+- Validation: none.
+- Secrecy: would be a secret; no value exists in the repo.
 
 ## Connections
 
 - **depends_on:** none found in source
-- **used_by:** no importer or caller found in source
-- **related:** none
+- **used_by:** none found in source
+- **related:** none found in source
 
 ## Tested by
 
@@ -49,7 +52,7 @@ AUTH_CLIENT_SECRET
 ## History
 
 - **Created:** commit `d181ff0` ("Document two-app architecture, sound profiles and rights-cleared vocals") on 2026-11-05
-- **Last touched:** commit `12fb6e8` ("Add hosted song generation to TTB Studio via fal ACE-Step and Google Lyria 3.5 (#2)") on 2026-11-05
+- **Last touched:** commit `09057ad` ("Self-hosted music engine and provider-agnostic routing (checkpoint) (#9)") on 2026-11-06
 
 ## Sources
 

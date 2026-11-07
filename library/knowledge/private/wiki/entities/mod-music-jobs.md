@@ -45,6 +45,8 @@ export function parseJobId(jobId: string): { provider: 'fal'; requestId: string 
 - `falJobId` prefixes a fal request id with `fal.` (`apps/ttb-studio/src/lib/server/music/jobs.ts:1-5`).
 - `parseJobId` returns `{provider: 'fal', requestId}` (lower-cased) for `fal.` ids, `{provider: 'lyria'}` for `lyria.` ids, and null otherwise (`apps/ttb-studio/src/lib/server/music/jobs.ts:7-14`).
 
+- Verified unchanged at HEAD `b58d457` (last touched `29c84e4`); no new importer outside the legacy generation routes.
+
 ## Connections
 
 - **depends_on:** none found in source

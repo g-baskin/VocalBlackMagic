@@ -30,6 +30,9 @@ This area explains the system and business to the team. It also holds the eviden
 | [`architecture/test-strategy.md`](architecture/test-strategy.md) | CI jobs, Bun and pytest coverage, untested areas |
 | [`architecture/music-generation-pipeline.md`](architecture/music-generation-pipeline.md) | TTB Studio generation via fal ACE-Step and Lyria |
 | [`architecture/vocal-reference-storage.md`](architecture/vocal-reference-storage.md) | Vocal Fix intake, on-disk layout, manifest, delete |
+| [`architecture/song-studio.md`](architecture/song-studio.md) | TTB studio API, song library, jobs, models x runners router, edits, Séance |
+| [`architecture/vocal-fix-pipeline.md`](architecture/vocal-fix-pipeline.md) | SvelteKit Vocal Fix intake, repair, Gold Vocal, voice forge and consent |
+| [`architecture/audio-engine.md`](architecture/audio-engine.md) | Self-hosted music engine, protocol v1, token, queue, backends |
 | [`auth/session-and-tenancy-model.md`](auth/session-and-tenancy-model.md) | Auth, database and billing contract packages |
 | [`security/trust-boundaries.md`](security/trust-boundaries.md) | Network and trust boundaries, dev gates |
 

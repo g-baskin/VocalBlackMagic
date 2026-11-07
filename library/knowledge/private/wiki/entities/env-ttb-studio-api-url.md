@@ -9,23 +9,25 @@ path: ".env.example"
 language: unknown
 depends_on: []
 used_by:
-  - "[[entities/mod-ttb-studio-backend]]"
-last_commit_hash: "12fb6e8"
+  - "[[entities/mod-ttb-studio-python-app]]"
+last_commit_hash: "09057ad"
 tested_by: []
 tags:
-  - entity
-  - env-var
-  - config
-related: []
+  - "entity"
+  - "env-var"
+  - "config"
+related:
+  - "[[questions/is-ttb-studio-backend-ts-dead-code]]"
 sources:
   - ".env.example"
+  - "apps/ttb-studio/src/lib/server/backend.ts"
 ---
 
 # TTB_STUDIO_API_URL
 
 ## Overview
 
-Base URL of the Python TTB Studio prototype (`.env.example:5`).
+Legacy URL of the Python TTB Studio prototype; `.env.example` says only unused legacy code reads it (`.env.example:2`).
 
 ## Signature / Definition
 
@@ -35,13 +37,16 @@ TTB_STUDIO_API_URL
 
 ## Behavior
 
-- Read only by the unused bridge `apps/ttb-studio/src/lib/server/backend.ts:3` with fallback port 8002.
+- Readers: `apps/ttb-studio/src/lib/server/backend.ts:3`; no importer of that module found (grep for `server/backend'` in apps/ttb-studio/src).
+- Default: `http://127.0.0.1:8002` (`apps/ttb-studio/src/lib/server/backend.ts:3`); example `.env.example:6`.
+- Validation: trailing slashes stripped.
+- Secrecy: not a secret.
 
 ## Connections
 
 - **depends_on:** none found in source
-- **used_by:** [[entities/mod-ttb-studio-backend]]
-- **related:** none
+- **used_by:** [[entities/mod-ttb-studio-python-app]]
+- **related:** [[questions/is-ttb-studio-backend-ts-dead-code]]
 
 ## Tested by
 
@@ -50,7 +55,7 @@ TTB_STUDIO_API_URL
 ## History
 
 - **Created:** commit `d181ff0` ("Document two-app architecture, sound profiles and rights-cleared vocals") on 2026-11-05
-- **Last touched:** commit `12fb6e8` ("Add hosted song generation to TTB Studio via fal ACE-Step and Google Lyria 3.5 (#2)") on 2026-11-05
+- **Last touched:** commit `09057ad` ("Self-hosted music engine and provider-agnostic routing (checkpoint) (#9)") on 2026-11-06
 
 ## Sources
 

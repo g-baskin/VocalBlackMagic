@@ -13,6 +13,9 @@ used_by:
   - "[[entities/mod-music-lyria]]"
   - "[[entities/route-ttb-get-generation-audio]]"
   - "[[entities/test-music]]"
+  - "[[entities/mod-studio-jobs]]"
+  - "[[entities/mod-studio-replicate]]"
+  - "[[entities/mod-studio-runner-direct]]"
 last_commit_hash: "29c84e4"
 tested_by:
   - "[[entities/test-music]]"
@@ -50,10 +53,12 @@ export async function verifiedAudioResponse(upstream: Response): Promise<Respons
 - `verifiedAudioResponse` rejects non-OK upstreams and out-of-range `content-length`, sniffs the head, then streams the rest while erroring on truncation or overflow (`apps/ttb-studio/src/lib/server/music/audio.ts:98-141`).
 - The response sets the sniffed `content-type`, `cache-control: private, no-store` and `x-content-type-options: nosniff` (`apps/ttb-studio/src/lib/server/music/audio.ts:142-148`).
 
+- Reused by studio jobs, Replicate and direct runners (`apps/ttb-studio/src/lib/server/studio/jobs.ts:15`, `apps/ttb-studio/src/lib/server/studio/replicate.ts:1`, `apps/ttb-studio/src/lib/server/studio/runners/direct.ts:12`). Module unchanged since `29c84e4`.
+
 ## Connections
 
 - **depends_on:** [[entities/mod-music-errors]]
-- **used_by:** [[entities/mod-music-lyria]], [[entities/route-ttb-get-generation-audio]], [[entities/test-music]]
+- **used_by:** [[entities/mod-music-lyria]], [[entities/route-ttb-get-generation-audio]], [[entities/test-music]], [[entities/mod-studio-jobs]], [[entities/mod-studio-replicate]], [[entities/mod-studio-runner-direct]]
 - **related:** [[concepts/hosted-generation-flow]]
 
 ## Tested by

@@ -22,8 +22,7 @@ depends_on:
   - "[[entities/mod-ttb-studio-env]]"
   - "[[entities/env-fal-key]]"
   - "[[entities/env-gemini-api-key]]"
-used_by:
-  - "[[entities/route-ttb-page]]"
+used_by: []
 last_commit_hash: "29c84e4"
 tested_by: []
 route_method: POST
@@ -36,6 +35,8 @@ tags:
 related:
   - "[[concepts/hosted-generation-flow]]"
   - "[[concepts/dev-only-generation-gate]]"
+  - "[[concepts/ttb-legacy-generation-api]]"
+  - "[[questions/ttb-retire-legacy-generations-routes]]"
   - "[[codegraph]]"
 sources:
   - "apps/ttb-studio/src/routes/api/generations/+server.ts"
@@ -43,9 +44,14 @@ sources:
 
 # TTB Studio POST /api/generations
 
+> [!contradiction]
+> Contract changed between `29c84e4` and `f88cc09` (HEAD `b58d457`).
+> Prior contract: used by [[entities/route-ttb-page]].
+> New contract: no caller in source; the page moved to `/api/studio/*` (`apps/ttb-studio/src/routes/+page.svelte:288-291`). Handler code unchanged since `29c84e4`.
+
 ## Overview
 
-Starts a hosted song generation with ACE-Step (async, fal queue) or Lyria 3.5 (synchronous) (`apps/ttb-studio/src/routes/api/generations/+server.ts:22-114`).
+Legacy hosted generation entry: ACE-Step (async, fal queue) or Lyria 3.5 (synchronous) (`apps/ttb-studio/src/routes/api/generations/+server.ts:22-114`).
 
 ## Signature / Definition
 
@@ -55,17 +61,18 @@ export const POST: RequestHandler
 
 ## Behavior
 
-- Returns the gate 403 outside development (`apps/ttb-studio/src/routes/api/generations/+server.ts:23-24`), 415 for non-JSON (`apps/ttb-studio/src/routes/api/generations/+server.ts:25-26`), 400 for invalid JSON (`apps/ttb-studio/src/routes/api/generations/+server.ts:28-32`), and 422 for wrong field types or a `validateGenerationRequest` error (`apps/ttb-studio/src/routes/api/generations/+server.ts:33-46`).
-- `ace-step`: 503 without `FAL_KEY`; 422 on ACE-Step limits; for a full song without lyrics, writes them with Gemini (503 without `GEMINI_API_KEY`); submits to fal and returns 202 with `job_id` `fal.<uuid>` and `status: queued` (`apps/ttb-studio/src/routes/api/generations/+server.ts:49-91`).
-- If fal submission fails after lyrics were written, the error response includes the written lyrics so a retry can reuse them (`apps/ttb-studio/src/routes/api/generations/+server.ts:76-84`).
-- `lyria-3.5`: 503 without `GEMINI_API_KEY`; otherwise returns 200 with `status: completed`, inline audio and lyrics; the id is `lyria.<random uuid>` and nothing is stored (`apps/ttb-studio/src/routes/api/generations/+server.ts:93-109`).
-- Other engines return 501 (`apps/ttb-studio/src/routes/api/generations/+server.ts:110`); thrown errors go through `errorResponse` (`apps/ttb-studio/src/routes/api/generations/+server.ts:111-113`).
+- Returns the gate 403 outside development (`apps/ttb-studio/src/routes/api/generations/+server.ts:23-24`), 415 for non-JSON (`apps/ttb-studio/src/routes/api/generations/+server.ts:25-26`), 400 for invalid JSON (`apps/ttb-studio/src/routes/api/generations/+server.ts:28-32`), and 422 for wrong field types or a `validateGenerationRequest` error (`apps/ttb-studio/src/routes/api/generations/+server.ts:33-46`). It does not apply the studio localhost check.
+- `ace-step`: 503 without `FAL_KEY`; 422 on ACE-Step limits; Gemini writes missing full-song lyrics (503 without `GEMINI_API_KEY`); returns 202 `fal.<uuid>` `queued` (`apps/ttb-studio/src/routes/api/generations/+server.ts:49-91`), echoing written lyrics on a failed submit (`apps/ttb-studio/src/routes/api/generations/+server.ts:76-84`).
+- `lyria-3.5`: 503 without `GEMINI_API_KEY`; otherwise 200 `completed` with inline audio, id `lyria.<uuid>`, nothing stored (`apps/ttb-studio/src/routes/api/generations/+server.ts:93-109`). Other engines 501 (`apps/ttb-studio/src/routes/api/generations/+server.ts:110`); thrown errors use `errorResponse` (`apps/ttb-studio/src/routes/api/generations/+server.ts:111-113`).
+- No browser caller at HEAD: a search of `apps/ttb-studio/src` finds `/api/generations` only in this route family and a test request URL (`apps/ttb-studio/src/lib/server/music/music.test.ts:311`).
+- > [!stale]
+  > Prior claim (wiki built at `29c84e4`), no longer true at `f88cc09`: used_by [[entities/route-ttb-page]].
 
 ## Connections
 
 - **depends_on:** [[entities/mod-music-gate]], [[entities/mod-music-errors]], [[entities/mod-music-fal]], [[entities/mod-music-jobs]], [[entities/mod-music-lyricist]], [[entities/mod-music-lyria]], [[entities/mod-music-prompt]], [[entities/mod-contracts]], [[entities/contract-generation-request]], [[entities/contract-generation-job]], [[entities/contract-validate-generation-request]], [[entities/mod-ttb-studio-env]], [[entities/env-fal-key]], [[entities/env-gemini-api-key]]
-- **used_by:** [[entities/route-ttb-page]]
-- **related:** [[concepts/hosted-generation-flow]], [[concepts/dev-only-generation-gate]], [[codegraph]]
+- **used_by:** no importer or caller found in source
+- **related:** [[concepts/hosted-generation-flow]], [[concepts/dev-only-generation-gate]], [[concepts/ttb-legacy-generation-api]], [[questions/ttb-retire-legacy-generations-routes]], [[codegraph]]
 
 ## Tested by
 

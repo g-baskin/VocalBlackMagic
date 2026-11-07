@@ -42,6 +42,8 @@ test suite
 - Prompt shape, unstored cheap request, filler rejection, prompt-injection fencing, truncation and error mapping (`apps/ttb-studio/src/lib/server/music/lyrics.test.ts:47-129`).
 - ACE-Step limit checks before spend (`apps/ttb-studio/src/lib/server/music/lyrics.test.ts:131-140`).
 
+- Verified unchanged at HEAD `b58d457` (last touched `29c84e4`); cited line ranges still hold.
+
 ## Connections
 
 - **depends_on:** [[entities/mod-music-errors]], [[entities/mod-music-fal]], [[entities/mod-music-lyria]], [[entities/mod-music-lyricist]], [[entities/mod-contracts]]

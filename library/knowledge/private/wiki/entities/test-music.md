@@ -45,6 +45,8 @@ test suite
 - Audio sniffing and streaming limits (`apps/ttb-studio/src/lib/server/music/music.test.ts:50-126`); fal adapter (`apps/ttb-studio/src/lib/server/music/music.test.ts:128-209`); Lyria adapter (`apps/ttb-studio/src/lib/server/music/music.test.ts:211-284`); capabilities (`apps/ttb-studio/src/lib/server/music/music.test.ts:286-306`); JSON gate (`apps/ttb-studio/src/lib/server/music/music.test.ts:308-321`).
 - Uses injected fetch stubs, so it does not contact providers.
 
+- Verified unchanged at HEAD `b58d457` (last touched `29c84e4`); cited line ranges still hold.
+
 ## Connections
 
 - **depends_on:** [[entities/mod-music-audio]], [[entities/mod-music-capabilities]], [[entities/mod-music-errors]], [[entities/mod-music-fal]], [[entities/mod-music-gate]], [[entities/mod-music-jobs]], [[entities/mod-music-lyria]], [[entities/mod-contracts]]

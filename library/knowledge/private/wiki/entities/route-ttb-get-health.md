@@ -28,7 +28,7 @@ sources:
 
 ## Overview
 
-Static health JSON (`apps/ttb-studio/src/routes/api/health/+server.ts:3-10`).
+Static health response (`apps/ttb-studio/src/routes/api/health/+server.ts:1-10`).
 
 ## Signature / Definition
 
@@ -38,7 +38,7 @@ export const GET: RequestHandler
 
 ## Behavior
 
-- Returns `status: ok`, `app: ttb-studio-saas`, `version: 0.2.0`, `auth_ready: false`, `paid_generation_ready: false` (`apps/ttb-studio/src/routes/api/health/+server.ts:4-10`). It reports process health only.
+- Returns `status: ok`, `app: ttb-studio-saas`, `version: 0.2.0`, `auth_ready: false`, `paid_generation_ready: false` (`apps/ttb-studio/src/routes/api/health/+server.ts:4-10`). Process health only; unchanged at HEAD.
 
 ## Connections
 
