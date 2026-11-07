@@ -12,6 +12,136 @@
     },
     {
       "relation": "imports",
+      "source": "apps/ttb-studio/src/lib/client/AbPlayer.svelte",
+      "target": "packages/ui/src/RuneButton.svelte"
+    },
+    {
+      "relation": "imports",
+      "source": "apps/ttb-studio/src/lib/client/AbPlayer.svelte",
+      "target": "packages/ui/src/SummoningCircle.svelte"
+    },
+    {
+      "relation": "imports",
+      "source": "apps/ttb-studio/src/lib/client/AbPlayer.svelte",
+      "target": "packages/ui/src/Waveform.svelte"
+    },
+    {
+      "relation": "imports",
+      "source": "apps/ttb-studio/src/lib/client/AbPlayer.svelte",
+      "target": "packages/ui/src/audio.ts"
+    },
+    {
+      "relation": "imports",
+      "source": "apps/ttb-studio/src/lib/client/MiniWave.svelte",
+      "target": "apps/ttb-studio/src/lib/client/api.ts"
+    },
+    {
+      "relation": "imports",
+      "source": "apps/ttb-studio/src/lib/client/MiniWave.svelte",
+      "target": "packages/ui/src/Waveform.svelte"
+    },
+    {
+      "relation": "imports",
+      "source": "apps/ttb-studio/src/lib/client/MiniWave.svelte",
+      "target": "packages/ui/src/audio.ts"
+    },
+    {
+      "relation": "imports",
+      "source": "apps/ttb-studio/src/lib/client/SongTake.svelte",
+      "target": "apps/ttb-studio/src/lib/client/api.ts"
+    },
+    {
+      "relation": "imports",
+      "source": "apps/ttb-studio/src/lib/client/SongTake.svelte",
+      "target": "packages/contracts/src/index.ts"
+    },
+    {
+      "relation": "imports",
+      "source": "apps/ttb-studio/src/lib/client/SongTake.svelte",
+      "target": "packages/ui/src/GrimoirePlayer.svelte"
+    },
+    {
+      "relation": "imports",
+      "source": "apps/ttb-studio/src/lib/client/SongTake.svelte",
+      "target": "packages/ui/src/Spectrogram.svelte"
+    },
+    {
+      "relation": "imports",
+      "source": "apps/ttb-studio/src/lib/client/SongTake.svelte",
+      "target": "packages/ui/src/audio.ts"
+    },
+    {
+      "relation": "imports",
+      "source": "apps/ttb-studio/src/lib/client/SongTake.svelte",
+      "target": "pkg:$app/paths"
+    },
+    {
+      "relation": "imports",
+      "source": "apps/ttb-studio/src/lib/client/StemMixer.svelte",
+      "target": "apps/ttb-studio/src/lib/client/api.ts"
+    },
+    {
+      "relation": "imports",
+      "source": "apps/ttb-studio/src/lib/client/StemMixer.svelte",
+      "target": "apps/ttb-studio/src/lib/client/jobs.ts"
+    },
+    {
+      "relation": "imports",
+      "source": "apps/ttb-studio/src/lib/client/StemMixer.svelte",
+      "target": "packages/contracts/src/index.ts"
+    },
+    {
+      "relation": "imports",
+      "source": "apps/ttb-studio/src/lib/client/StemMixer.svelte",
+      "target": "packages/ui/src/RuneButton.svelte"
+    },
+    {
+      "relation": "imports",
+      "source": "apps/ttb-studio/src/lib/client/StemMixer.svelte",
+      "target": "packages/ui/src/SigilLoader.svelte"
+    },
+    {
+      "relation": "imports",
+      "source": "apps/ttb-studio/src/lib/client/StemMixer.svelte",
+      "target": "packages/ui/src/Waveform.svelte"
+    },
+    {
+      "relation": "imports",
+      "source": "apps/ttb-studio/src/lib/client/StemMixer.svelte",
+      "target": "packages/ui/src/audio.ts"
+    },
+    {
+      "relation": "imports",
+      "source": "apps/ttb-studio/src/lib/client/StemMixer.svelte",
+      "target": "pkg:svelte"
+    },
+    {
+      "relation": "imports",
+      "source": "apps/ttb-studio/src/lib/client/jobs.ts",
+      "target": "apps/ttb-studio/src/lib/client/api.ts"
+    },
+    {
+      "relation": "imports",
+      "source": "apps/ttb-studio/src/lib/client/jobs.ts",
+      "target": "packages/contracts/src/index.ts"
+    },
+    {
+      "relation": "browser_fetch",
+      "source": "apps/ttb-studio/src/lib/client/jobs.ts",
+      "target": "route:apps/ttb-studio:GET /api/studio/jobs/[id]"
+    },
+    {
+      "relation": "imports",
+      "source": "apps/ttb-studio/src/lib/client/seance-time.test.ts",
+      "target": "apps/ttb-studio/src/lib/client/seance-time.ts"
+    },
+    {
+      "relation": "imports",
+      "source": "apps/ttb-studio/src/lib/client/seance-time.test.ts",
+      "target": "pkg:bun:test"
+    },
+    {
+      "relation": "imports",
       "source": "apps/ttb-studio/src/lib/server/music/audio.ts",
       "target": "apps/ttb-studio/src/lib/server/music/errors.ts"
     },
@@ -172,18 +302,1153 @@
     },
     {
       "relation": "imports",
+      "source": "apps/ttb-studio/src/lib/server/studio/context.ts",
+      "target": "apps/ttb-studio/src/lib/server/music/errors.ts"
+    },
+    {
+      "relation": "imports",
+      "source": "apps/ttb-studio/src/lib/server/studio/context.ts",
+      "target": "apps/ttb-studio/src/lib/server/music/gate.ts"
+    },
+    {
+      "relation": "imports",
+      "source": "apps/ttb-studio/src/lib/server/studio/context.ts",
+      "target": "apps/ttb-studio/src/lib/server/studio/create.ts"
+    },
+    {
+      "relation": "imports",
+      "source": "apps/ttb-studio/src/lib/server/studio/context.ts",
+      "target": "apps/ttb-studio/src/lib/server/studio/library.ts"
+    },
+    {
+      "relation": "imports",
+      "source": "apps/ttb-studio/src/lib/server/studio/context.ts",
+      "target": "apps/ttb-studio/src/lib/server/studio/paths.ts"
+    },
+    {
+      "relation": "imports",
+      "source": "apps/ttb-studio/src/lib/server/studio/context.ts",
+      "target": "apps/ttb-studio/src/lib/server/studio/runners/engine.ts"
+    },
+    {
+      "relation": "imports",
+      "source": "apps/ttb-studio/src/lib/server/studio/context.ts",
+      "target": "pkg:$app/env/private"
+    },
+    {
+      "relation": "imports",
+      "source": "apps/ttb-studio/src/lib/server/studio/cover.ts",
+      "target": "apps/ttb-studio/src/lib/server/music/errors.ts"
+    },
+    {
+      "relation": "imports",
+      "source": "apps/ttb-studio/src/lib/server/studio/cover.ts",
+      "target": "apps/ttb-studio/src/lib/server/studio/library.ts"
+    },
+    {
+      "relation": "imports",
+      "source": "apps/ttb-studio/src/lib/server/studio/cover.ts",
+      "target": "apps/ttb-studio/src/lib/server/studio/replicate.ts"
+    },
+    {
+      "relation": "imports",
+      "source": "apps/ttb-studio/src/lib/server/studio/cover.ts",
+      "target": "packages/contracts/src/index.ts"
+    },
+    {
+      "relation": "imports",
+      "source": "apps/ttb-studio/src/lib/server/studio/cover.ts",
+      "target": "pkg:node:fs/promises"
+    },
+    {
+      "relation": "imports",
+      "source": "apps/ttb-studio/src/lib/server/studio/cover.ts",
+      "target": "pkg:node:path"
+    },
+    {
+      "relation": "imports",
+      "source": "apps/ttb-studio/src/lib/server/studio/create.ts",
+      "target": "apps/ttb-studio/src/lib/server/music/errors.ts"
+    },
+    {
+      "relation": "imports",
+      "source": "apps/ttb-studio/src/lib/server/studio/create.ts",
+      "target": "apps/ttb-studio/src/lib/server/music/fal.ts"
+    },
+    {
+      "relation": "imports",
+      "source": "apps/ttb-studio/src/lib/server/studio/create.ts",
+      "target": "apps/ttb-studio/src/lib/server/music/lyria.ts"
+    },
+    {
+      "relation": "imports",
+      "source": "apps/ttb-studio/src/lib/server/studio/create.ts",
+      "target": "apps/ttb-studio/src/lib/server/studio/engines.ts"
+    },
+    {
+      "relation": "imports",
+      "source": "apps/ttb-studio/src/lib/server/studio/create.ts",
+      "target": "apps/ttb-studio/src/lib/server/studio/jobs.ts"
+    },
+    {
+      "relation": "imports",
+      "source": "apps/ttb-studio/src/lib/server/studio/create.ts",
+      "target": "apps/ttb-studio/src/lib/server/studio/lyrics.ts"
+    },
+    {
+      "relation": "imports",
+      "source": "apps/ttb-studio/src/lib/server/studio/create.ts",
+      "target": "apps/ttb-studio/src/lib/server/studio/runners/engine.ts"
+    },
+    {
+      "relation": "imports",
+      "source": "apps/ttb-studio/src/lib/server/studio/create.ts",
+      "target": "apps/ttb-studio/src/lib/server/studio/runners/models.ts"
+    },
+    {
+      "relation": "imports",
+      "source": "apps/ttb-studio/src/lib/server/studio/create.ts",
+      "target": "apps/ttb-studio/src/lib/server/studio/runners/routed.ts"
+    },
+    {
+      "relation": "imports",
+      "source": "apps/ttb-studio/src/lib/server/studio/create.ts",
+      "target": "apps/ttb-studio/src/lib/server/studio/voicesummon.ts"
+    },
+    {
+      "relation": "imports",
+      "source": "apps/ttb-studio/src/lib/server/studio/create.ts",
+      "target": "packages/contracts/src/index.ts"
+    },
+    {
+      "relation": "imports",
+      "source": "apps/ttb-studio/src/lib/server/studio/derive.ts",
+      "target": "apps/ttb-studio/src/lib/server/music/errors.ts"
+    },
+    {
+      "relation": "imports",
+      "source": "apps/ttb-studio/src/lib/server/studio/derive.ts",
+      "target": "apps/ttb-studio/src/lib/server/studio/cover.ts"
+    },
+    {
+      "relation": "imports",
+      "source": "apps/ttb-studio/src/lib/server/studio/derive.ts",
+      "target": "apps/ttb-studio/src/lib/server/studio/engines.ts"
+    },
+    {
+      "relation": "imports",
+      "source": "apps/ttb-studio/src/lib/server/studio/derive.ts",
+      "target": "apps/ttb-studio/src/lib/server/studio/jobs.ts"
+    },
+    {
+      "relation": "imports",
+      "source": "apps/ttb-studio/src/lib/server/studio/derive.ts",
+      "target": "apps/ttb-studio/src/lib/server/studio/master.ts"
+    },
+    {
+      "relation": "imports",
+      "source": "apps/ttb-studio/src/lib/server/studio/derive.ts",
+      "target": "apps/ttb-studio/src/lib/server/studio/replicate.ts"
+    },
+    {
+      "relation": "imports",
+      "source": "apps/ttb-studio/src/lib/server/studio/derive.ts",
+      "target": "apps/ttb-studio/src/lib/server/studio/voices.ts"
+    },
+    {
+      "relation": "imports",
+      "source": "apps/ttb-studio/src/lib/server/studio/derive.ts",
+      "target": "packages/contracts/src/index.ts"
+    },
+    {
+      "relation": "imports",
+      "source": "apps/ttb-studio/src/lib/server/studio/derive.ts",
+      "target": "pkg:node:fs/promises"
+    },
+    {
+      "relation": "imports",
+      "source": "apps/ttb-studio/src/lib/server/studio/derive.ts",
+      "target": "pkg:node:os"
+    },
+    {
+      "relation": "imports",
+      "source": "apps/ttb-studio/src/lib/server/studio/derive.ts",
+      "target": "pkg:node:path"
+    },
+    {
+      "relation": "imports",
+      "source": "apps/ttb-studio/src/lib/server/studio/edit.test.ts",
+      "target": "apps/ttb-studio/src/lib/server/studio/edit.ts"
+    },
+    {
+      "relation": "imports",
+      "source": "apps/ttb-studio/src/lib/server/studio/edit.test.ts",
+      "target": "apps/ttb-studio/src/lib/server/studio/jobs.ts"
+    },
+    {
+      "relation": "imports",
+      "source": "apps/ttb-studio/src/lib/server/studio/edit.test.ts",
+      "target": "apps/ttb-studio/src/lib/server/studio/library.ts"
+    },
+    {
+      "relation": "imports",
+      "source": "apps/ttb-studio/src/lib/server/studio/edit.test.ts",
+      "target": "packages/contracts/src/index.ts"
+    },
+    {
+      "relation": "imports",
+      "source": "apps/ttb-studio/src/lib/server/studio/edit.test.ts",
+      "target": "pkg:bun:test"
+    },
+    {
+      "relation": "imports",
+      "source": "apps/ttb-studio/src/lib/server/studio/edit.test.ts",
+      "target": "pkg:node:fs/promises"
+    },
+    {
+      "relation": "imports",
+      "source": "apps/ttb-studio/src/lib/server/studio/edit.test.ts",
+      "target": "pkg:node:os"
+    },
+    {
+      "relation": "imports",
+      "source": "apps/ttb-studio/src/lib/server/studio/edit.test.ts",
+      "target": "pkg:node:path"
+    },
+    {
+      "relation": "imports",
+      "source": "apps/ttb-studio/src/lib/server/studio/edit.ts",
+      "target": "apps/ttb-studio/src/lib/server/music/errors.ts"
+    },
+    {
+      "relation": "imports",
+      "source": "apps/ttb-studio/src/lib/server/studio/edit.ts",
+      "target": "apps/ttb-studio/src/lib/server/music/fal.ts"
+    },
+    {
+      "relation": "imports",
+      "source": "apps/ttb-studio/src/lib/server/studio/edit.ts",
+      "target": "apps/ttb-studio/src/lib/server/studio/jobs.ts"
+    },
+    {
+      "relation": "imports",
+      "source": "apps/ttb-studio/src/lib/server/studio/edit.ts",
+      "target": "apps/ttb-studio/src/lib/server/studio/master.ts"
+    },
+    {
+      "relation": "imports",
+      "source": "apps/ttb-studio/src/lib/server/studio/edit.ts",
+      "target": "apps/ttb-studio/src/lib/server/studio/runners/engine.ts"
+    },
+    {
+      "relation": "imports",
+      "source": "apps/ttb-studio/src/lib/server/studio/edit.ts",
+      "target": "apps/ttb-studio/src/lib/server/studio/runners/router.ts"
+    },
+    {
+      "relation": "calls_external",
+      "source": "apps/ttb-studio/src/lib/server/studio/edit.ts",
+      "target": "external:fal.ai"
+    },
+    {
+      "relation": "calls_external",
+      "source": "apps/ttb-studio/src/lib/server/studio/edit.ts",
+      "target": "external:queue.fal.run"
+    },
+    {
+      "relation": "imports",
+      "source": "apps/ttb-studio/src/lib/server/studio/edit.ts",
+      "target": "packages/contracts/src/index.ts"
+    },
+    {
+      "relation": "imports",
+      "source": "apps/ttb-studio/src/lib/server/studio/engines.ts",
+      "target": "apps/ttb-studio/src/lib/server/studio/replicate.ts"
+    },
+    {
+      "relation": "imports",
+      "source": "apps/ttb-studio/src/lib/server/studio/engines.ts",
+      "target": "packages/contracts/src/index.ts"
+    },
+    {
+      "relation": "imports",
+      "source": "apps/ttb-studio/src/lib/server/studio/gold.ts",
+      "target": "apps/ttb-studio/src/lib/server/music/errors.ts"
+    },
+    {
+      "relation": "imports",
+      "source": "apps/ttb-studio/src/lib/server/studio/gold.ts",
+      "target": "packages/contracts/src/index.ts"
+    },
+    {
+      "relation": "imports",
+      "source": "apps/ttb-studio/src/lib/server/studio/gold.ts",
+      "target": "pkg:node:fs/promises"
+    },
+    {
+      "relation": "imports",
+      "source": "apps/ttb-studio/src/lib/server/studio/gold.ts",
+      "target": "pkg:node:path"
+    },
+    {
+      "relation": "imports",
+      "source": "apps/ttb-studio/src/lib/server/studio/jobs.ts",
+      "target": "apps/ttb-studio/src/lib/server/music/audio.ts"
+    },
+    {
+      "relation": "imports",
+      "source": "apps/ttb-studio/src/lib/server/studio/jobs.ts",
+      "target": "apps/ttb-studio/src/lib/server/music/errors.ts"
+    },
+    {
+      "relation": "imports",
+      "source": "apps/ttb-studio/src/lib/server/studio/jobs.ts",
+      "target": "apps/ttb-studio/src/lib/server/music/fal.ts"
+    },
+    {
+      "relation": "imports",
+      "source": "apps/ttb-studio/src/lib/server/studio/jobs.ts",
+      "target": "apps/ttb-studio/src/lib/server/studio/cover.ts"
+    },
+    {
+      "relation": "imports",
+      "source": "apps/ttb-studio/src/lib/server/studio/jobs.ts",
+      "target": "apps/ttb-studio/src/lib/server/studio/library.ts"
+    },
+    {
+      "relation": "imports",
+      "source": "apps/ttb-studio/src/lib/server/studio/jobs.ts",
+      "target": "apps/ttb-studio/src/lib/server/studio/replicate.ts"
+    },
+    {
+      "relation": "imports",
+      "source": "apps/ttb-studio/src/lib/server/studio/jobs.ts",
+      "target": "apps/ttb-studio/src/lib/server/studio/runners/engine.ts"
+    },
+    {
+      "relation": "imports",
+      "source": "apps/ttb-studio/src/lib/server/studio/jobs.ts",
+      "target": "packages/contracts/src/index.ts"
+    },
+    {
+      "relation": "imports",
+      "source": "apps/ttb-studio/src/lib/server/studio/jobs.ts",
+      "target": "pkg:node:fs/promises"
+    },
+    {
+      "relation": "imports",
+      "source": "apps/ttb-studio/src/lib/server/studio/jobs.ts",
+      "target": "pkg:node:path"
+    },
+    {
+      "relation": "imports",
+      "source": "apps/ttb-studio/src/lib/server/studio/library.ts",
+      "target": "packages/contracts/src/index.ts"
+    },
+    {
+      "relation": "imports",
+      "source": "apps/ttb-studio/src/lib/server/studio/library.ts",
+      "target": "pkg:node:fs/promises"
+    },
+    {
+      "relation": "imports",
+      "source": "apps/ttb-studio/src/lib/server/studio/library.ts",
+      "target": "pkg:node:path"
+    },
+    {
+      "relation": "imports",
+      "source": "apps/ttb-studio/src/lib/server/studio/lyrics.test.ts",
+      "target": "apps/ttb-studio/src/lib/server/studio/lyrics.ts"
+    },
+    {
+      "relation": "imports",
+      "source": "apps/ttb-studio/src/lib/server/studio/lyrics.test.ts",
+      "target": "packages/contracts/src/index.ts"
+    },
+    {
+      "relation": "imports",
+      "source": "apps/ttb-studio/src/lib/server/studio/lyrics.test.ts",
+      "target": "pkg:bun:test"
+    },
+    {
+      "relation": "imports",
+      "source": "apps/ttb-studio/src/lib/server/studio/lyrics.ts",
+      "target": "apps/ttb-studio/src/lib/server/music/errors.ts"
+    },
+    {
+      "relation": "imports",
+      "source": "apps/ttb-studio/src/lib/server/studio/lyrics.ts",
+      "target": "apps/ttb-studio/src/lib/server/music/lyricist.ts"
+    },
+    {
+      "relation": "imports",
+      "source": "apps/ttb-studio/src/lib/server/studio/lyrics.ts",
+      "target": "apps/ttb-studio/src/lib/server/studio/engines.ts"
+    },
+    {
+      "relation": "imports",
+      "source": "apps/ttb-studio/src/lib/server/studio/lyrics.ts",
+      "target": "apps/ttb-studio/src/lib/server/studio/replicate.ts"
+    },
+    {
+      "relation": "calls_external",
+      "source": "apps/ttb-studio/src/lib/server/studio/lyrics.ts",
+      "target": "external:ai.google.dev"
+    },
+    {
+      "relation": "calls_external",
+      "source": "apps/ttb-studio/src/lib/server/studio/lyrics.ts",
+      "target": "external:api.anthropic.com"
+    },
+    {
+      "relation": "calls_external",
+      "source": "apps/ttb-studio/src/lib/server/studio/lyrics.ts",
+      "target": "external:api.openai.com"
+    },
+    {
+      "relation": "calls_external",
+      "source": "apps/ttb-studio/src/lib/server/studio/lyrics.ts",
+      "target": "external:docs.anthropic.com"
+    },
+    {
+      "relation": "calls_external",
+      "source": "apps/ttb-studio/src/lib/server/studio/lyrics.ts",
+      "target": "external:generativelanguage.googleapis.com"
+    },
+    {
+      "relation": "calls_external",
+      "source": "apps/ttb-studio/src/lib/server/studio/lyrics.ts",
+      "target": "external:platform.openai.com"
+    },
+    {
+      "relation": "imports",
+      "source": "apps/ttb-studio/src/lib/server/studio/lyrics.ts",
+      "target": "packages/contracts/src/index.ts"
+    },
+    {
+      "relation": "imports",
+      "source": "apps/ttb-studio/src/lib/server/studio/master.ts",
+      "target": "apps/ttb-studio/src/lib/server/music/errors.ts"
+    },
+    {
+      "relation": "imports",
+      "source": "apps/ttb-studio/src/lib/server/studio/paths.ts",
+      "target": "pkg:node:fs"
+    },
+    {
+      "relation": "imports",
+      "source": "apps/ttb-studio/src/lib/server/studio/paths.ts",
+      "target": "pkg:node:path"
+    },
+    {
+      "relation": "imports",
+      "source": "apps/ttb-studio/src/lib/server/studio/replicate.ts",
+      "target": "apps/ttb-studio/src/lib/server/music/audio.ts"
+    },
+    {
+      "relation": "imports",
+      "source": "apps/ttb-studio/src/lib/server/studio/replicate.ts",
+      "target": "apps/ttb-studio/src/lib/server/music/errors.ts"
+    },
+    {
+      "relation": "calls_external",
+      "source": "apps/ttb-studio/src/lib/server/studio/replicate.ts",
+      "target": "external:api.replicate.com"
+    },
+    {
+      "relation": "imports",
+      "source": "apps/ttb-studio/src/lib/server/studio/review.test.ts",
+      "target": "apps/ttb-studio/src/lib/server/music/errors.ts"
+    },
+    {
+      "relation": "imports",
+      "source": "apps/ttb-studio/src/lib/server/studio/review.test.ts",
+      "target": "apps/ttb-studio/src/lib/server/studio/create.ts"
+    },
+    {
+      "relation": "imports",
+      "source": "apps/ttb-studio/src/lib/server/studio/review.test.ts",
+      "target": "apps/ttb-studio/src/lib/server/studio/edit.ts"
+    },
+    {
+      "relation": "imports",
+      "source": "apps/ttb-studio/src/lib/server/studio/review.test.ts",
+      "target": "apps/ttb-studio/src/lib/server/studio/jobs.ts"
+    },
+    {
+      "relation": "imports",
+      "source": "apps/ttb-studio/src/lib/server/studio/review.test.ts",
+      "target": "apps/ttb-studio/src/lib/server/studio/library.ts"
+    },
+    {
+      "relation": "imports",
+      "source": "apps/ttb-studio/src/lib/server/studio/review.test.ts",
+      "target": "apps/ttb-studio/src/lib/server/studio/runners/capabilities.ts"
+    },
+    {
+      "relation": "imports",
+      "source": "apps/ttb-studio/src/lib/server/studio/review.test.ts",
+      "target": "apps/ttb-studio/src/lib/server/studio/seal.ts"
+    },
+    {
+      "relation": "imports",
+      "source": "apps/ttb-studio/src/lib/server/studio/review.test.ts",
+      "target": "packages/contracts/src/index.ts"
+    },
+    {
+      "relation": "imports",
+      "source": "apps/ttb-studio/src/lib/server/studio/review.test.ts",
+      "target": "pkg:bun:test"
+    },
+    {
+      "relation": "imports",
+      "source": "apps/ttb-studio/src/lib/server/studio/review.test.ts",
+      "target": "pkg:node:fs/promises"
+    },
+    {
+      "relation": "imports",
+      "source": "apps/ttb-studio/src/lib/server/studio/review.test.ts",
+      "target": "pkg:node:os"
+    },
+    {
+      "relation": "imports",
+      "source": "apps/ttb-studio/src/lib/server/studio/review.test.ts",
+      "target": "pkg:node:path"
+    },
+    {
+      "relation": "imports",
+      "source": "apps/ttb-studio/src/lib/server/studio/runners/capabilities.test.ts",
+      "target": "apps/ttb-studio/src/lib/server/studio/runners/capabilities.ts"
+    },
+    {
+      "relation": "imports",
+      "source": "apps/ttb-studio/src/lib/server/studio/runners/capabilities.test.ts",
+      "target": "pkg:bun:test"
+    },
+    {
+      "relation": "imports",
+      "source": "apps/ttb-studio/src/lib/server/studio/runners/capabilities.ts",
+      "target": "apps/ttb-studio/src/lib/server/studio/runners/models.ts"
+    },
+    {
+      "relation": "imports",
+      "source": "apps/ttb-studio/src/lib/server/studio/runners/capabilities.ts",
+      "target": "apps/ttb-studio/src/lib/server/studio/runners/routed.ts"
+    },
+    {
+      "relation": "imports",
+      "source": "apps/ttb-studio/src/lib/server/studio/runners/capabilities.ts",
+      "target": "apps/ttb-studio/src/lib/server/studio/runners/router.ts"
+    },
+    {
+      "relation": "imports",
+      "source": "apps/ttb-studio/src/lib/server/studio/runners/capabilities.ts",
+      "target": "packages/contracts/src/index.ts"
+    },
+    {
+      "relation": "imports",
+      "source": "apps/ttb-studio/src/lib/server/studio/runners/direct.test.ts",
+      "target": "apps/ttb-studio/src/lib/server/studio/runners/direct.ts"
+    },
+    {
+      "relation": "imports",
+      "source": "apps/ttb-studio/src/lib/server/studio/runners/direct.test.ts",
+      "target": "apps/ttb-studio/src/lib/server/studio/runners/engine.ts"
+    },
+    {
+      "relation": "imports",
+      "source": "apps/ttb-studio/src/lib/server/studio/runners/direct.test.ts",
+      "target": "pkg:bun:test"
+    },
+    {
+      "relation": "imports",
+      "source": "apps/ttb-studio/src/lib/server/studio/runners/direct.ts",
+      "target": "apps/ttb-studio/src/lib/server/music/audio.ts"
+    },
+    {
+      "relation": "imports",
+      "source": "apps/ttb-studio/src/lib/server/studio/runners/direct.ts",
+      "target": "apps/ttb-studio/src/lib/server/music/errors.ts"
+    },
+    {
+      "relation": "imports",
+      "source": "apps/ttb-studio/src/lib/server/studio/runners/direct.ts",
+      "target": "apps/ttb-studio/src/lib/server/music/lyria.ts"
+    },
+    {
+      "relation": "imports",
+      "source": "apps/ttb-studio/src/lib/server/studio/runners/direct.ts",
+      "target": "apps/ttb-studio/src/lib/server/studio/replicate.ts"
+    },
+    {
+      "relation": "imports",
+      "source": "apps/ttb-studio/src/lib/server/studio/runners/direct.ts",
+      "target": "apps/ttb-studio/src/lib/server/studio/runners/engine.ts"
+    },
+    {
+      "relation": "imports",
+      "source": "apps/ttb-studio/src/lib/server/studio/runners/direct.ts",
+      "target": "apps/ttb-studio/src/lib/server/studio/runners/models.ts"
+    },
+    {
+      "relation": "calls_external",
+      "source": "apps/ttb-studio/src/lib/server/studio/runners/direct.ts",
+      "target": "external:ai.google.dev"
+    },
+    {
+      "relation": "calls_external",
+      "source": "apps/ttb-studio/src/lib/server/studio/runners/direct.ts",
+      "target": "external:api.elevenlabs.io"
+    },
+    {
+      "relation": "calls_external",
+      "source": "apps/ttb-studio/src/lib/server/studio/runners/direct.ts",
+      "target": "external:api.minimax.io"
+    },
+    {
+      "relation": "calls_external",
+      "source": "apps/ttb-studio/src/lib/server/studio/runners/direct.ts",
+      "target": "external:elevenlabs.io"
+    },
+    {
+      "relation": "calls_external",
+      "source": "apps/ttb-studio/src/lib/server/studio/runners/direct.ts",
+      "target": "external:platform.minimax.io"
+    },
+    {
+      "relation": "imports",
+      "source": "apps/ttb-studio/src/lib/server/studio/runners/engine.test.ts",
+      "target": "apps/ttb-studio/src/lib/server/studio/runners/engine.ts"
+    },
+    {
+      "relation": "imports",
+      "source": "apps/ttb-studio/src/lib/server/studio/runners/engine.test.ts",
+      "target": "packages/contracts/src/index.ts"
+    },
+    {
+      "relation": "imports",
+      "source": "apps/ttb-studio/src/lib/server/studio/runners/engine.test.ts",
+      "target": "pkg:bun:test"
+    },
+    {
+      "relation": "imports",
+      "source": "apps/ttb-studio/src/lib/server/studio/runners/engine.ts",
+      "target": "apps/ttb-studio/src/lib/server/music/errors.ts"
+    },
+    {
+      "relation": "imports",
+      "source": "apps/ttb-studio/src/lib/server/studio/runners/engine.ts",
+      "target": "apps/ttb-studio/src/lib/server/studio/replicate.ts"
+    },
+    {
+      "relation": "engine_call",
+      "source": "apps/ttb-studio/src/lib/server/studio/runners/engine.ts",
+      "target": "endpoint:services/audio-engine:DELETE /v1/jobs/{job_id}"
+    },
+    {
+      "relation": "engine_call",
+      "source": "apps/ttb-studio/src/lib/server/studio/runners/engine.ts",
+      "target": "endpoint:services/audio-engine:GET /v1/health"
+    },
+    {
+      "relation": "engine_call",
+      "source": "apps/ttb-studio/src/lib/server/studio/runners/engine.ts",
+      "target": "endpoint:services/audio-engine:GET /v1/jobs/{job_id}"
+    },
+    {
+      "relation": "engine_call",
+      "source": "apps/ttb-studio/src/lib/server/studio/runners/engine.ts",
+      "target": "endpoint:services/audio-engine:POST /v1/jobs"
+    },
+    {
+      "relation": "imports",
+      "source": "apps/ttb-studio/src/lib/server/studio/runners/engine.ts",
+      "target": "packages/contracts/src/index.ts"
+    },
+    {
+      "relation": "imports",
+      "source": "apps/ttb-studio/src/lib/server/studio/runners/models.ts",
+      "target": "apps/ttb-studio/src/lib/server/studio/replicate.ts"
+    },
+    {
+      "relation": "imports",
+      "source": "apps/ttb-studio/src/lib/server/studio/runners/models.ts",
+      "target": "packages/contracts/src/index.ts"
+    },
+    {
+      "relation": "imports",
+      "source": "apps/ttb-studio/src/lib/server/studio/runners/routed.ts",
+      "target": "apps/ttb-studio/src/lib/server/music/errors.ts"
+    },
+    {
+      "relation": "imports",
+      "source": "apps/ttb-studio/src/lib/server/studio/runners/routed.ts",
+      "target": "apps/ttb-studio/src/lib/server/music/fal.ts"
+    },
+    {
+      "relation": "imports",
+      "source": "apps/ttb-studio/src/lib/server/studio/runners/routed.ts",
+      "target": "apps/ttb-studio/src/lib/server/studio/jobs.ts"
+    },
+    {
+      "relation": "imports",
+      "source": "apps/ttb-studio/src/lib/server/studio/runners/routed.ts",
+      "target": "apps/ttb-studio/src/lib/server/studio/replicate.ts"
+    },
+    {
+      "relation": "imports",
+      "source": "apps/ttb-studio/src/lib/server/studio/runners/routed.ts",
+      "target": "apps/ttb-studio/src/lib/server/studio/runners/direct.ts"
+    },
+    {
+      "relation": "imports",
+      "source": "apps/ttb-studio/src/lib/server/studio/runners/routed.ts",
+      "target": "apps/ttb-studio/src/lib/server/studio/runners/engine.ts"
+    },
+    {
+      "relation": "imports",
+      "source": "apps/ttb-studio/src/lib/server/studio/runners/routed.ts",
+      "target": "apps/ttb-studio/src/lib/server/studio/runners/models.ts"
+    },
+    {
+      "relation": "imports",
+      "source": "apps/ttb-studio/src/lib/server/studio/runners/routed.ts",
+      "target": "apps/ttb-studio/src/lib/server/studio/runners/router.ts"
+    },
+    {
+      "relation": "imports",
+      "source": "apps/ttb-studio/src/lib/server/studio/runners/routed.ts",
+      "target": "packages/contracts/src/index.ts"
+    },
+    {
+      "relation": "imports",
+      "source": "apps/ttb-studio/src/lib/server/studio/runners/router.test.ts",
+      "target": "apps/ttb-studio/src/lib/server/music/errors.ts"
+    },
+    {
+      "relation": "imports",
+      "source": "apps/ttb-studio/src/lib/server/studio/runners/router.test.ts",
+      "target": "apps/ttb-studio/src/lib/server/studio/runners/engine.ts"
+    },
+    {
+      "relation": "imports",
+      "source": "apps/ttb-studio/src/lib/server/studio/runners/router.test.ts",
+      "target": "apps/ttb-studio/src/lib/server/studio/runners/models.ts"
+    },
+    {
+      "relation": "imports",
+      "source": "apps/ttb-studio/src/lib/server/studio/runners/router.test.ts",
+      "target": "apps/ttb-studio/src/lib/server/studio/runners/router.ts"
+    },
+    {
+      "relation": "imports",
+      "source": "apps/ttb-studio/src/lib/server/studio/runners/router.test.ts",
+      "target": "pkg:bun:test"
+    },
+    {
+      "relation": "imports",
+      "source": "apps/ttb-studio/src/lib/server/studio/runners/router.ts",
+      "target": "apps/ttb-studio/src/lib/server/music/errors.ts"
+    },
+    {
+      "relation": "imports",
+      "source": "apps/ttb-studio/src/lib/server/studio/runners/router.ts",
+      "target": "apps/ttb-studio/src/lib/server/studio/runners/engine.ts"
+    },
+    {
+      "relation": "imports",
+      "source": "apps/ttb-studio/src/lib/server/studio/runners/router.ts",
+      "target": "apps/ttb-studio/src/lib/server/studio/runners/models.ts"
+    },
+    {
+      "relation": "imports",
+      "source": "apps/ttb-studio/src/lib/server/studio/runners/router.ts",
+      "target": "packages/contracts/src/index.ts"
+    },
+    {
+      "relation": "imports",
+      "source": "apps/ttb-studio/src/lib/server/studio/seal.test.ts",
+      "target": "apps/ttb-studio/src/lib/server/studio/create.ts"
+    },
+    {
+      "relation": "imports",
+      "source": "apps/ttb-studio/src/lib/server/studio/seal.test.ts",
+      "target": "apps/ttb-studio/src/lib/server/studio/jobs.ts"
+    },
+    {
+      "relation": "imports",
+      "source": "apps/ttb-studio/src/lib/server/studio/seal.test.ts",
+      "target": "apps/ttb-studio/src/lib/server/studio/library.ts"
+    },
+    {
+      "relation": "imports",
+      "source": "apps/ttb-studio/src/lib/server/studio/seal.test.ts",
+      "target": "apps/ttb-studio/src/lib/server/studio/seal.ts"
+    },
+    {
+      "relation": "imports",
+      "source": "apps/ttb-studio/src/lib/server/studio/seal.test.ts",
+      "target": "apps/ttb-studio/src/lib/server/studio/seance.ts"
+    },
+    {
+      "relation": "imports",
+      "source": "apps/ttb-studio/src/lib/server/studio/seal.test.ts",
+      "target": "packages/contracts/src/index.ts"
+    },
+    {
+      "relation": "imports",
+      "source": "apps/ttb-studio/src/lib/server/studio/seal.test.ts",
+      "target": "pkg:bun:test"
+    },
+    {
+      "relation": "imports",
+      "source": "apps/ttb-studio/src/lib/server/studio/seal.test.ts",
+      "target": "pkg:node:fs/promises"
+    },
+    {
+      "relation": "imports",
+      "source": "apps/ttb-studio/src/lib/server/studio/seal.test.ts",
+      "target": "pkg:node:os"
+    },
+    {
+      "relation": "imports",
+      "source": "apps/ttb-studio/src/lib/server/studio/seal.test.ts",
+      "target": "pkg:node:path"
+    },
+    {
+      "relation": "imports",
+      "source": "apps/ttb-studio/src/lib/server/studio/seal.ts",
+      "target": "apps/ttb-studio/src/lib/server/studio/seance.ts"
+    },
+    {
+      "relation": "imports",
+      "source": "apps/ttb-studio/src/lib/server/studio/seal.ts",
+      "target": "packages/contracts/src/index.ts"
+    },
+    {
+      "relation": "imports",
+      "source": "apps/ttb-studio/src/lib/server/studio/seance.test.ts",
+      "target": "apps/ttb-studio/src/lib/server/music/errors.ts"
+    },
+    {
+      "relation": "imports",
+      "source": "apps/ttb-studio/src/lib/server/studio/seance.test.ts",
+      "target": "apps/ttb-studio/src/lib/server/studio/seance.ts"
+    },
+    {
+      "relation": "imports",
+      "source": "apps/ttb-studio/src/lib/server/studio/seance.test.ts",
+      "target": "packages/contracts/src/index.ts"
+    },
+    {
+      "relation": "imports",
+      "source": "apps/ttb-studio/src/lib/server/studio/seance.test.ts",
+      "target": "pkg:bun:test"
+    },
+    {
+      "relation": "imports",
+      "source": "apps/ttb-studio/src/lib/server/studio/seance.test.ts",
+      "target": "pkg:node:fs/promises"
+    },
+    {
+      "relation": "imports",
+      "source": "apps/ttb-studio/src/lib/server/studio/seance.test.ts",
+      "target": "pkg:node:os"
+    },
+    {
+      "relation": "imports",
+      "source": "apps/ttb-studio/src/lib/server/studio/seance.test.ts",
+      "target": "pkg:node:path"
+    },
+    {
+      "relation": "imports",
+      "source": "apps/ttb-studio/src/lib/server/studio/seance.ts",
+      "target": "apps/ttb-studio/src/lib/server/music/errors.ts"
+    },
+    {
+      "relation": "imports",
+      "source": "apps/ttb-studio/src/lib/server/studio/seance.ts",
+      "target": "apps/ttb-studio/src/lib/server/studio/create.ts"
+    },
+    {
+      "relation": "imports",
+      "source": "apps/ttb-studio/src/lib/server/studio/seance.ts",
+      "target": "packages/contracts/src/index.ts"
+    },
+    {
+      "relation": "imports",
+      "source": "apps/ttb-studio/src/lib/server/studio/seance.ts",
+      "target": "pkg:node:crypto"
+    },
+    {
+      "relation": "imports",
+      "source": "apps/ttb-studio/src/lib/server/studio/seance.ts",
+      "target": "pkg:node:fs/promises"
+    },
+    {
+      "relation": "imports",
+      "source": "apps/ttb-studio/src/lib/server/studio/seance.ts",
+      "target": "pkg:node:path"
+    },
+    {
+      "relation": "imports",
+      "source": "apps/ttb-studio/src/lib/server/studio/studio.test.ts",
+      "target": "apps/ttb-studio/src/lib/server/music/errors.ts"
+    },
+    {
+      "relation": "imports",
+      "source": "apps/ttb-studio/src/lib/server/studio/studio.test.ts",
+      "target": "apps/ttb-studio/src/lib/server/studio/create.ts"
+    },
+    {
+      "relation": "imports",
+      "source": "apps/ttb-studio/src/lib/server/studio/studio.test.ts",
+      "target": "apps/ttb-studio/src/lib/server/studio/derive.ts"
+    },
+    {
+      "relation": "imports",
+      "source": "apps/ttb-studio/src/lib/server/studio/studio.test.ts",
+      "target": "apps/ttb-studio/src/lib/server/studio/engines.ts"
+    },
+    {
+      "relation": "imports",
+      "source": "apps/ttb-studio/src/lib/server/studio/studio.test.ts",
+      "target": "apps/ttb-studio/src/lib/server/studio/jobs.ts"
+    },
+    {
+      "relation": "imports",
+      "source": "apps/ttb-studio/src/lib/server/studio/studio.test.ts",
+      "target": "apps/ttb-studio/src/lib/server/studio/library.ts"
+    },
+    {
+      "relation": "imports",
+      "source": "apps/ttb-studio/src/lib/server/studio/studio.test.ts",
+      "target": "apps/ttb-studio/src/lib/server/studio/lyrics.ts"
+    },
+    {
+      "relation": "imports",
+      "source": "apps/ttb-studio/src/lib/server/studio/studio.test.ts",
+      "target": "apps/ttb-studio/src/lib/server/studio/master.ts"
+    },
+    {
+      "relation": "imports",
+      "source": "apps/ttb-studio/src/lib/server/studio/studio.test.ts",
+      "target": "apps/ttb-studio/src/lib/server/studio/paths.ts"
+    },
+    {
+      "relation": "imports",
+      "source": "apps/ttb-studio/src/lib/server/studio/studio.test.ts",
+      "target": "apps/ttb-studio/src/lib/server/studio/range.ts"
+    },
+    {
+      "relation": "imports",
+      "source": "apps/ttb-studio/src/lib/server/studio/studio.test.ts",
+      "target": "apps/ttb-studio/src/lib/server/studio/replicate.ts"
+    },
+    {
+      "relation": "imports",
+      "source": "apps/ttb-studio/src/lib/server/studio/studio.test.ts",
+      "target": "apps/ttb-studio/src/lib/server/studio/voices.ts"
+    },
+    {
+      "relation": "imports",
+      "source": "apps/ttb-studio/src/lib/server/studio/studio.test.ts",
+      "target": "packages/contracts/src/index.ts"
+    },
+    {
+      "relation": "imports",
+      "source": "apps/ttb-studio/src/lib/server/studio/studio.test.ts",
+      "target": "pkg:bun:test"
+    },
+    {
+      "relation": "imports",
+      "source": "apps/ttb-studio/src/lib/server/studio/studio.test.ts",
+      "target": "pkg:node:fs/promises"
+    },
+    {
+      "relation": "imports",
+      "source": "apps/ttb-studio/src/lib/server/studio/studio.test.ts",
+      "target": "pkg:node:os"
+    },
+    {
+      "relation": "imports",
+      "source": "apps/ttb-studio/src/lib/server/studio/studio.test.ts",
+      "target": "pkg:node:path"
+    },
+    {
+      "relation": "imports",
+      "source": "apps/ttb-studio/src/lib/server/studio/voices.ts",
+      "target": "packages/contracts/src/index.ts"
+    },
+    {
+      "relation": "imports",
+      "source": "apps/ttb-studio/src/lib/server/studio/voices.ts",
+      "target": "pkg:node:fs/promises"
+    },
+    {
+      "relation": "imports",
+      "source": "apps/ttb-studio/src/lib/server/studio/voices.ts",
+      "target": "pkg:node:path"
+    },
+    {
+      "relation": "imports",
+      "source": "apps/ttb-studio/src/lib/server/studio/voicesummon.ts",
+      "target": "apps/ttb-studio/src/lib/server/music/errors.ts"
+    },
+    {
+      "relation": "imports",
+      "source": "apps/ttb-studio/src/lib/server/studio/voicesummon.ts",
+      "target": "apps/ttb-studio/src/lib/server/studio/engines.ts"
+    },
+    {
+      "relation": "imports",
+      "source": "apps/ttb-studio/src/lib/server/studio/voicesummon.ts",
+      "target": "apps/ttb-studio/src/lib/server/studio/gold.ts"
+    },
+    {
+      "relation": "imports",
+      "source": "apps/ttb-studio/src/lib/server/studio/voicesummon.ts",
+      "target": "apps/ttb-studio/src/lib/server/studio/jobs.ts"
+    },
+    {
+      "relation": "imports",
+      "source": "apps/ttb-studio/src/lib/server/studio/voicesummon.ts",
+      "target": "apps/ttb-studio/src/lib/server/studio/library.ts"
+    },
+    {
+      "relation": "imports",
+      "source": "apps/ttb-studio/src/lib/server/studio/voicesummon.ts",
+      "target": "apps/ttb-studio/src/lib/server/studio/master.ts"
+    },
+    {
+      "relation": "imports",
+      "source": "apps/ttb-studio/src/lib/server/studio/voicesummon.ts",
+      "target": "apps/ttb-studio/src/lib/server/studio/replicate.ts"
+    },
+    {
+      "relation": "imports",
+      "source": "apps/ttb-studio/src/lib/server/studio/voicesummon.ts",
+      "target": "apps/ttb-studio/src/lib/server/studio/voices.ts"
+    },
+    {
+      "relation": "imports",
+      "source": "apps/ttb-studio/src/lib/server/studio/voicesummon.ts",
+      "target": "packages/contracts/src/index.ts"
+    },
+    {
+      "relation": "imports",
+      "source": "apps/ttb-studio/src/lib/server/studio/voicesummon.ts",
+      "target": "pkg:node:fs/promises"
+    },
+    {
+      "relation": "imports",
+      "source": "apps/ttb-studio/src/lib/server/studio/voicesummon.ts",
+      "target": "pkg:node:os"
+    },
+    {
+      "relation": "imports",
+      "source": "apps/ttb-studio/src/lib/server/studio/voicesummon.ts",
+      "target": "pkg:node:path"
+    },
+    {
+      "relation": "imports",
+      "source": "apps/ttb-studio/src/routes/+error.svelte",
+      "target": "packages/ui/src/RuneButton.svelte"
+    },
+    {
+      "relation": "imports",
+      "source": "apps/ttb-studio/src/routes/+error.svelte",
+      "target": "packages/ui/src/Sigil.svelte"
+    },
+    {
+      "relation": "imports",
+      "source": "apps/ttb-studio/src/routes/+error.svelte",
+      "target": "pkg:$app/paths"
+    },
+    {
+      "relation": "imports",
+      "source": "apps/ttb-studio/src/routes/+error.svelte",
+      "target": "pkg:$app/state"
+    },
+    {
+      "relation": "imports",
+      "source": "apps/ttb-studio/src/routes/+layout.svelte",
+      "target": "packages/ui/src/ArcaneShell.svelte"
+    },
+    {
+      "relation": "imports",
+      "source": "apps/ttb-studio/src/routes/+layout.svelte",
+      "target": "packages/ui/src/theme.css"
+    },
+    {
+      "relation": "imports",
+      "source": "apps/ttb-studio/src/routes/+layout.svelte",
+      "target": "pkg:$app/paths"
+    },
+    {
+      "relation": "imports",
+      "source": "apps/ttb-studio/src/routes/+page.svelte",
+      "target": "apps/ttb-studio/src/lib/client/ModelPicker.svelte"
+    },
+    {
+      "relation": "imports",
+      "source": "apps/ttb-studio/src/routes/+page.svelte",
+      "target": "apps/ttb-studio/src/lib/client/SongTake.svelte"
+    },
+    {
+      "relation": "imports",
+      "source": "apps/ttb-studio/src/routes/+page.svelte",
+      "target": "apps/ttb-studio/src/lib/client/api.ts"
+    },
+    {
+      "relation": "imports",
       "source": "apps/ttb-studio/src/routes/+page.svelte",
       "target": "packages/contracts/src/index.ts"
     },
     {
       "relation": "imports",
       "source": "apps/ttb-studio/src/routes/+page.svelte",
-      "target": "packages/ui/src/BrandHeader.svelte"
+      "target": "packages/ui/src/ArcaneInput.svelte"
     },
     {
       "relation": "imports",
       "source": "apps/ttb-studio/src/routes/+page.svelte",
-      "target": "packages/ui/src/StatusPanel.svelte"
+      "target": "packages/ui/src/ArcanePanel.svelte"
+    },
+    {
+      "relation": "imports",
+      "source": "apps/ttb-studio/src/routes/+page.svelte",
+      "target": "packages/ui/src/ArcaneSelect.svelte"
+    },
+    {
+      "relation": "imports",
+      "source": "apps/ttb-studio/src/routes/+page.svelte",
+      "target": "packages/ui/src/ArcaneTextarea.svelte"
+    },
+    {
+      "relation": "imports",
+      "source": "apps/ttb-studio/src/routes/+page.svelte",
+      "target": "packages/ui/src/OracleStatus.svelte"
+    },
+    {
+      "relation": "imports",
+      "source": "apps/ttb-studio/src/routes/+page.svelte",
+      "target": "packages/ui/src/RitualProgress.svelte"
+    },
+    {
+      "relation": "imports",
+      "source": "apps/ttb-studio/src/routes/+page.svelte",
+      "target": "packages/ui/src/RuneButton.svelte"
+    },
+    {
+      "relation": "imports",
+      "source": "apps/ttb-studio/src/routes/+page.svelte",
+      "target": "packages/ui/src/RuneToggle.svelte"
+    },
+    {
+      "relation": "imports",
+      "source": "apps/ttb-studio/src/routes/+page.svelte",
+      "target": "packages/ui/src/SigilLoader.svelte"
     },
     {
       "relation": "imports",
@@ -193,17 +1458,37 @@
     {
       "relation": "browser_fetch",
       "source": "apps/ttb-studio/src/routes/+page.svelte",
-      "target": "route:apps/ttb-studio:GET /api/capabilities"
+      "target": "route:apps/ttb-studio:DELETE /api/studio/jobs/[id]"
     },
     {
       "relation": "browser_fetch",
       "source": "apps/ttb-studio/src/routes/+page.svelte",
-      "target": "route:apps/ttb-studio:GET /api/generations/[id]"
+      "target": "route:apps/ttb-studio:GET /api/studio/capabilities"
     },
     {
       "relation": "browser_fetch",
       "source": "apps/ttb-studio/src/routes/+page.svelte",
-      "target": "route:apps/ttb-studio:POST /api/generations"
+      "target": "route:apps/ttb-studio:GET /api/studio/jobs/[id]"
+    },
+    {
+      "relation": "browser_fetch",
+      "source": "apps/ttb-studio/src/routes/+page.svelte",
+      "target": "route:apps/ttb-studio:GET /api/studio/songs"
+    },
+    {
+      "relation": "browser_fetch",
+      "source": "apps/ttb-studio/src/routes/+page.svelte",
+      "target": "route:apps/ttb-studio:GET /api/studio/songs/[id]"
+    },
+    {
+      "relation": "browser_fetch",
+      "source": "apps/ttb-studio/src/routes/+page.svelte",
+      "target": "route:apps/ttb-studio:GET /api/studio/voices"
+    },
+    {
+      "relation": "browser_fetch",
+      "source": "apps/ttb-studio/src/routes/+page.svelte",
+      "target": "route:apps/ttb-studio:POST /api/studio/songs"
     },
     {
       "relation": "imports",
@@ -337,6 +1622,756 @@
     },
     {
       "relation": "imports",
+      "source": "apps/ttb-studio/src/routes/api/studio/capabilities/+server.ts",
+      "target": "apps/ttb-studio/src/lib/server/music/gate.ts"
+    },
+    {
+      "relation": "imports",
+      "source": "apps/ttb-studio/src/routes/api/studio/capabilities/+server.ts",
+      "target": "apps/ttb-studio/src/lib/server/studio/context.ts"
+    },
+    {
+      "relation": "imports",
+      "source": "apps/ttb-studio/src/routes/api/studio/capabilities/+server.ts",
+      "target": "apps/ttb-studio/src/lib/server/studio/engines.ts"
+    },
+    {
+      "relation": "imports",
+      "source": "apps/ttb-studio/src/routes/api/studio/capabilities/+server.ts",
+      "target": "apps/ttb-studio/src/lib/server/studio/master.ts"
+    },
+    {
+      "relation": "imports",
+      "source": "apps/ttb-studio/src/routes/api/studio/capabilities/+server.ts",
+      "target": "apps/ttb-studio/src/lib/server/studio/runners/capabilities.ts"
+    },
+    {
+      "relation": "imports",
+      "source": "apps/ttb-studio/src/routes/api/studio/capabilities/+server.ts",
+      "target": "apps/ttb-studio/src/lib/server/studio/voices.ts"
+    },
+    {
+      "relation": "imports",
+      "source": "apps/ttb-studio/src/routes/api/studio/capabilities/+server.ts",
+      "target": "pkg:node:fs"
+    },
+    {
+      "relation": "imports",
+      "source": "apps/ttb-studio/src/routes/api/studio/jobs/[id]/+server.ts",
+      "target": "apps/ttb-studio/src/lib/server/studio/context.ts"
+    },
+    {
+      "relation": "imports",
+      "source": "apps/ttb-studio/src/routes/api/studio/jobs/[id]/+server.ts",
+      "target": "apps/ttb-studio/src/lib/server/studio/jobs.ts"
+    },
+    {
+      "relation": "imports",
+      "source": "apps/ttb-studio/src/routes/api/studio/lyrics/+server.ts",
+      "target": "apps/ttb-studio/src/lib/server/studio/context.ts"
+    },
+    {
+      "relation": "imports",
+      "source": "apps/ttb-studio/src/routes/api/studio/lyrics/+server.ts",
+      "target": "apps/ttb-studio/src/lib/server/studio/create.ts"
+    },
+    {
+      "relation": "imports",
+      "source": "apps/ttb-studio/src/routes/api/studio/lyrics/+server.ts",
+      "target": "apps/ttb-studio/src/lib/server/studio/lyrics.ts"
+    },
+    {
+      "relation": "imports",
+      "source": "apps/ttb-studio/src/routes/api/studio/lyrics/+server.ts",
+      "target": "packages/contracts/src/index.ts"
+    },
+    {
+      "relation": "imports",
+      "source": "apps/ttb-studio/src/routes/api/studio/seances/+server.ts",
+      "target": "apps/ttb-studio/src/lib/server/studio/context.ts"
+    },
+    {
+      "relation": "imports",
+      "source": "apps/ttb-studio/src/routes/api/studio/seances/+server.ts",
+      "target": "apps/ttb-studio/src/lib/server/studio/seance.ts"
+    },
+    {
+      "relation": "imports",
+      "source": "apps/ttb-studio/src/routes/api/studio/seances/+server.ts",
+      "target": "apps/ttb-studio/src/routes/api/studio/seances/_deps.ts"
+    },
+    {
+      "relation": "imports",
+      "source": "apps/ttb-studio/src/routes/api/studio/seances/+server.ts",
+      "target": "packages/contracts/src/index.ts"
+    },
+    {
+      "relation": "imports",
+      "source": "apps/ttb-studio/src/routes/api/studio/seances/[id]/+server.ts",
+      "target": "apps/ttb-studio/src/lib/server/studio/context.ts"
+    },
+    {
+      "relation": "imports",
+      "source": "apps/ttb-studio/src/routes/api/studio/seances/[id]/+server.ts",
+      "target": "apps/ttb-studio/src/lib/server/studio/seance.ts"
+    },
+    {
+      "relation": "imports",
+      "source": "apps/ttb-studio/src/routes/api/studio/seances/[id]/+server.ts",
+      "target": "apps/ttb-studio/src/routes/api/studio/seances/_deps.ts"
+    },
+    {
+      "relation": "imports",
+      "source": "apps/ttb-studio/src/routes/api/studio/seances/[id]/rank/+server.ts",
+      "target": "apps/ttb-studio/src/lib/server/studio/context.ts"
+    },
+    {
+      "relation": "imports",
+      "source": "apps/ttb-studio/src/routes/api/studio/seances/[id]/rank/+server.ts",
+      "target": "apps/ttb-studio/src/lib/server/studio/seance.ts"
+    },
+    {
+      "relation": "imports",
+      "source": "apps/ttb-studio/src/routes/api/studio/seances/[id]/rank/+server.ts",
+      "target": "apps/ttb-studio/src/routes/api/studio/seances/_deps.ts"
+    },
+    {
+      "relation": "imports",
+      "source": "apps/ttb-studio/src/routes/api/studio/seances/[id]/rank/+server.ts",
+      "target": "packages/contracts/src/index.ts"
+    },
+    {
+      "relation": "imports",
+      "source": "apps/ttb-studio/src/routes/api/studio/seances/_deps.ts",
+      "target": "apps/ttb-studio/src/lib/server/music/gate.ts"
+    },
+    {
+      "relation": "imports",
+      "source": "apps/ttb-studio/src/routes/api/studio/seances/_deps.ts",
+      "target": "apps/ttb-studio/src/lib/server/studio/context.ts"
+    },
+    {
+      "relation": "imports",
+      "source": "apps/ttb-studio/src/routes/api/studio/seances/_deps.ts",
+      "target": "apps/ttb-studio/src/lib/server/studio/create.ts"
+    },
+    {
+      "relation": "imports",
+      "source": "apps/ttb-studio/src/routes/api/studio/seances/_deps.ts",
+      "target": "apps/ttb-studio/src/lib/server/studio/jobs.ts"
+    },
+    {
+      "relation": "imports",
+      "source": "apps/ttb-studio/src/routes/api/studio/seances/_deps.ts",
+      "target": "apps/ttb-studio/src/lib/server/studio/lyrics.ts"
+    },
+    {
+      "relation": "imports",
+      "source": "apps/ttb-studio/src/routes/api/studio/seances/_deps.ts",
+      "target": "apps/ttb-studio/src/lib/server/studio/runners/capabilities.ts"
+    },
+    {
+      "relation": "imports",
+      "source": "apps/ttb-studio/src/routes/api/studio/seances/_deps.ts",
+      "target": "apps/ttb-studio/src/lib/server/studio/seance.ts"
+    },
+    {
+      "relation": "imports",
+      "source": "apps/ttb-studio/src/routes/api/studio/seances/leaderboard/+server.ts",
+      "target": "apps/ttb-studio/src/lib/server/studio/context.ts"
+    },
+    {
+      "relation": "imports",
+      "source": "apps/ttb-studio/src/routes/api/studio/seances/leaderboard/+server.ts",
+      "target": "apps/ttb-studio/src/lib/server/studio/seance.ts"
+    },
+    {
+      "relation": "imports",
+      "source": "apps/ttb-studio/src/routes/api/studio/seances/leaderboard/+server.ts",
+      "target": "apps/ttb-studio/src/routes/api/studio/seances/_deps.ts"
+    },
+    {
+      "relation": "imports",
+      "source": "apps/ttb-studio/src/routes/api/studio/songs/+server.ts",
+      "target": "apps/ttb-studio/src/lib/server/studio/context.ts"
+    },
+    {
+      "relation": "imports",
+      "source": "apps/ttb-studio/src/routes/api/studio/songs/+server.ts",
+      "target": "apps/ttb-studio/src/lib/server/studio/create.ts"
+    },
+    {
+      "relation": "imports",
+      "source": "apps/ttb-studio/src/routes/api/studio/songs/+server.ts",
+      "target": "apps/ttb-studio/src/lib/server/studio/seal.ts"
+    },
+    {
+      "relation": "imports",
+      "source": "apps/ttb-studio/src/routes/api/studio/songs/+server.ts",
+      "target": "packages/contracts/src/index.ts"
+    },
+    {
+      "relation": "imports",
+      "source": "apps/ttb-studio/src/routes/api/studio/songs/[id]/+server.ts",
+      "target": "apps/ttb-studio/src/lib/server/studio/context.ts"
+    },
+    {
+      "relation": "imports",
+      "source": "apps/ttb-studio/src/routes/api/studio/songs/[id]/+server.ts",
+      "target": "apps/ttb-studio/src/lib/server/studio/seal.ts"
+    },
+    {
+      "relation": "imports",
+      "source": "apps/ttb-studio/src/routes/api/studio/songs/[id]/audio/+server.ts",
+      "target": "apps/ttb-studio/src/lib/server/studio/context.ts"
+    },
+    {
+      "relation": "imports",
+      "source": "apps/ttb-studio/src/routes/api/studio/songs/[id]/audio/+server.ts",
+      "target": "apps/ttb-studio/src/lib/server/studio/library.ts"
+    },
+    {
+      "relation": "imports",
+      "source": "apps/ttb-studio/src/routes/api/studio/songs/[id]/audio/+server.ts",
+      "target": "apps/ttb-studio/src/lib/server/studio/range.ts"
+    },
+    {
+      "relation": "imports",
+      "source": "apps/ttb-studio/src/routes/api/studio/songs/[id]/cover/+server.ts",
+      "target": "apps/ttb-studio/src/lib/server/studio/context.ts"
+    },
+    {
+      "relation": "imports",
+      "source": "apps/ttb-studio/src/routes/api/studio/songs/[id]/cover/+server.ts",
+      "target": "apps/ttb-studio/src/lib/server/studio/cover.ts"
+    },
+    {
+      "relation": "imports",
+      "source": "apps/ttb-studio/src/routes/api/studio/songs/[id]/cover/+server.ts",
+      "target": "apps/ttb-studio/src/lib/server/studio/range.ts"
+    },
+    {
+      "relation": "imports",
+      "source": "apps/ttb-studio/src/routes/api/studio/songs/[id]/cover/+server.ts",
+      "target": "apps/ttb-studio/src/lib/server/studio/seal.ts"
+    },
+    {
+      "relation": "imports",
+      "source": "apps/ttb-studio/src/routes/api/studio/songs/[id]/edit/+server.ts",
+      "target": "apps/ttb-studio/src/lib/server/studio/context.ts"
+    },
+    {
+      "relation": "imports",
+      "source": "apps/ttb-studio/src/routes/api/studio/songs/[id]/edit/+server.ts",
+      "target": "apps/ttb-studio/src/lib/server/studio/edit.ts"
+    },
+    {
+      "relation": "imports",
+      "source": "apps/ttb-studio/src/routes/api/studio/songs/[id]/edit/+server.ts",
+      "target": "packages/contracts/src/index.ts"
+    },
+    {
+      "relation": "imports",
+      "source": "apps/ttb-studio/src/routes/api/studio/songs/[id]/master/+server.ts",
+      "target": "apps/ttb-studio/src/lib/server/studio/context.ts"
+    },
+    {
+      "relation": "imports",
+      "source": "apps/ttb-studio/src/routes/api/studio/songs/[id]/master/+server.ts",
+      "target": "apps/ttb-studio/src/lib/server/studio/derive.ts"
+    },
+    {
+      "relation": "imports",
+      "source": "apps/ttb-studio/src/routes/api/studio/songs/[id]/reimagine/+server.ts",
+      "target": "apps/ttb-studio/src/lib/server/studio/context.ts"
+    },
+    {
+      "relation": "imports",
+      "source": "apps/ttb-studio/src/routes/api/studio/songs/[id]/reimagine/+server.ts",
+      "target": "apps/ttb-studio/src/lib/server/studio/derive.ts"
+    },
+    {
+      "relation": "imports",
+      "source": "apps/ttb-studio/src/routes/api/studio/songs/[id]/stems/+server.ts",
+      "target": "apps/ttb-studio/src/lib/server/studio/context.ts"
+    },
+    {
+      "relation": "imports",
+      "source": "apps/ttb-studio/src/routes/api/studio/songs/[id]/stems/+server.ts",
+      "target": "apps/ttb-studio/src/lib/server/studio/derive.ts"
+    },
+    {
+      "relation": "imports",
+      "source": "apps/ttb-studio/src/routes/api/studio/songs/[id]/voice/+server.ts",
+      "target": "apps/ttb-studio/src/lib/server/studio/context.ts"
+    },
+    {
+      "relation": "imports",
+      "source": "apps/ttb-studio/src/routes/api/studio/songs/[id]/voice/+server.ts",
+      "target": "apps/ttb-studio/src/lib/server/studio/derive.ts"
+    },
+    {
+      "relation": "imports",
+      "source": "apps/ttb-studio/src/routes/api/studio/songs/[id]/voice/+server.ts",
+      "target": "apps/ttb-studio/src/lib/server/studio/voices.ts"
+    },
+    {
+      "relation": "imports",
+      "source": "apps/ttb-studio/src/routes/api/studio/voices/+server.ts",
+      "target": "apps/ttb-studio/src/lib/server/studio/context.ts"
+    },
+    {
+      "relation": "imports",
+      "source": "apps/ttb-studio/src/routes/api/studio/voices/+server.ts",
+      "target": "apps/ttb-studio/src/lib/server/studio/voices.ts"
+    },
+    {
+      "relation": "imports",
+      "source": "apps/ttb-studio/src/routes/arcana/+page.svelte",
+      "target": "packages/ui/src/DesignCodex.svelte"
+    },
+    {
+      "relation": "imports",
+      "source": "apps/ttb-studio/src/routes/grimoire/+page.svelte",
+      "target": "packages/ui/src/ABCompare.svelte"
+    },
+    {
+      "relation": "imports",
+      "source": "apps/ttb-studio/src/routes/grimoire/+page.svelte",
+      "target": "packages/ui/src/ArcaneInput.svelte"
+    },
+    {
+      "relation": "imports",
+      "source": "apps/ttb-studio/src/routes/grimoire/+page.svelte",
+      "target": "packages/ui/src/ArcanePanel.svelte"
+    },
+    {
+      "relation": "imports",
+      "source": "apps/ttb-studio/src/routes/grimoire/+page.svelte",
+      "target": "packages/ui/src/ArcaneSelect.svelte"
+    },
+    {
+      "relation": "imports",
+      "source": "apps/ttb-studio/src/routes/grimoire/+page.svelte",
+      "target": "packages/ui/src/ArcaneTextarea.svelte"
+    },
+    {
+      "relation": "imports",
+      "source": "apps/ttb-studio/src/routes/grimoire/+page.svelte",
+      "target": "packages/ui/src/GrimoirePlayer.svelte"
+    },
+    {
+      "relation": "imports",
+      "source": "apps/ttb-studio/src/routes/grimoire/+page.svelte",
+      "target": "packages/ui/src/OracleStatus.svelte"
+    },
+    {
+      "relation": "imports",
+      "source": "apps/ttb-studio/src/routes/grimoire/+page.svelte",
+      "target": "packages/ui/src/PitchTrace.svelte"
+    },
+    {
+      "relation": "imports",
+      "source": "apps/ttb-studio/src/routes/grimoire/+page.svelte",
+      "target": "packages/ui/src/RitualProgress.svelte"
+    },
+    {
+      "relation": "imports",
+      "source": "apps/ttb-studio/src/routes/grimoire/+page.svelte",
+      "target": "packages/ui/src/RuneButton.svelte"
+    },
+    {
+      "relation": "imports",
+      "source": "apps/ttb-studio/src/routes/grimoire/+page.svelte",
+      "target": "packages/ui/src/RuneDropzone.svelte"
+    },
+    {
+      "relation": "imports",
+      "source": "apps/ttb-studio/src/routes/grimoire/+page.svelte",
+      "target": "packages/ui/src/RuneMeter.svelte"
+    },
+    {
+      "relation": "imports",
+      "source": "apps/ttb-studio/src/routes/grimoire/+page.svelte",
+      "target": "packages/ui/src/RuneRecorder.svelte"
+    },
+    {
+      "relation": "imports",
+      "source": "apps/ttb-studio/src/routes/grimoire/+page.svelte",
+      "target": "packages/ui/src/RuneToggle.svelte"
+    },
+    {
+      "relation": "imports",
+      "source": "apps/ttb-studio/src/routes/grimoire/+page.svelte",
+      "target": "packages/ui/src/SigilLoader.svelte"
+    },
+    {
+      "relation": "imports",
+      "source": "apps/ttb-studio/src/routes/grimoire/+page.svelte",
+      "target": "packages/ui/src/Spectrogram.svelte"
+    },
+    {
+      "relation": "imports",
+      "source": "apps/ttb-studio/src/routes/grimoire/+page.svelte",
+      "target": "packages/ui/src/SummoningCircle.svelte"
+    },
+    {
+      "relation": "imports",
+      "source": "apps/ttb-studio/src/routes/grimoire/+page.svelte",
+      "target": "packages/ui/src/VoiceSigil.svelte"
+    },
+    {
+      "relation": "imports",
+      "source": "apps/ttb-studio/src/routes/grimoire/+page.svelte",
+      "target": "packages/ui/src/Waveform.svelte"
+    },
+    {
+      "relation": "imports",
+      "source": "apps/ttb-studio/src/routes/grimoire/+page.svelte",
+      "target": "packages/ui/src/audio.ts"
+    },
+    {
+      "relation": "imports",
+      "source": "apps/ttb-studio/src/routes/grimoire/+page.svelte",
+      "target": "pkg:svelte"
+    },
+    {
+      "relation": "imports",
+      "source": "apps/ttb-studio/src/routes/library/+page.svelte",
+      "target": "apps/ttb-studio/src/lib/client/MiniWave.svelte"
+    },
+    {
+      "relation": "imports",
+      "source": "apps/ttb-studio/src/routes/library/+page.svelte",
+      "target": "apps/ttb-studio/src/lib/client/api.ts"
+    },
+    {
+      "relation": "imports",
+      "source": "apps/ttb-studio/src/routes/library/+page.svelte",
+      "target": "packages/contracts/src/index.ts"
+    },
+    {
+      "relation": "imports",
+      "source": "apps/ttb-studio/src/routes/library/+page.svelte",
+      "target": "packages/ui/src/ArcanePanel.svelte"
+    },
+    {
+      "relation": "imports",
+      "source": "apps/ttb-studio/src/routes/library/+page.svelte",
+      "target": "packages/ui/src/OracleStatus.svelte"
+    },
+    {
+      "relation": "imports",
+      "source": "apps/ttb-studio/src/routes/library/+page.svelte",
+      "target": "packages/ui/src/RuneButton.svelte"
+    },
+    {
+      "relation": "imports",
+      "source": "apps/ttb-studio/src/routes/library/+page.svelte",
+      "target": "packages/ui/src/SigilLoader.svelte"
+    },
+    {
+      "relation": "imports",
+      "source": "apps/ttb-studio/src/routes/library/+page.svelte",
+      "target": "pkg:$app/paths"
+    },
+    {
+      "relation": "imports",
+      "source": "apps/ttb-studio/src/routes/library/+page.svelte",
+      "target": "pkg:svelte"
+    },
+    {
+      "relation": "browser_fetch",
+      "source": "apps/ttb-studio/src/routes/library/+page.svelte",
+      "target": "route:apps/ttb-studio:DELETE /api/studio/songs/[id]"
+    },
+    {
+      "relation": "browser_fetch",
+      "source": "apps/ttb-studio/src/routes/library/+page.svelte",
+      "target": "route:apps/ttb-studio:GET /api/studio/songs"
+    },
+    {
+      "relation": "browser_fetch",
+      "source": "apps/ttb-studio/src/routes/library/+page.svelte",
+      "target": "route:apps/ttb-studio:PATCH /api/studio/songs/[id]"
+    },
+    {
+      "relation": "browser_fetch",
+      "source": "apps/ttb-studio/src/routes/library/[id]/+page.svelte",
+      "target": "api-path:apps/ttb-studio:POST:/api/studio/songs/*/*"
+    },
+    {
+      "relation": "imports",
+      "source": "apps/ttb-studio/src/routes/library/[id]/+page.svelte",
+      "target": "apps/ttb-studio/src/lib/client/AbPlayer.svelte"
+    },
+    {
+      "relation": "imports",
+      "source": "apps/ttb-studio/src/routes/library/[id]/+page.svelte",
+      "target": "apps/ttb-studio/src/lib/client/StemMixer.svelte"
+    },
+    {
+      "relation": "imports",
+      "source": "apps/ttb-studio/src/routes/library/[id]/+page.svelte",
+      "target": "apps/ttb-studio/src/lib/client/api.ts"
+    },
+    {
+      "relation": "imports",
+      "source": "apps/ttb-studio/src/routes/library/[id]/+page.svelte",
+      "target": "apps/ttb-studio/src/lib/client/jobs.ts"
+    },
+    {
+      "relation": "imports",
+      "source": "apps/ttb-studio/src/routes/library/[id]/+page.svelte",
+      "target": "packages/contracts/src/index.ts"
+    },
+    {
+      "relation": "imports",
+      "source": "apps/ttb-studio/src/routes/library/[id]/+page.svelte",
+      "target": "packages/ui/src/ArcaneInput.svelte"
+    },
+    {
+      "relation": "imports",
+      "source": "apps/ttb-studio/src/routes/library/[id]/+page.svelte",
+      "target": "packages/ui/src/ArcanePanel.svelte"
+    },
+    {
+      "relation": "imports",
+      "source": "apps/ttb-studio/src/routes/library/[id]/+page.svelte",
+      "target": "packages/ui/src/ArcaneSelect.svelte"
+    },
+    {
+      "relation": "imports",
+      "source": "apps/ttb-studio/src/routes/library/[id]/+page.svelte",
+      "target": "packages/ui/src/ArcaneTextarea.svelte"
+    },
+    {
+      "relation": "imports",
+      "source": "apps/ttb-studio/src/routes/library/[id]/+page.svelte",
+      "target": "packages/ui/src/OracleStatus.svelte"
+    },
+    {
+      "relation": "imports",
+      "source": "apps/ttb-studio/src/routes/library/[id]/+page.svelte",
+      "target": "packages/ui/src/PitchTrace.svelte"
+    },
+    {
+      "relation": "imports",
+      "source": "apps/ttb-studio/src/routes/library/[id]/+page.svelte",
+      "target": "packages/ui/src/RegionSelect.svelte"
+    },
+    {
+      "relation": "imports",
+      "source": "apps/ttb-studio/src/routes/library/[id]/+page.svelte",
+      "target": "packages/ui/src/RitualProgress.svelte"
+    },
+    {
+      "relation": "imports",
+      "source": "apps/ttb-studio/src/routes/library/[id]/+page.svelte",
+      "target": "packages/ui/src/RuneButton.svelte"
+    },
+    {
+      "relation": "imports",
+      "source": "apps/ttb-studio/src/routes/library/[id]/+page.svelte",
+      "target": "packages/ui/src/SigilLoader.svelte"
+    },
+    {
+      "relation": "imports",
+      "source": "apps/ttb-studio/src/routes/library/[id]/+page.svelte",
+      "target": "packages/ui/src/Spectrogram.svelte"
+    },
+    {
+      "relation": "imports",
+      "source": "apps/ttb-studio/src/routes/library/[id]/+page.svelte",
+      "target": "packages/ui/src/audio.ts"
+    },
+    {
+      "relation": "imports",
+      "source": "apps/ttb-studio/src/routes/library/[id]/+page.svelte",
+      "target": "pkg:$app/paths"
+    },
+    {
+      "relation": "imports",
+      "source": "apps/ttb-studio/src/routes/library/[id]/+page.svelte",
+      "target": "pkg:$app/state"
+    },
+    {
+      "relation": "imports",
+      "source": "apps/ttb-studio/src/routes/library/[id]/+page.svelte",
+      "target": "pkg:svelte"
+    },
+    {
+      "relation": "browser_fetch",
+      "source": "apps/ttb-studio/src/routes/library/[id]/+page.svelte",
+      "target": "route:apps/ttb-studio:GET /api/studio/songs/[id]"
+    },
+    {
+      "relation": "browser_fetch",
+      "source": "apps/ttb-studio/src/routes/library/[id]/+page.svelte",
+      "target": "route:apps/ttb-studio:GET /api/studio/songs/[id]/edit"
+    },
+    {
+      "relation": "browser_fetch",
+      "source": "apps/ttb-studio/src/routes/library/[id]/+page.svelte",
+      "target": "route:apps/ttb-studio:GET /api/studio/voices"
+    },
+    {
+      "relation": "browser_fetch",
+      "source": "apps/ttb-studio/src/routes/library/[id]/+page.svelte",
+      "target": "route:apps/ttb-studio:POST /api/studio/songs/[id]/cover"
+    },
+    {
+      "relation": "browser_fetch",
+      "source": "apps/ttb-studio/src/routes/library/[id]/+page.svelte",
+      "target": "route:apps/ttb-studio:POST /api/studio/songs/[id]/master"
+    },
+    {
+      "relation": "imports",
+      "source": "apps/ttb-studio/src/routes/lyrics/+page.svelte",
+      "target": "apps/ttb-studio/src/lib/client/api.ts"
+    },
+    {
+      "relation": "imports",
+      "source": "apps/ttb-studio/src/routes/lyrics/+page.svelte",
+      "target": "packages/contracts/src/index.ts"
+    },
+    {
+      "relation": "imports",
+      "source": "apps/ttb-studio/src/routes/lyrics/+page.svelte",
+      "target": "packages/ui/src/ArcaneInput.svelte"
+    },
+    {
+      "relation": "imports",
+      "source": "apps/ttb-studio/src/routes/lyrics/+page.svelte",
+      "target": "packages/ui/src/ArcanePanel.svelte"
+    },
+    {
+      "relation": "imports",
+      "source": "apps/ttb-studio/src/routes/lyrics/+page.svelte",
+      "target": "packages/ui/src/ArcaneSelect.svelte"
+    },
+    {
+      "relation": "imports",
+      "source": "apps/ttb-studio/src/routes/lyrics/+page.svelte",
+      "target": "packages/ui/src/ArcaneTextarea.svelte"
+    },
+    {
+      "relation": "imports",
+      "source": "apps/ttb-studio/src/routes/lyrics/+page.svelte",
+      "target": "packages/ui/src/OracleStatus.svelte"
+    },
+    {
+      "relation": "imports",
+      "source": "apps/ttb-studio/src/routes/lyrics/+page.svelte",
+      "target": "packages/ui/src/RuneButton.svelte"
+    },
+    {
+      "relation": "imports",
+      "source": "apps/ttb-studio/src/routes/lyrics/+page.svelte",
+      "target": "packages/ui/src/SigilLoader.svelte"
+    },
+    {
+      "relation": "imports",
+      "source": "apps/ttb-studio/src/routes/lyrics/+page.svelte",
+      "target": "pkg:$app/navigation"
+    },
+    {
+      "relation": "imports",
+      "source": "apps/ttb-studio/src/routes/lyrics/+page.svelte",
+      "target": "pkg:$app/paths"
+    },
+    {
+      "relation": "browser_fetch",
+      "source": "apps/ttb-studio/src/routes/lyrics/+page.svelte",
+      "target": "route:apps/ttb-studio:POST /api/studio/lyrics"
+    },
+    {
+      "relation": "imports",
+      "source": "apps/ttb-studio/src/routes/seance/+page.svelte",
+      "target": "apps/ttb-studio/src/lib/client/api.ts"
+    },
+    {
+      "relation": "imports",
+      "source": "apps/ttb-studio/src/routes/seance/+page.svelte",
+      "target": "apps/ttb-studio/src/lib/client/seance-time.ts"
+    },
+    {
+      "relation": "imports",
+      "source": "apps/ttb-studio/src/routes/seance/+page.svelte",
+      "target": "packages/contracts/src/index.ts"
+    },
+    {
+      "relation": "imports",
+      "source": "apps/ttb-studio/src/routes/seance/+page.svelte",
+      "target": "packages/ui/src/ArcaneInput.svelte"
+    },
+    {
+      "relation": "imports",
+      "source": "apps/ttb-studio/src/routes/seance/+page.svelte",
+      "target": "packages/ui/src/ArcanePanel.svelte"
+    },
+    {
+      "relation": "imports",
+      "source": "apps/ttb-studio/src/routes/seance/+page.svelte",
+      "target": "packages/ui/src/ArcaneTextarea.svelte"
+    },
+    {
+      "relation": "imports",
+      "source": "apps/ttb-studio/src/routes/seance/+page.svelte",
+      "target": "packages/ui/src/RitualProgress.svelte"
+    },
+    {
+      "relation": "imports",
+      "source": "apps/ttb-studio/src/routes/seance/+page.svelte",
+      "target": "packages/ui/src/RuneButton.svelte"
+    },
+    {
+      "relation": "imports",
+      "source": "apps/ttb-studio/src/routes/seance/+page.svelte",
+      "target": "packages/ui/src/RuneToggle.svelte"
+    },
+    {
+      "relation": "imports",
+      "source": "apps/ttb-studio/src/routes/seance/+page.svelte",
+      "target": "packages/ui/src/Waveform.svelte"
+    },
+    {
+      "relation": "imports",
+      "source": "apps/ttb-studio/src/routes/seance/+page.svelte",
+      "target": "packages/ui/src/audio.ts"
+    },
+    {
+      "relation": "imports",
+      "source": "apps/ttb-studio/src/routes/seance/+page.svelte",
+      "target": "pkg:svelte"
+    },
+    {
+      "relation": "browser_fetch",
+      "source": "apps/ttb-studio/src/routes/seance/+page.svelte",
+      "target": "route:apps/ttb-studio:GET /api/studio/capabilities"
+    },
+    {
+      "relation": "browser_fetch",
+      "source": "apps/ttb-studio/src/routes/seance/+page.svelte",
+      "target": "route:apps/ttb-studio:GET /api/studio/seances/[id]"
+    },
+    {
+      "relation": "browser_fetch",
+      "source": "apps/ttb-studio/src/routes/seance/+page.svelte",
+      "target": "route:apps/ttb-studio:GET /api/studio/seances/leaderboard"
+    },
+    {
+      "relation": "browser_fetch",
+      "source": "apps/ttb-studio/src/routes/seance/+page.svelte",
+      "target": "route:apps/ttb-studio:POST /api/studio/seances"
+    },
+    {
+      "relation": "browser_fetch",
+      "source": "apps/ttb-studio/src/routes/seance/+page.svelte",
+      "target": "route:apps/ttb-studio:POST /api/studio/seances/[id]/rank"
+    },
+    {
+      "relation": "imports",
       "source": "apps/ttb-studio/vite.config.ts",
       "target": "pkg:@sveltejs/adapter-bun"
     },
@@ -362,48 +2397,418 @@
     },
     {
       "relation": "imports",
-      "source": "apps/vocal-fix/src/routes/+page.svelte",
+      "source": "apps/vocal-fix/src/env.ts",
+      "target": "pkg:@sveltejs/kit/env"
+    },
+    {
+      "relation": "imports",
+      "source": "apps/vocal-fix/src/hooks.server.ts",
+      "target": "apps/vocal-fix/src/lib/server/gate.ts"
+    },
+    {
+      "relation": "imports",
+      "source": "apps/vocal-fix/src/hooks.server.ts",
+      "target": "pkg:@sveltejs/kit/hooks"
+    },
+    {
+      "relation": "imports",
+      "source": "apps/vocal-fix/src/lib/server/chain.ts",
+      "target": "apps/vocal-fix/src/lib/server/diagnose.ts"
+    },
+    {
+      "relation": "imports",
+      "source": "apps/vocal-fix/src/lib/server/context.ts",
+      "target": "apps/vocal-fix/src/lib/server/paths.ts"
+    },
+    {
+      "relation": "imports",
+      "source": "apps/vocal-fix/src/lib/server/context.ts",
+      "target": "apps/vocal-fix/src/lib/server/service.ts"
+    },
+    {
+      "relation": "imports",
+      "source": "apps/vocal-fix/src/lib/server/diagnose.ts",
+      "target": "apps/vocal-fix/src/lib/server/media.ts"
+    },
+    {
+      "relation": "imports",
+      "source": "apps/vocal-fix/src/lib/server/forge.ts",
+      "target": "apps/vocal-fix/src/lib/server/errors.ts"
+    },
+    {
+      "relation": "imports",
+      "source": "apps/vocal-fix/src/lib/server/forge.ts",
       "target": "packages/contracts/src/index.ts"
     },
     {
       "relation": "imports",
-      "source": "apps/vocal-fix/src/routes/+page.svelte",
-      "target": "packages/ui/src/BrandHeader.svelte"
+      "source": "apps/vocal-fix/src/lib/server/forge.ts",
+      "target": "pkg:node:crypto"
+    },
+    {
+      "relation": "imports",
+      "source": "apps/vocal-fix/src/lib/server/forge.ts",
+      "target": "pkg:node:fs/promises"
+    },
+    {
+      "relation": "imports",
+      "source": "apps/vocal-fix/src/lib/server/forge.ts",
+      "target": "pkg:node:path"
+    },
+    {
+      "relation": "imports",
+      "source": "apps/vocal-fix/src/lib/server/jobs.ts",
+      "target": "apps/vocal-fix/src/lib/server/errors.ts"
+    },
+    {
+      "relation": "imports",
+      "source": "apps/vocal-fix/src/lib/server/jobs.ts",
+      "target": "pkg:node:crypto"
+    },
+    {
+      "relation": "imports",
+      "source": "apps/vocal-fix/src/lib/server/jobs.ts",
+      "target": "pkg:node:fs/promises"
+    },
+    {
+      "relation": "imports",
+      "source": "apps/vocal-fix/src/lib/server/jobs.ts",
+      "target": "pkg:node:path"
+    },
+    {
+      "relation": "imports",
+      "source": "apps/vocal-fix/src/lib/server/media.ts",
+      "target": "apps/vocal-fix/src/lib/server/errors.ts"
+    },
+    {
+      "relation": "imports",
+      "source": "apps/vocal-fix/src/lib/server/media.ts",
+      "target": "apps/vocal-fix/src/lib/server/storage.ts"
+    },
+    {
+      "relation": "imports",
+      "source": "apps/vocal-fix/src/lib/server/paths.ts",
+      "target": "pkg:node:fs"
+    },
+    {
+      "relation": "imports",
+      "source": "apps/vocal-fix/src/lib/server/paths.ts",
+      "target": "pkg:node:path"
+    },
+    {
+      "relation": "imports",
+      "source": "apps/vocal-fix/src/lib/server/replicate.ts",
+      "target": "apps/vocal-fix/src/lib/server/errors.ts"
+    },
+    {
+      "relation": "calls_external",
+      "source": "apps/vocal-fix/src/lib/server/replicate.ts",
+      "target": "external:api.replicate.com"
+    },
+    {
+      "relation": "imports",
+      "source": "apps/vocal-fix/src/lib/server/server.test.ts",
+      "target": "apps/vocal-fix/src/lib/server/chain.ts"
+    },
+    {
+      "relation": "imports",
+      "source": "apps/vocal-fix/src/lib/server/server.test.ts",
+      "target": "apps/vocal-fix/src/lib/server/diagnose.ts"
+    },
+    {
+      "relation": "imports",
+      "source": "apps/vocal-fix/src/lib/server/server.test.ts",
+      "target": "apps/vocal-fix/src/lib/server/errors.ts"
+    },
+    {
+      "relation": "imports",
+      "source": "apps/vocal-fix/src/lib/server/server.test.ts",
+      "target": "apps/vocal-fix/src/lib/server/forge.ts"
+    },
+    {
+      "relation": "imports",
+      "source": "apps/vocal-fix/src/lib/server/server.test.ts",
+      "target": "apps/vocal-fix/src/lib/server/gate.ts"
+    },
+    {
+      "relation": "imports",
+      "source": "apps/vocal-fix/src/lib/server/server.test.ts",
+      "target": "apps/vocal-fix/src/lib/server/gold.ts"
+    },
+    {
+      "relation": "imports",
+      "source": "apps/vocal-fix/src/lib/server/server.test.ts",
+      "target": "apps/vocal-fix/src/lib/server/media.ts"
+    },
+    {
+      "relation": "imports",
+      "source": "apps/vocal-fix/src/lib/server/server.test.ts",
+      "target": "apps/vocal-fix/src/lib/server/profile.ts"
+    },
+    {
+      "relation": "imports",
+      "source": "apps/vocal-fix/src/lib/server/server.test.ts",
+      "target": "apps/vocal-fix/src/lib/server/replicate.ts"
+    },
+    {
+      "relation": "imports",
+      "source": "apps/vocal-fix/src/lib/server/server.test.ts",
+      "target": "apps/vocal-fix/src/lib/server/storage.ts"
+    },
+    {
+      "relation": "imports",
+      "source": "apps/vocal-fix/src/lib/server/server.test.ts",
+      "target": "packages/contracts/src/index.ts"
+    },
+    {
+      "relation": "imports",
+      "source": "apps/vocal-fix/src/lib/server/server.test.ts",
+      "target": "pkg:bun:test"
+    },
+    {
+      "relation": "imports",
+      "source": "apps/vocal-fix/src/lib/server/server.test.ts",
+      "target": "pkg:node:fs/promises"
+    },
+    {
+      "relation": "imports",
+      "source": "apps/vocal-fix/src/lib/server/server.test.ts",
+      "target": "pkg:node:os"
+    },
+    {
+      "relation": "imports",
+      "source": "apps/vocal-fix/src/lib/server/server.test.ts",
+      "target": "pkg:node:path"
+    },
+    {
+      "relation": "imports",
+      "source": "apps/vocal-fix/src/lib/server/service.ts",
+      "target": "apps/vocal-fix/src/lib/server/chain.ts"
+    },
+    {
+      "relation": "imports",
+      "source": "apps/vocal-fix/src/lib/server/service.ts",
+      "target": "apps/vocal-fix/src/lib/server/diagnose.ts"
+    },
+    {
+      "relation": "imports",
+      "source": "apps/vocal-fix/src/lib/server/service.ts",
+      "target": "apps/vocal-fix/src/lib/server/errors.ts"
+    },
+    {
+      "relation": "imports",
+      "source": "apps/vocal-fix/src/lib/server/service.ts",
+      "target": "apps/vocal-fix/src/lib/server/forge.ts"
+    },
+    {
+      "relation": "imports",
+      "source": "apps/vocal-fix/src/lib/server/service.ts",
+      "target": "apps/vocal-fix/src/lib/server/gold.ts"
+    },
+    {
+      "relation": "imports",
+      "source": "apps/vocal-fix/src/lib/server/service.ts",
+      "target": "apps/vocal-fix/src/lib/server/jobs.ts"
+    },
+    {
+      "relation": "imports",
+      "source": "apps/vocal-fix/src/lib/server/service.ts",
+      "target": "apps/vocal-fix/src/lib/server/media.ts"
+    },
+    {
+      "relation": "imports",
+      "source": "apps/vocal-fix/src/lib/server/service.ts",
+      "target": "apps/vocal-fix/src/lib/server/profile.ts"
+    },
+    {
+      "relation": "imports",
+      "source": "apps/vocal-fix/src/lib/server/service.ts",
+      "target": "apps/vocal-fix/src/lib/server/replicate.ts"
+    },
+    {
+      "relation": "imports",
+      "source": "apps/vocal-fix/src/lib/server/service.ts",
+      "target": "apps/vocal-fix/src/lib/server/storage.ts"
+    },
+    {
+      "relation": "imports",
+      "source": "apps/vocal-fix/src/lib/server/service.ts",
+      "target": "packages/contracts/src/index.ts"
+    },
+    {
+      "relation": "imports",
+      "source": "apps/vocal-fix/src/lib/server/service.ts",
+      "target": "pkg:node:crypto"
+    },
+    {
+      "relation": "imports",
+      "source": "apps/vocal-fix/src/lib/server/service.ts",
+      "target": "pkg:node:fs/promises"
+    },
+    {
+      "relation": "imports",
+      "source": "apps/vocal-fix/src/lib/server/service.ts",
+      "target": "pkg:node:path"
+    },
+    {
+      "relation": "imports",
+      "source": "apps/vocal-fix/src/lib/server/storage.ts",
+      "target": "apps/vocal-fix/src/lib/server/errors.ts"
+    },
+    {
+      "relation": "imports",
+      "source": "apps/vocal-fix/src/lib/server/storage.ts",
+      "target": "pkg:node:crypto"
+    },
+    {
+      "relation": "imports",
+      "source": "apps/vocal-fix/src/lib/server/storage.ts",
+      "target": "pkg:node:fs/promises"
+    },
+    {
+      "relation": "imports",
+      "source": "apps/vocal-fix/src/lib/server/storage.ts",
+      "target": "pkg:node:path"
+    },
+    {
+      "relation": "imports",
+      "source": "apps/vocal-fix/src/lib/server/svc.ts",
+      "target": "apps/vocal-fix/src/lib/server/context.ts"
+    },
+    {
+      "relation": "imports",
+      "source": "apps/vocal-fix/src/lib/server/svc.ts",
+      "target": "pkg:$app/env/private"
+    },
+    {
+      "relation": "imports",
+      "source": "apps/vocal-fix/src/routes/+error.svelte",
+      "target": "packages/ui/src/RuneButton.svelte"
+    },
+    {
+      "relation": "imports",
+      "source": "apps/vocal-fix/src/routes/+error.svelte",
+      "target": "packages/ui/src/Sigil.svelte"
+    },
+    {
+      "relation": "imports",
+      "source": "apps/vocal-fix/src/routes/+error.svelte",
+      "target": "pkg:$app/paths"
+    },
+    {
+      "relation": "imports",
+      "source": "apps/vocal-fix/src/routes/+error.svelte",
+      "target": "pkg:$app/state"
+    },
+    {
+      "relation": "imports",
+      "source": "apps/vocal-fix/src/routes/+layout.svelte",
+      "target": "packages/ui/src/ArcaneShell.svelte"
+    },
+    {
+      "relation": "imports",
+      "source": "apps/vocal-fix/src/routes/+layout.svelte",
+      "target": "packages/ui/src/theme.css"
+    },
+    {
+      "relation": "imports",
+      "source": "apps/vocal-fix/src/routes/+layout.svelte",
+      "target": "pkg:$app/paths"
     },
     {
       "relation": "imports",
       "source": "apps/vocal-fix/src/routes/+page.svelte",
-      "target": "packages/ui/src/StatusPanel.svelte"
+      "target": "apps/vocal-fix/src/lib/client.ts"
     },
     {
       "relation": "imports",
       "source": "apps/vocal-fix/src/routes/+page.svelte",
-      "target": "pkg:svelte"
+      "target": "packages/ui/src/ArcaneInput.svelte"
+    },
+    {
+      "relation": "imports",
+      "source": "apps/vocal-fix/src/routes/+page.svelte",
+      "target": "packages/ui/src/ArcanePanel.svelte"
+    },
+    {
+      "relation": "imports",
+      "source": "apps/vocal-fix/src/routes/+page.svelte",
+      "target": "packages/ui/src/OracleStatus.svelte"
+    },
+    {
+      "relation": "imports",
+      "source": "apps/vocal-fix/src/routes/+page.svelte",
+      "target": "packages/ui/src/RitualProgress.svelte"
+    },
+    {
+      "relation": "imports",
+      "source": "apps/vocal-fix/src/routes/+page.svelte",
+      "target": "packages/ui/src/RuneButton.svelte"
+    },
+    {
+      "relation": "imports",
+      "source": "apps/vocal-fix/src/routes/+page.svelte",
+      "target": "packages/ui/src/RuneDropzone.svelte"
+    },
+    {
+      "relation": "imports",
+      "source": "apps/vocal-fix/src/routes/+page.svelte",
+      "target": "packages/ui/src/RuneRecorder.svelte"
+    },
+    {
+      "relation": "imports",
+      "source": "apps/vocal-fix/src/routes/+page.svelte",
+      "target": "packages/ui/src/RuneToggle.svelte"
+    },
+    {
+      "relation": "imports",
+      "source": "apps/vocal-fix/src/routes/+page.svelte",
+      "target": "pkg:$app/navigation"
+    },
+    {
+      "relation": "imports",
+      "source": "apps/vocal-fix/src/routes/+page.svelte",
+      "target": "pkg:$app/paths"
     },
     {
       "relation": "browser_fetch",
       "source": "apps/vocal-fix/src/routes/+page.svelte",
-      "target": "route:apps/vocal-fix:DELETE /api/references/[session_id]"
+      "target": "route:apps/vocal-fix:POST /api/sessions"
     },
     {
       "relation": "browser_fetch",
       "source": "apps/vocal-fix/src/routes/+page.svelte",
-      "target": "route:apps/vocal-fix:GET /api/capabilities"
-    },
-    {
-      "relation": "browser_fetch",
-      "source": "apps/vocal-fix/src/routes/+page.svelte",
-      "target": "route:apps/vocal-fix:POST /api/references"
+      "target": "route:apps/vocal-fix:POST /api/sessions/[id]/diagnose"
     },
     {
       "relation": "imports",
       "source": "apps/vocal-fix/src/routes/api/capabilities/+server.ts",
-      "target": "apps/vocal-fix/src/lib/server/backend.ts"
+      "target": "apps/vocal-fix/src/lib/server/chain.ts"
     },
     {
-      "relation": "proxies_to",
+      "relation": "imports",
       "source": "apps/vocal-fix/src/routes/api/capabilities/+server.ts",
-      "target": "endpoint:apps/vocal_fix:GET /api/capabilities"
+      "target": "apps/vocal-fix/src/lib/server/forge.ts"
+    },
+    {
+      "relation": "imports",
+      "source": "apps/vocal-fix/src/routes/api/capabilities/+server.ts",
+      "target": "apps/vocal-fix/src/lib/server/gate.ts"
+    },
+    {
+      "relation": "imports",
+      "source": "apps/vocal-fix/src/routes/api/capabilities/+server.ts",
+      "target": "apps/vocal-fix/src/lib/server/replicate.ts"
+    },
+    {
+      "relation": "imports",
+      "source": "apps/vocal-fix/src/routes/api/capabilities/+server.ts",
+      "target": "apps/vocal-fix/src/lib/server/service.ts"
+    },
+    {
+      "relation": "imports",
+      "source": "apps/vocal-fix/src/routes/api/capabilities/+server.ts",
+      "target": "apps/vocal-fix/src/lib/server/svc.ts"
     },
     {
       "relation": "imports",
@@ -434,6 +2839,466 @@
       "relation": "proxies_to",
       "source": "apps/vocal-fix/src/routes/api/references/[session_id]/+server.ts",
       "target": "endpoint:apps/vocal_fix:GET /api/references/{session_id}"
+    },
+    {
+      "relation": "imports",
+      "source": "apps/vocal-fix/src/routes/api/sessions/+server.ts",
+      "target": "apps/vocal-fix/src/lib/server/errors.ts"
+    },
+    {
+      "relation": "imports",
+      "source": "apps/vocal-fix/src/routes/api/sessions/+server.ts",
+      "target": "apps/vocal-fix/src/lib/server/gate.ts"
+    },
+    {
+      "relation": "imports",
+      "source": "apps/vocal-fix/src/routes/api/sessions/+server.ts",
+      "target": "apps/vocal-fix/src/lib/server/media.ts"
+    },
+    {
+      "relation": "imports",
+      "source": "apps/vocal-fix/src/routes/api/sessions/+server.ts",
+      "target": "apps/vocal-fix/src/lib/server/svc.ts"
+    },
+    {
+      "relation": "imports",
+      "source": "apps/vocal-fix/src/routes/api/sessions/[id]/+server.ts",
+      "target": "apps/vocal-fix/src/lib/server/errors.ts"
+    },
+    {
+      "relation": "imports",
+      "source": "apps/vocal-fix/src/routes/api/sessions/[id]/+server.ts",
+      "target": "apps/vocal-fix/src/lib/server/gate.ts"
+    },
+    {
+      "relation": "imports",
+      "source": "apps/vocal-fix/src/routes/api/sessions/[id]/+server.ts",
+      "target": "apps/vocal-fix/src/lib/server/svc.ts"
+    },
+    {
+      "relation": "imports",
+      "source": "apps/vocal-fix/src/routes/api/sessions/[id]/audio/[area]/[file]/+server.ts",
+      "target": "apps/vocal-fix/src/lib/server/errors.ts"
+    },
+    {
+      "relation": "imports",
+      "source": "apps/vocal-fix/src/routes/api/sessions/[id]/audio/[area]/[file]/+server.ts",
+      "target": "apps/vocal-fix/src/lib/server/gate.ts"
+    },
+    {
+      "relation": "imports",
+      "source": "apps/vocal-fix/src/routes/api/sessions/[id]/audio/[area]/[file]/+server.ts",
+      "target": "apps/vocal-fix/src/lib/server/range.ts"
+    },
+    {
+      "relation": "imports",
+      "source": "apps/vocal-fix/src/routes/api/sessions/[id]/audio/[area]/[file]/+server.ts",
+      "target": "apps/vocal-fix/src/lib/server/svc.ts"
+    },
+    {
+      "relation": "imports",
+      "source": "apps/vocal-fix/src/routes/api/sessions/[id]/diagnose/+server.ts",
+      "target": "apps/vocal-fix/src/lib/server/errors.ts"
+    },
+    {
+      "relation": "imports",
+      "source": "apps/vocal-fix/src/routes/api/sessions/[id]/diagnose/+server.ts",
+      "target": "apps/vocal-fix/src/lib/server/gate.ts"
+    },
+    {
+      "relation": "imports",
+      "source": "apps/vocal-fix/src/routes/api/sessions/[id]/diagnose/+server.ts",
+      "target": "apps/vocal-fix/src/lib/server/svc.ts"
+    },
+    {
+      "relation": "imports",
+      "source": "apps/vocal-fix/src/routes/api/sessions/[id]/forge/+server.ts",
+      "target": "apps/vocal-fix/src/lib/server/errors.ts"
+    },
+    {
+      "relation": "imports",
+      "source": "apps/vocal-fix/src/routes/api/sessions/[id]/forge/+server.ts",
+      "target": "apps/vocal-fix/src/lib/server/gate.ts"
+    },
+    {
+      "relation": "imports",
+      "source": "apps/vocal-fix/src/routes/api/sessions/[id]/forge/+server.ts",
+      "target": "apps/vocal-fix/src/lib/server/svc.ts"
+    },
+    {
+      "relation": "imports",
+      "source": "apps/vocal-fix/src/routes/api/sessions/[id]/gold/+server.ts",
+      "target": "apps/vocal-fix/src/lib/server/errors.ts"
+    },
+    {
+      "relation": "imports",
+      "source": "apps/vocal-fix/src/routes/api/sessions/[id]/gold/+server.ts",
+      "target": "apps/vocal-fix/src/lib/server/gate.ts"
+    },
+    {
+      "relation": "imports",
+      "source": "apps/vocal-fix/src/routes/api/sessions/[id]/gold/+server.ts",
+      "target": "apps/vocal-fix/src/lib/server/svc.ts"
+    },
+    {
+      "relation": "imports",
+      "source": "apps/vocal-fix/src/routes/api/sessions/[id]/jobs/[job]/+server.ts",
+      "target": "apps/vocal-fix/src/lib/server/errors.ts"
+    },
+    {
+      "relation": "imports",
+      "source": "apps/vocal-fix/src/routes/api/sessions/[id]/jobs/[job]/+server.ts",
+      "target": "apps/vocal-fix/src/lib/server/gate.ts"
+    },
+    {
+      "relation": "imports",
+      "source": "apps/vocal-fix/src/routes/api/sessions/[id]/jobs/[job]/+server.ts",
+      "target": "apps/vocal-fix/src/lib/server/svc.ts"
+    },
+    {
+      "relation": "imports",
+      "source": "apps/vocal-fix/src/routes/api/sessions/[id]/repair/+server.ts",
+      "target": "apps/vocal-fix/src/lib/server/errors.ts"
+    },
+    {
+      "relation": "imports",
+      "source": "apps/vocal-fix/src/routes/api/sessions/[id]/repair/+server.ts",
+      "target": "apps/vocal-fix/src/lib/server/gate.ts"
+    },
+    {
+      "relation": "imports",
+      "source": "apps/vocal-fix/src/routes/api/sessions/[id]/repair/+server.ts",
+      "target": "apps/vocal-fix/src/lib/server/svc.ts"
+    },
+    {
+      "relation": "imports",
+      "source": "apps/vocal-fix/src/routes/api/voices/+server.ts",
+      "target": "apps/vocal-fix/src/lib/server/gate.ts"
+    },
+    {
+      "relation": "imports",
+      "source": "apps/vocal-fix/src/routes/api/voices/+server.ts",
+      "target": "apps/vocal-fix/src/lib/server/svc.ts"
+    },
+    {
+      "relation": "imports",
+      "source": "apps/vocal-fix/src/routes/api/voices/[voice_id]/+server.ts",
+      "target": "apps/vocal-fix/src/lib/server/errors.ts"
+    },
+    {
+      "relation": "imports",
+      "source": "apps/vocal-fix/src/routes/api/voices/[voice_id]/+server.ts",
+      "target": "apps/vocal-fix/src/lib/server/gate.ts"
+    },
+    {
+      "relation": "imports",
+      "source": "apps/vocal-fix/src/routes/api/voices/[voice_id]/+server.ts",
+      "target": "apps/vocal-fix/src/lib/server/svc.ts"
+    },
+    {
+      "relation": "imports",
+      "source": "apps/vocal-fix/src/routes/arcana/+page.svelte",
+      "target": "packages/ui/src/DesignCodex.svelte"
+    },
+    {
+      "relation": "imports",
+      "source": "apps/vocal-fix/src/routes/session/[id]/+page.svelte",
+      "target": "apps/vocal-fix/src/lib/client.ts"
+    },
+    {
+      "relation": "imports",
+      "source": "apps/vocal-fix/src/routes/session/[id]/+page.svelte",
+      "target": "packages/ui/src/ABCompare.svelte"
+    },
+    {
+      "relation": "imports",
+      "source": "apps/vocal-fix/src/routes/session/[id]/+page.svelte",
+      "target": "packages/ui/src/ArcanePanel.svelte"
+    },
+    {
+      "relation": "imports",
+      "source": "apps/vocal-fix/src/routes/session/[id]/+page.svelte",
+      "target": "packages/ui/src/ArcaneSelect.svelte"
+    },
+    {
+      "relation": "imports",
+      "source": "apps/vocal-fix/src/routes/session/[id]/+page.svelte",
+      "target": "packages/ui/src/OracleStatus.svelte"
+    },
+    {
+      "relation": "imports",
+      "source": "apps/vocal-fix/src/routes/session/[id]/+page.svelte",
+      "target": "packages/ui/src/PitchTrace.svelte"
+    },
+    {
+      "relation": "imports",
+      "source": "apps/vocal-fix/src/routes/session/[id]/+page.svelte",
+      "target": "packages/ui/src/RitualProgress.svelte"
+    },
+    {
+      "relation": "imports",
+      "source": "apps/vocal-fix/src/routes/session/[id]/+page.svelte",
+      "target": "packages/ui/src/RuneButton.svelte"
+    },
+    {
+      "relation": "imports",
+      "source": "apps/vocal-fix/src/routes/session/[id]/+page.svelte",
+      "target": "packages/ui/src/RuneMeter.svelte"
+    },
+    {
+      "relation": "imports",
+      "source": "apps/vocal-fix/src/routes/session/[id]/+page.svelte",
+      "target": "packages/ui/src/RuneToggle.svelte"
+    },
+    {
+      "relation": "imports",
+      "source": "apps/vocal-fix/src/routes/session/[id]/+page.svelte",
+      "target": "packages/ui/src/SigilLoader.svelte"
+    },
+    {
+      "relation": "imports",
+      "source": "apps/vocal-fix/src/routes/session/[id]/+page.svelte",
+      "target": "packages/ui/src/Spectrogram.svelte"
+    },
+    {
+      "relation": "imports",
+      "source": "apps/vocal-fix/src/routes/session/[id]/+page.svelte",
+      "target": "packages/ui/src/Waveform.svelte"
+    },
+    {
+      "relation": "imports",
+      "source": "apps/vocal-fix/src/routes/session/[id]/+page.svelte",
+      "target": "packages/ui/src/audio.ts"
+    },
+    {
+      "relation": "imports",
+      "source": "apps/vocal-fix/src/routes/session/[id]/+page.svelte",
+      "target": "pkg:$app/paths"
+    },
+    {
+      "relation": "imports",
+      "source": "apps/vocal-fix/src/routes/session/[id]/+page.svelte",
+      "target": "pkg:$app/state"
+    },
+    {
+      "relation": "browser_fetch",
+      "source": "apps/vocal-fix/src/routes/session/[id]/+page.svelte",
+      "target": "route:apps/vocal-fix:DELETE /api/sessions/[id]"
+    },
+    {
+      "relation": "browser_fetch",
+      "source": "apps/vocal-fix/src/routes/session/[id]/+page.svelte",
+      "target": "route:apps/vocal-fix:DELETE /api/sessions/[id]/jobs/[job]"
+    },
+    {
+      "relation": "browser_fetch",
+      "source": "apps/vocal-fix/src/routes/session/[id]/+page.svelte",
+      "target": "route:apps/vocal-fix:GET /api/capabilities"
+    },
+    {
+      "relation": "browser_fetch",
+      "source": "apps/vocal-fix/src/routes/session/[id]/+page.svelte",
+      "target": "route:apps/vocal-fix:GET /api/sessions/[id]"
+    },
+    {
+      "relation": "browser_fetch",
+      "source": "apps/vocal-fix/src/routes/session/[id]/+page.svelte",
+      "target": "route:apps/vocal-fix:GET /api/sessions/[id]/jobs/[job]"
+    },
+    {
+      "relation": "browser_fetch",
+      "source": "apps/vocal-fix/src/routes/session/[id]/+page.svelte",
+      "target": "route:apps/vocal-fix:POST /api/sessions/[id]/diagnose"
+    },
+    {
+      "relation": "browser_fetch",
+      "source": "apps/vocal-fix/src/routes/session/[id]/+page.svelte",
+      "target": "route:apps/vocal-fix:POST /api/sessions/[id]/repair"
+    },
+    {
+      "relation": "imports",
+      "source": "apps/vocal-fix/src/routes/session/[id]/forge/+page.svelte",
+      "target": "packages/ui/src/ArcaneInput.svelte"
+    },
+    {
+      "relation": "imports",
+      "source": "apps/vocal-fix/src/routes/session/[id]/forge/+page.svelte",
+      "target": "packages/ui/src/ArcanePanel.svelte"
+    },
+    {
+      "relation": "imports",
+      "source": "apps/vocal-fix/src/routes/session/[id]/forge/+page.svelte",
+      "target": "packages/ui/src/OracleStatus.svelte"
+    },
+    {
+      "relation": "imports",
+      "source": "apps/vocal-fix/src/routes/session/[id]/forge/+page.svelte",
+      "target": "packages/ui/src/RitualProgress.svelte"
+    },
+    {
+      "relation": "imports",
+      "source": "apps/vocal-fix/src/routes/session/[id]/forge/+page.svelte",
+      "target": "packages/ui/src/RuneButton.svelte"
+    },
+    {
+      "relation": "imports",
+      "source": "apps/vocal-fix/src/routes/session/[id]/forge/+page.svelte",
+      "target": "packages/ui/src/RuneToggle.svelte"
+    },
+    {
+      "relation": "imports",
+      "source": "apps/vocal-fix/src/routes/session/[id]/forge/+page.svelte",
+      "target": "packages/ui/src/SigilLoader.svelte"
+    },
+    {
+      "relation": "imports",
+      "source": "apps/vocal-fix/src/routes/session/[id]/forge/+page.svelte",
+      "target": "packages/ui/src/VoiceSigil.svelte"
+    },
+    {
+      "relation": "imports",
+      "source": "apps/vocal-fix/src/routes/session/[id]/forge/+page.svelte",
+      "target": "packages/ui/src/audio.ts"
+    },
+    {
+      "relation": "imports",
+      "source": "apps/vocal-fix/src/routes/session/[id]/forge/+page.svelte",
+      "target": "pkg:$app/paths"
+    },
+    {
+      "relation": "imports",
+      "source": "apps/vocal-fix/src/routes/session/[id]/forge/+page.svelte",
+      "target": "pkg:$app/state"
+    },
+    {
+      "relation": "browser_fetch",
+      "source": "apps/vocal-fix/src/routes/session/[id]/forge/+page.svelte",
+      "target": "route:apps/vocal-fix:GET /api/sessions/[id]"
+    },
+    {
+      "relation": "browser_fetch",
+      "source": "apps/vocal-fix/src/routes/session/[id]/forge/+page.svelte",
+      "target": "route:apps/vocal-fix:GET /api/sessions/[id]/jobs/[job]"
+    },
+    {
+      "relation": "browser_fetch",
+      "source": "apps/vocal-fix/src/routes/session/[id]/forge/+page.svelte",
+      "target": "route:apps/vocal-fix:POST /api/sessions/[id]/forge"
+    },
+    {
+      "relation": "imports",
+      "source": "apps/vocal-fix/src/routes/session/[id]/gold/+page.svelte",
+      "target": "packages/ui/src/ArcanePanel.svelte"
+    },
+    {
+      "relation": "imports",
+      "source": "apps/vocal-fix/src/routes/session/[id]/gold/+page.svelte",
+      "target": "packages/ui/src/GrimoirePlayer.svelte"
+    },
+    {
+      "relation": "imports",
+      "source": "apps/vocal-fix/src/routes/session/[id]/gold/+page.svelte",
+      "target": "packages/ui/src/OracleStatus.svelte"
+    },
+    {
+      "relation": "imports",
+      "source": "apps/vocal-fix/src/routes/session/[id]/gold/+page.svelte",
+      "target": "packages/ui/src/RitualProgress.svelte"
+    },
+    {
+      "relation": "imports",
+      "source": "apps/vocal-fix/src/routes/session/[id]/gold/+page.svelte",
+      "target": "packages/ui/src/RuneButton.svelte"
+    },
+    {
+      "relation": "imports",
+      "source": "apps/vocal-fix/src/routes/session/[id]/gold/+page.svelte",
+      "target": "packages/ui/src/RuneToggle.svelte"
+    },
+    {
+      "relation": "imports",
+      "source": "apps/vocal-fix/src/routes/session/[id]/gold/+page.svelte",
+      "target": "packages/ui/src/SigilLoader.svelte"
+    },
+    {
+      "relation": "imports",
+      "source": "apps/vocal-fix/src/routes/session/[id]/gold/+page.svelte",
+      "target": "packages/ui/src/VoiceSigil.svelte"
+    },
+    {
+      "relation": "imports",
+      "source": "apps/vocal-fix/src/routes/session/[id]/gold/+page.svelte",
+      "target": "packages/ui/src/Waveform.svelte"
+    },
+    {
+      "relation": "imports",
+      "source": "apps/vocal-fix/src/routes/session/[id]/gold/+page.svelte",
+      "target": "packages/ui/src/audio.ts"
+    },
+    {
+      "relation": "imports",
+      "source": "apps/vocal-fix/src/routes/session/[id]/gold/+page.svelte",
+      "target": "pkg:$app/paths"
+    },
+    {
+      "relation": "imports",
+      "source": "apps/vocal-fix/src/routes/session/[id]/gold/+page.svelte",
+      "target": "pkg:$app/state"
+    },
+    {
+      "relation": "browser_fetch",
+      "source": "apps/vocal-fix/src/routes/session/[id]/gold/+page.svelte",
+      "target": "route:apps/vocal-fix:GET /api/sessions/[id]"
+    },
+    {
+      "relation": "browser_fetch",
+      "source": "apps/vocal-fix/src/routes/session/[id]/gold/+page.svelte",
+      "target": "route:apps/vocal-fix:POST /api/sessions/[id]/gold"
+    },
+    {
+      "relation": "imports",
+      "source": "apps/vocal-fix/src/routes/voices/+page.svelte",
+      "target": "packages/contracts/src/index.ts"
+    },
+    {
+      "relation": "imports",
+      "source": "apps/vocal-fix/src/routes/voices/+page.svelte",
+      "target": "packages/ui/src/ArcanePanel.svelte"
+    },
+    {
+      "relation": "imports",
+      "source": "apps/vocal-fix/src/routes/voices/+page.svelte",
+      "target": "packages/ui/src/OracleStatus.svelte"
+    },
+    {
+      "relation": "imports",
+      "source": "apps/vocal-fix/src/routes/voices/+page.svelte",
+      "target": "packages/ui/src/RuneButton.svelte"
+    },
+    {
+      "relation": "imports",
+      "source": "apps/vocal-fix/src/routes/voices/+page.svelte",
+      "target": "packages/ui/src/Sigil.svelte"
+    },
+    {
+      "relation": "imports",
+      "source": "apps/vocal-fix/src/routes/voices/+page.svelte",
+      "target": "packages/ui/src/SigilLoader.svelte"
+    },
+    {
+      "relation": "imports",
+      "source": "apps/vocal-fix/src/routes/voices/+page.svelte",
+      "target": "pkg:$app/paths"
+    },
+    {
+      "relation": "browser_fetch",
+      "source": "apps/vocal-fix/src/routes/voices/+page.svelte",
+      "target": "route:apps/vocal-fix:DELETE /api/voices/[voice_id]"
+    },
+    {
+      "relation": "browser_fetch",
+      "source": "apps/vocal-fix/src/routes/voices/+page.svelte",
+      "target": "route:apps/vocal-fix:GET /api/voices"
     },
     {
       "relation": "imports",
@@ -511,6 +3376,41 @@
       "target": "apps/vocal_fix/app.py"
     },
     {
+      "relation": "defined_in",
+      "source": "endpoint:services/audio-engine:DELETE /v1/jobs/{job_id}",
+      "target": "services/audio-engine/vbm_engine/app.py"
+    },
+    {
+      "relation": "defined_in",
+      "source": "endpoint:services/audio-engine:GET /v1/health",
+      "target": "services/audio-engine/vbm_engine/app.py"
+    },
+    {
+      "relation": "defined_in",
+      "source": "endpoint:services/audio-engine:GET /v1/jobs/{job_id}",
+      "target": "services/audio-engine/vbm_engine/app.py"
+    },
+    {
+      "relation": "defined_in",
+      "source": "endpoint:services/audio-engine:GET /v1/jobs/{job_id}/audio",
+      "target": "services/audio-engine/vbm_engine/app.py"
+    },
+    {
+      "relation": "defined_in",
+      "source": "endpoint:services/audio-engine:POST /v1/jobs",
+      "target": "services/audio-engine/vbm_engine/app.py"
+    },
+    {
+      "relation": "imports",
+      "source": "packages/contracts/src/engine.test.ts",
+      "target": "packages/contracts/src/engine.ts"
+    },
+    {
+      "relation": "imports",
+      "source": "packages/contracts/src/engine.test.ts",
+      "target": "pkg:bun:test"
+    },
+    {
       "relation": "imports",
       "source": "packages/contracts/src/index.test.ts",
       "target": "packages/contracts/src/index.ts"
@@ -519,6 +3419,231 @@
       "relation": "imports",
       "source": "packages/contracts/src/index.test.ts",
       "target": "pkg:bun:test"
+    },
+    {
+      "relation": "imports",
+      "source": "packages/contracts/src/studio.ts",
+      "target": "packages/contracts/src/index.ts"
+    },
+    {
+      "relation": "imports",
+      "source": "packages/ui/src/ABCompare.svelte",
+      "target": "packages/ui/src/SigilLoader.svelte"
+    },
+    {
+      "relation": "imports",
+      "source": "packages/ui/src/ABCompare.svelte",
+      "target": "packages/ui/src/Waveform.svelte"
+    },
+    {
+      "relation": "imports",
+      "source": "packages/ui/src/ABCompare.svelte",
+      "target": "packages/ui/src/audio.ts"
+    },
+    {
+      "relation": "imports",
+      "source": "packages/ui/src/ArcanePanel.svelte",
+      "target": "pkg:svelte"
+    },
+    {
+      "relation": "imports",
+      "source": "packages/ui/src/ArcaneShell.svelte",
+      "target": "packages/ui/src/Sigil.svelte"
+    },
+    {
+      "relation": "imports",
+      "source": "packages/ui/src/ArcaneShell.svelte",
+      "target": "packages/ui/src/canvas.ts"
+    },
+    {
+      "relation": "imports",
+      "source": "packages/ui/src/ArcaneShell.svelte",
+      "target": "pkg:svelte"
+    },
+    {
+      "relation": "imports",
+      "source": "packages/ui/src/DesignCodex.svelte",
+      "target": "packages/ui/src/ArcanePanel.svelte"
+    },
+    {
+      "relation": "imports",
+      "source": "packages/ui/src/DesignCodex.svelte",
+      "target": "packages/ui/src/MermaidDiagram.svelte"
+    },
+    {
+      "relation": "imports",
+      "source": "packages/ui/src/DesignCodex.svelte",
+      "target": "packages/ui/src/mermaid-doc.ts"
+    },
+    {
+      "relation": "imports",
+      "source": "packages/ui/src/EmptyState.svelte",
+      "target": "packages/ui/src/Sigil.svelte"
+    },
+    {
+      "relation": "imports",
+      "source": "packages/ui/src/GrimoirePlayer.svelte",
+      "target": "packages/ui/src/SigilLoader.svelte"
+    },
+    {
+      "relation": "imports",
+      "source": "packages/ui/src/GrimoirePlayer.svelte",
+      "target": "packages/ui/src/SummoningCircle.svelte"
+    },
+    {
+      "relation": "imports",
+      "source": "packages/ui/src/GrimoirePlayer.svelte",
+      "target": "packages/ui/src/Waveform.svelte"
+    },
+    {
+      "relation": "imports",
+      "source": "packages/ui/src/GrimoirePlayer.svelte",
+      "target": "packages/ui/src/audio.ts"
+    },
+    {
+      "relation": "imports",
+      "source": "packages/ui/src/MermaidDiagram.svelte",
+      "target": "packages/ui/src/Sigil.svelte"
+    },
+    {
+      "relation": "imports",
+      "source": "packages/ui/src/OracleStatus.svelte",
+      "target": "pkg:svelte"
+    },
+    {
+      "relation": "imports",
+      "source": "packages/ui/src/PitchTrace.svelte",
+      "target": "packages/ui/src/EmptyState.svelte"
+    },
+    {
+      "relation": "imports",
+      "source": "packages/ui/src/PitchTrace.svelte",
+      "target": "packages/ui/src/audio.ts"
+    },
+    {
+      "relation": "imports",
+      "source": "packages/ui/src/PitchTrace.svelte",
+      "target": "packages/ui/src/canvas.ts"
+    },
+    {
+      "relation": "imports",
+      "source": "packages/ui/src/RegionSelect.svelte",
+      "target": "packages/ui/src/Waveform.svelte"
+    },
+    {
+      "relation": "imports",
+      "source": "packages/ui/src/RegionSelect.svelte",
+      "target": "packages/ui/src/region.ts"
+    },
+    {
+      "relation": "imports",
+      "source": "packages/ui/src/RuneButton.svelte",
+      "target": "pkg:svelte"
+    },
+    {
+      "relation": "imports",
+      "source": "packages/ui/src/RuneRecorder.svelte",
+      "target": "packages/ui/src/RuneButton.svelte"
+    },
+    {
+      "relation": "imports",
+      "source": "packages/ui/src/RuneRecorder.svelte",
+      "target": "packages/ui/src/audio.ts"
+    },
+    {
+      "relation": "imports",
+      "source": "packages/ui/src/Spectrogram.svelte",
+      "target": "packages/ui/src/EmptyState.svelte"
+    },
+    {
+      "relation": "imports",
+      "source": "packages/ui/src/Spectrogram.svelte",
+      "target": "packages/ui/src/audio.ts"
+    },
+    {
+      "relation": "imports",
+      "source": "packages/ui/src/Spectrogram.svelte",
+      "target": "packages/ui/src/canvas.ts"
+    },
+    {
+      "relation": "imports",
+      "source": "packages/ui/src/SummoningCircle.svelte",
+      "target": "packages/ui/src/audio-graph.ts"
+    },
+    {
+      "relation": "imports",
+      "source": "packages/ui/src/SummoningCircle.svelte",
+      "target": "packages/ui/src/canvas.ts"
+    },
+    {
+      "relation": "imports",
+      "source": "packages/ui/src/VoiceSigil.svelte",
+      "target": "packages/ui/src/EmptyState.svelte"
+    },
+    {
+      "relation": "imports",
+      "source": "packages/ui/src/VoiceSigil.svelte",
+      "target": "packages/ui/src/audio.ts"
+    },
+    {
+      "relation": "imports",
+      "source": "packages/ui/src/Waveform.svelte",
+      "target": "packages/ui/src/EmptyState.svelte"
+    },
+    {
+      "relation": "imports",
+      "source": "packages/ui/src/Waveform.svelte",
+      "target": "packages/ui/src/audio.ts"
+    },
+    {
+      "relation": "imports",
+      "source": "packages/ui/src/Waveform.svelte",
+      "target": "packages/ui/src/canvas.ts"
+    },
+    {
+      "relation": "imports",
+      "source": "packages/ui/src/audio.test.ts",
+      "target": "packages/ui/src/audio.ts"
+    },
+    {
+      "relation": "imports",
+      "source": "packages/ui/src/audio.test.ts",
+      "target": "pkg:bun:test"
+    },
+    {
+      "relation": "imports",
+      "source": "packages/ui/src/mermaid-doc.test.ts",
+      "target": "packages/ui/src/mermaid-doc.ts"
+    },
+    {
+      "relation": "imports",
+      "source": "packages/ui/src/mermaid-doc.test.ts",
+      "target": "pkg:bun:test"
+    },
+    {
+      "relation": "imports",
+      "source": "packages/ui/src/mermaid-doc.test.ts",
+      "target": "pkg:node:fs"
+    },
+    {
+      "relation": "imports",
+      "source": "packages/ui/src/region.test.ts",
+      "target": "packages/ui/src/region.ts"
+    },
+    {
+      "relation": "imports",
+      "source": "packages/ui/src/region.test.ts",
+      "target": "pkg:bun:test"
+    },
+    {
+      "relation": "defined_in",
+      "source": "route:apps/ttb-studio:DELETE /api/studio/jobs/[id]",
+      "target": "apps/ttb-studio/src/routes/api/studio/jobs/[id]/+server.ts"
+    },
+    {
+      "relation": "defined_in",
+      "source": "route:apps/ttb-studio:DELETE /api/studio/songs/[id]",
+      "target": "apps/ttb-studio/src/routes/api/studio/songs/[id]/+server.ts"
     },
     {
       "relation": "defined_in",
@@ -542,8 +3667,98 @@
     },
     {
       "relation": "defined_in",
+      "source": "route:apps/ttb-studio:GET /api/studio/capabilities",
+      "target": "apps/ttb-studio/src/routes/api/studio/capabilities/+server.ts"
+    },
+    {
+      "relation": "defined_in",
+      "source": "route:apps/ttb-studio:GET /api/studio/jobs/[id]",
+      "target": "apps/ttb-studio/src/routes/api/studio/jobs/[id]/+server.ts"
+    },
+    {
+      "relation": "defined_in",
+      "source": "route:apps/ttb-studio:GET /api/studio/seances",
+      "target": "apps/ttb-studio/src/routes/api/studio/seances/+server.ts"
+    },
+    {
+      "relation": "defined_in",
+      "source": "route:apps/ttb-studio:GET /api/studio/seances/[id]",
+      "target": "apps/ttb-studio/src/routes/api/studio/seances/[id]/+server.ts"
+    },
+    {
+      "relation": "defined_in",
+      "source": "route:apps/ttb-studio:GET /api/studio/seances/leaderboard",
+      "target": "apps/ttb-studio/src/routes/api/studio/seances/leaderboard/+server.ts"
+    },
+    {
+      "relation": "defined_in",
+      "source": "route:apps/ttb-studio:GET /api/studio/songs",
+      "target": "apps/ttb-studio/src/routes/api/studio/songs/+server.ts"
+    },
+    {
+      "relation": "defined_in",
+      "source": "route:apps/ttb-studio:GET /api/studio/songs/[id]",
+      "target": "apps/ttb-studio/src/routes/api/studio/songs/[id]/+server.ts"
+    },
+    {
+      "relation": "defined_in",
+      "source": "route:apps/ttb-studio:GET /api/studio/songs/[id]/audio",
+      "target": "apps/ttb-studio/src/routes/api/studio/songs/[id]/audio/+server.ts"
+    },
+    {
+      "relation": "defined_in",
+      "source": "route:apps/ttb-studio:GET /api/studio/songs/[id]/cover",
+      "target": "apps/ttb-studio/src/routes/api/studio/songs/[id]/cover/+server.ts"
+    },
+    {
+      "relation": "defined_in",
+      "source": "route:apps/ttb-studio:GET /api/studio/songs/[id]/edit",
+      "target": "apps/ttb-studio/src/routes/api/studio/songs/[id]/edit/+server.ts"
+    },
+    {
+      "relation": "defined_in",
+      "source": "route:apps/ttb-studio:GET /api/studio/voices",
+      "target": "apps/ttb-studio/src/routes/api/studio/voices/+server.ts"
+    },
+    {
+      "relation": "defined_in",
       "source": "route:apps/ttb-studio:PAGE /",
       "target": "apps/ttb-studio/src/routes/+page.svelte"
+    },
+    {
+      "relation": "defined_in",
+      "source": "route:apps/ttb-studio:PAGE /arcana",
+      "target": "apps/ttb-studio/src/routes/arcana/+page.svelte"
+    },
+    {
+      "relation": "defined_in",
+      "source": "route:apps/ttb-studio:PAGE /grimoire",
+      "target": "apps/ttb-studio/src/routes/grimoire/+page.svelte"
+    },
+    {
+      "relation": "defined_in",
+      "source": "route:apps/ttb-studio:PAGE /library",
+      "target": "apps/ttb-studio/src/routes/library/+page.svelte"
+    },
+    {
+      "relation": "defined_in",
+      "source": "route:apps/ttb-studio:PAGE /library/[id]",
+      "target": "apps/ttb-studio/src/routes/library/[id]/+page.svelte"
+    },
+    {
+      "relation": "defined_in",
+      "source": "route:apps/ttb-studio:PAGE /lyrics",
+      "target": "apps/ttb-studio/src/routes/lyrics/+page.svelte"
+    },
+    {
+      "relation": "defined_in",
+      "source": "route:apps/ttb-studio:PAGE /seance",
+      "target": "apps/ttb-studio/src/routes/seance/+page.svelte"
+    },
+    {
+      "relation": "defined_in",
+      "source": "route:apps/ttb-studio:PATCH /api/studio/songs/[id]",
+      "target": "apps/ttb-studio/src/routes/api/studio/songs/[id]/+server.ts"
     },
     {
       "relation": "defined_in",
@@ -552,8 +3767,73 @@
     },
     {
       "relation": "defined_in",
+      "source": "route:apps/ttb-studio:POST /api/studio/lyrics",
+      "target": "apps/ttb-studio/src/routes/api/studio/lyrics/+server.ts"
+    },
+    {
+      "relation": "defined_in",
+      "source": "route:apps/ttb-studio:POST /api/studio/seances",
+      "target": "apps/ttb-studio/src/routes/api/studio/seances/+server.ts"
+    },
+    {
+      "relation": "defined_in",
+      "source": "route:apps/ttb-studio:POST /api/studio/seances/[id]/rank",
+      "target": "apps/ttb-studio/src/routes/api/studio/seances/[id]/rank/+server.ts"
+    },
+    {
+      "relation": "defined_in",
+      "source": "route:apps/ttb-studio:POST /api/studio/songs",
+      "target": "apps/ttb-studio/src/routes/api/studio/songs/+server.ts"
+    },
+    {
+      "relation": "defined_in",
+      "source": "route:apps/ttb-studio:POST /api/studio/songs/[id]/cover",
+      "target": "apps/ttb-studio/src/routes/api/studio/songs/[id]/cover/+server.ts"
+    },
+    {
+      "relation": "defined_in",
+      "source": "route:apps/ttb-studio:POST /api/studio/songs/[id]/edit",
+      "target": "apps/ttb-studio/src/routes/api/studio/songs/[id]/edit/+server.ts"
+    },
+    {
+      "relation": "defined_in",
+      "source": "route:apps/ttb-studio:POST /api/studio/songs/[id]/master",
+      "target": "apps/ttb-studio/src/routes/api/studio/songs/[id]/master/+server.ts"
+    },
+    {
+      "relation": "defined_in",
+      "source": "route:apps/ttb-studio:POST /api/studio/songs/[id]/reimagine",
+      "target": "apps/ttb-studio/src/routes/api/studio/songs/[id]/reimagine/+server.ts"
+    },
+    {
+      "relation": "defined_in",
+      "source": "route:apps/ttb-studio:POST /api/studio/songs/[id]/stems",
+      "target": "apps/ttb-studio/src/routes/api/studio/songs/[id]/stems/+server.ts"
+    },
+    {
+      "relation": "defined_in",
+      "source": "route:apps/ttb-studio:POST /api/studio/songs/[id]/voice",
+      "target": "apps/ttb-studio/src/routes/api/studio/songs/[id]/voice/+server.ts"
+    },
+    {
+      "relation": "defined_in",
       "source": "route:apps/vocal-fix:DELETE /api/references/[session_id]",
       "target": "apps/vocal-fix/src/routes/api/references/[session_id]/+server.ts"
+    },
+    {
+      "relation": "defined_in",
+      "source": "route:apps/vocal-fix:DELETE /api/sessions/[id]",
+      "target": "apps/vocal-fix/src/routes/api/sessions/[id]/+server.ts"
+    },
+    {
+      "relation": "defined_in",
+      "source": "route:apps/vocal-fix:DELETE /api/sessions/[id]/jobs/[job]",
+      "target": "apps/vocal-fix/src/routes/api/sessions/[id]/jobs/[job]/+server.ts"
+    },
+    {
+      "relation": "defined_in",
+      "source": "route:apps/vocal-fix:DELETE /api/voices/[voice_id]",
+      "target": "apps/vocal-fix/src/routes/api/voices/[voice_id]/+server.ts"
     },
     {
       "relation": "defined_in",
@@ -572,13 +3852,313 @@
     },
     {
       "relation": "defined_in",
+      "source": "route:apps/vocal-fix:GET /api/sessions/[id]",
+      "target": "apps/vocal-fix/src/routes/api/sessions/[id]/+server.ts"
+    },
+    {
+      "relation": "defined_in",
+      "source": "route:apps/vocal-fix:GET /api/sessions/[id]/audio/[area]/[file]",
+      "target": "apps/vocal-fix/src/routes/api/sessions/[id]/audio/[area]/[file]/+server.ts"
+    },
+    {
+      "relation": "defined_in",
+      "source": "route:apps/vocal-fix:GET /api/sessions/[id]/jobs/[job]",
+      "target": "apps/vocal-fix/src/routes/api/sessions/[id]/jobs/[job]/+server.ts"
+    },
+    {
+      "relation": "defined_in",
+      "source": "route:apps/vocal-fix:GET /api/voices",
+      "target": "apps/vocal-fix/src/routes/api/voices/+server.ts"
+    },
+    {
+      "relation": "defined_in",
       "source": "route:apps/vocal-fix:PAGE /",
       "target": "apps/vocal-fix/src/routes/+page.svelte"
     },
     {
       "relation": "defined_in",
+      "source": "route:apps/vocal-fix:PAGE /arcana",
+      "target": "apps/vocal-fix/src/routes/arcana/+page.svelte"
+    },
+    {
+      "relation": "defined_in",
+      "source": "route:apps/vocal-fix:PAGE /session/[id]",
+      "target": "apps/vocal-fix/src/routes/session/[id]/+page.svelte"
+    },
+    {
+      "relation": "defined_in",
+      "source": "route:apps/vocal-fix:PAGE /session/[id]/forge",
+      "target": "apps/vocal-fix/src/routes/session/[id]/forge/+page.svelte"
+    },
+    {
+      "relation": "defined_in",
+      "source": "route:apps/vocal-fix:PAGE /session/[id]/gold",
+      "target": "apps/vocal-fix/src/routes/session/[id]/gold/+page.svelte"
+    },
+    {
+      "relation": "defined_in",
+      "source": "route:apps/vocal-fix:PAGE /voices",
+      "target": "apps/vocal-fix/src/routes/voices/+page.svelte"
+    },
+    {
+      "relation": "defined_in",
       "source": "route:apps/vocal-fix:POST /api/references",
       "target": "apps/vocal-fix/src/routes/api/references/+server.ts"
+    },
+    {
+      "relation": "defined_in",
+      "source": "route:apps/vocal-fix:POST /api/sessions",
+      "target": "apps/vocal-fix/src/routes/api/sessions/+server.ts"
+    },
+    {
+      "relation": "defined_in",
+      "source": "route:apps/vocal-fix:POST /api/sessions/[id]/diagnose",
+      "target": "apps/vocal-fix/src/routes/api/sessions/[id]/diagnose/+server.ts"
+    },
+    {
+      "relation": "defined_in",
+      "source": "route:apps/vocal-fix:POST /api/sessions/[id]/forge",
+      "target": "apps/vocal-fix/src/routes/api/sessions/[id]/forge/+server.ts"
+    },
+    {
+      "relation": "defined_in",
+      "source": "route:apps/vocal-fix:POST /api/sessions/[id]/gold",
+      "target": "apps/vocal-fix/src/routes/api/sessions/[id]/gold/+server.ts"
+    },
+    {
+      "relation": "defined_in",
+      "source": "route:apps/vocal-fix:POST /api/sessions/[id]/repair",
+      "target": "apps/vocal-fix/src/routes/api/sessions/[id]/repair/+server.ts"
+    },
+    {
+      "relation": "imports",
+      "source": "services/audio-engine/modal_app.py",
+      "target": "services/audio-engine/vbm_engine/app.py"
+    },
+    {
+      "relation": "imports",
+      "source": "services/audio-engine/modal_app.py",
+      "target": "services/audio-engine/vbm_engine/download.py"
+    },
+    {
+      "relation": "imports",
+      "source": "services/audio-engine/tests/conftest.py",
+      "target": "services/audio-engine/tests/fake_backend.py"
+    },
+    {
+      "relation": "imports",
+      "source": "services/audio-engine/tests/conftest.py",
+      "target": "services/audio-engine/vbm_engine/app.py"
+    },
+    {
+      "relation": "imports",
+      "source": "services/audio-engine/tests/fake_backend.py",
+      "target": "services/audio-engine/vbm_engine/backends/base.py"
+    },
+    {
+      "relation": "imports",
+      "source": "services/audio-engine/tests/test_backends.py",
+      "target": "services/audio-engine/vbm_engine/backends/__init__.py"
+    },
+    {
+      "relation": "imports",
+      "source": "services/audio-engine/tests/test_backends.py",
+      "target": "services/audio-engine/vbm_engine/backends/ace_step.py"
+    },
+    {
+      "relation": "imports",
+      "source": "services/audio-engine/tests/test_backends.py",
+      "target": "services/audio-engine/vbm_engine/backends/base.py"
+    },
+    {
+      "relation": "imports",
+      "source": "services/audio-engine/tests/test_backends.py",
+      "target": "services/audio-engine/vbm_engine/backends/diffrhythm.py"
+    },
+    {
+      "relation": "imports",
+      "source": "services/audio-engine/tests/test_backends.py",
+      "target": "services/audio-engine/vbm_engine/download.py"
+    },
+    {
+      "relation": "imports",
+      "source": "services/audio-engine/tests/test_backends.py",
+      "target": "services/audio-engine/vbm_engine/validation.py"
+    },
+    {
+      "relation": "imports",
+      "source": "services/audio-engine/tests/test_protocol.py",
+      "target": "services/audio-engine/tests/conftest.py"
+    },
+    {
+      "relation": "imports",
+      "source": "services/audio-engine/tests/test_protocol.py",
+      "target": "services/audio-engine/tests/fake_backend.py"
+    },
+    {
+      "relation": "imports",
+      "source": "services/audio-engine/tests/test_protocol.py",
+      "target": "services/audio-engine/vbm_engine/__main__.py"
+    },
+    {
+      "relation": "imports",
+      "source": "services/audio-engine/tests/test_protocol.py",
+      "target": "services/audio-engine/vbm_engine/app.py"
+    },
+    {
+      "relation": "imports",
+      "source": "services/audio-engine/tests/test_protocol.py",
+      "target": "services/audio-engine/vbm_engine/audio.py"
+    },
+    {
+      "relation": "imports",
+      "source": "services/audio-engine/tests/test_protocol.py",
+      "target": "services/audio-engine/vbm_engine/backends/__init__.py"
+    },
+    {
+      "relation": "imports",
+      "source": "services/audio-engine/tests/test_validation_parity.py",
+      "target": "services/audio-engine/vbm_engine/validation.py"
+    },
+    {
+      "relation": "imports",
+      "source": "services/audio-engine/vbm_engine/__main__.py",
+      "target": "services/audio-engine/vbm_engine/app.py"
+    },
+    {
+      "relation": "imports",
+      "source": "services/audio-engine/vbm_engine/app.py",
+      "target": "services/audio-engine/vbm_engine/__init__.py"
+    },
+    {
+      "relation": "imports",
+      "source": "services/audio-engine/vbm_engine/app.py",
+      "target": "services/audio-engine/vbm_engine/audio.py"
+    },
+    {
+      "relation": "imports",
+      "source": "services/audio-engine/vbm_engine/app.py",
+      "target": "services/audio-engine/vbm_engine/backends/__init__.py"
+    },
+    {
+      "relation": "imports",
+      "source": "services/audio-engine/vbm_engine/app.py",
+      "target": "services/audio-engine/vbm_engine/backends/base.py"
+    },
+    {
+      "relation": "imports",
+      "source": "services/audio-engine/vbm_engine/app.py",
+      "target": "services/audio-engine/vbm_engine/device.py"
+    },
+    {
+      "relation": "imports",
+      "source": "services/audio-engine/vbm_engine/app.py",
+      "target": "services/audio-engine/vbm_engine/jobs.py"
+    },
+    {
+      "relation": "imports",
+      "source": "services/audio-engine/vbm_engine/app.py",
+      "target": "services/audio-engine/vbm_engine/validation.py"
+    },
+    {
+      "relation": "imports",
+      "source": "services/audio-engine/vbm_engine/backends/__init__.py",
+      "target": "services/audio-engine/vbm_engine/backends/ace_step.py"
+    },
+    {
+      "relation": "imports",
+      "source": "services/audio-engine/vbm_engine/backends/__init__.py",
+      "target": "services/audio-engine/vbm_engine/backends/base.py"
+    },
+    {
+      "relation": "imports",
+      "source": "services/audio-engine/vbm_engine/backends/__init__.py",
+      "target": "services/audio-engine/vbm_engine/backends/diffrhythm.py"
+    },
+    {
+      "relation": "imports",
+      "source": "services/audio-engine/vbm_engine/backends/__init__.py",
+      "target": "services/audio-engine/vbm_engine/backends/heartmula.py"
+    },
+    {
+      "relation": "imports",
+      "source": "services/audio-engine/vbm_engine/backends/__init__.py",
+      "target": "services/audio-engine/vbm_engine/backends/yue2.py"
+    },
+    {
+      "relation": "imports",
+      "source": "services/audio-engine/vbm_engine/backends/ace_step.py",
+      "target": "services/audio-engine/vbm_engine/backends/base.py"
+    },
+    {
+      "relation": "imports",
+      "source": "services/audio-engine/vbm_engine/backends/ace_step.py",
+      "target": "services/audio-engine/vbm_engine/device.py"
+    },
+    {
+      "relation": "imports",
+      "source": "services/audio-engine/vbm_engine/backends/common.py",
+      "target": "services/audio-engine/vbm_engine/backends/base.py"
+    },
+    {
+      "relation": "imports",
+      "source": "services/audio-engine/vbm_engine/backends/common.py",
+      "target": "services/audio-engine/vbm_engine/device.py"
+    },
+    {
+      "relation": "imports",
+      "source": "services/audio-engine/vbm_engine/backends/diffrhythm.py",
+      "target": "services/audio-engine/vbm_engine/backends/base.py"
+    },
+    {
+      "relation": "imports",
+      "source": "services/audio-engine/vbm_engine/backends/diffrhythm.py",
+      "target": "services/audio-engine/vbm_engine/backends/common.py"
+    },
+    {
+      "relation": "imports",
+      "source": "services/audio-engine/vbm_engine/backends/heartmula.py",
+      "target": "services/audio-engine/vbm_engine/backends/base.py"
+    },
+    {
+      "relation": "imports",
+      "source": "services/audio-engine/vbm_engine/backends/heartmula.py",
+      "target": "services/audio-engine/vbm_engine/backends/common.py"
+    },
+    {
+      "relation": "imports",
+      "source": "services/audio-engine/vbm_engine/backends/yue2.py",
+      "target": "services/audio-engine/vbm_engine/backends/base.py"
+    },
+    {
+      "relation": "imports",
+      "source": "services/audio-engine/vbm_engine/backends/yue2.py",
+      "target": "services/audio-engine/vbm_engine/backends/common.py"
+    },
+    {
+      "relation": "imports",
+      "source": "services/audio-engine/vbm_engine/device.py",
+      "target": "services/audio-engine/vbm_engine/backends/base.py"
+    },
+    {
+      "relation": "imports",
+      "source": "services/audio-engine/vbm_engine/download.py",
+      "target": "services/audio-engine/vbm_engine/app.py"
+    },
+    {
+      "relation": "imports",
+      "source": "services/audio-engine/vbm_engine/download.py",
+      "target": "services/audio-engine/vbm_engine/backends/__init__.py"
+    },
+    {
+      "relation": "imports",
+      "source": "services/audio-engine/vbm_engine/jobs.py",
+      "target": "services/audio-engine/vbm_engine/audio.py"
+    },
+    {
+      "relation": "imports",
+      "source": "services/audio-engine/vbm_engine/jobs.py",
+      "target": "services/audio-engine/vbm_engine/backends/base.py"
     },
     {
       "relation": "imports",
@@ -594,6 +4174,10 @@
   "multigraph": false,
   "nodes": [
     {
+      "id": "api-path:apps/ttb-studio:POST:/api/studio/songs/*/*",
+      "type": "unresolved-api-path"
+    },
+    {
       "app": "apps/__init__.py",
       "id": "apps/__init__.py",
       "kind": "module",
@@ -604,7 +4188,70 @@
       "app": "apps/ttb-studio",
       "id": "apps/ttb-studio/src/env.ts",
       "kind": "module",
-      "lines": 16,
+      "lines": 45,
+      "type": "file"
+    },
+    {
+      "app": "apps/ttb-studio",
+      "id": "apps/ttb-studio/src/lib/client/AbPlayer.svelte",
+      "kind": "svelte-component",
+      "lines": 164,
+      "type": "file"
+    },
+    {
+      "app": "apps/ttb-studio",
+      "id": "apps/ttb-studio/src/lib/client/MiniWave.svelte",
+      "kind": "svelte-component",
+      "lines": 31,
+      "type": "file"
+    },
+    {
+      "app": "apps/ttb-studio",
+      "id": "apps/ttb-studio/src/lib/client/ModelPicker.svelte",
+      "kind": "svelte-component",
+      "lines": 175,
+      "type": "file"
+    },
+    {
+      "app": "apps/ttb-studio",
+      "id": "apps/ttb-studio/src/lib/client/SongTake.svelte",
+      "kind": "svelte-component",
+      "lines": 58,
+      "type": "file"
+    },
+    {
+      "app": "apps/ttb-studio",
+      "id": "apps/ttb-studio/src/lib/client/StemMixer.svelte",
+      "kind": "svelte-component",
+      "lines": 267,
+      "type": "file"
+    },
+    {
+      "app": "apps/ttb-studio",
+      "id": "apps/ttb-studio/src/lib/client/api.ts",
+      "kind": "module",
+      "lines": 21,
+      "type": "file"
+    },
+    {
+      "app": "apps/ttb-studio",
+      "id": "apps/ttb-studio/src/lib/client/jobs.ts",
+      "kind": "module",
+      "lines": 56,
+      "type": "file"
+    },
+    {
+      "app": "apps/ttb-studio",
+      "id": "apps/ttb-studio/src/lib/client/seance-time.test.ts",
+      "kind": "test",
+      "lines": 32,
+      "type": "file"
+    },
+    {
+      "app": "apps/ttb-studio",
+      "id": "apps/ttb-studio/src/lib/client/seance-time.ts",
+      "kind": "module",
+      "lines": 20,
       "type": "file"
     },
     {
@@ -625,7 +4272,7 @@
       "app": "apps/ttb-studio",
       "id": "apps/ttb-studio/src/lib/server/music/capabilities.ts",
       "kind": "module",
-      "lines": 37,
+      "lines": 40,
       "type": "file"
     },
     {
@@ -639,7 +4286,7 @@
       "app": "apps/ttb-studio",
       "id": "apps/ttb-studio/src/lib/server/music/fal.ts",
       "kind": "module",
-      "lines": 161,
+      "lines": 166,
       "type": "file"
     },
     {
@@ -660,7 +4307,7 @@
       "app": "apps/ttb-studio",
       "id": "apps/ttb-studio/src/lib/server/music/lyria.ts",
       "kind": "module",
-      "lines": 117,
+      "lines": 118,
       "type": "file"
     },
     {
@@ -673,14 +4320,14 @@
     {
       "app": "apps/ttb-studio",
       "id": "apps/ttb-studio/src/lib/server/music/lyrics.test.ts",
-      "kind": "module",
+      "kind": "test",
       "lines": 155,
       "type": "file"
     },
     {
       "app": "apps/ttb-studio",
       "id": "apps/ttb-studio/src/lib/server/music/music.test.ts",
-      "kind": "module",
+      "kind": "test",
       "lines": 322,
       "type": "file"
     },
@@ -693,23 +4340,268 @@
     },
     {
       "app": "apps/ttb-studio",
+      "id": "apps/ttb-studio/src/lib/server/studio/context.ts",
+      "kind": "module",
+      "lines": 75,
+      "type": "file"
+    },
+    {
+      "app": "apps/ttb-studio",
+      "id": "apps/ttb-studio/src/lib/server/studio/cover.ts",
+      "kind": "module",
+      "lines": 149,
+      "type": "file"
+    },
+    {
+      "app": "apps/ttb-studio",
+      "id": "apps/ttb-studio/src/lib/server/studio/create.ts",
+      "kind": "module",
+      "lines": 281,
+      "type": "file"
+    },
+    {
+      "app": "apps/ttb-studio",
+      "id": "apps/ttb-studio/src/lib/server/studio/derive.ts",
+      "kind": "module",
+      "lines": 205,
+      "type": "file"
+    },
+    {
+      "app": "apps/ttb-studio",
+      "id": "apps/ttb-studio/src/lib/server/studio/edit.test.ts",
+      "kind": "test",
+      "lines": 257,
+      "type": "file"
+    },
+    {
+      "app": "apps/ttb-studio",
+      "id": "apps/ttb-studio/src/lib/server/studio/edit.ts",
+      "kind": "module",
+      "lines": 407,
+      "type": "file"
+    },
+    {
+      "app": "apps/ttb-studio",
+      "id": "apps/ttb-studio/src/lib/server/studio/engines.ts",
+      "kind": "module",
+      "lines": 246,
+      "type": "file"
+    },
+    {
+      "app": "apps/ttb-studio",
+      "id": "apps/ttb-studio/src/lib/server/studio/gold.ts",
+      "kind": "module",
+      "lines": 41,
+      "type": "file"
+    },
+    {
+      "app": "apps/ttb-studio",
+      "id": "apps/ttb-studio/src/lib/server/studio/jobs.ts",
+      "kind": "module",
+      "lines": 529,
+      "type": "file"
+    },
+    {
+      "app": "apps/ttb-studio",
+      "id": "apps/ttb-studio/src/lib/server/studio/library.ts",
+      "kind": "module",
+      "lines": 172,
+      "type": "file"
+    },
+    {
+      "app": "apps/ttb-studio",
+      "id": "apps/ttb-studio/src/lib/server/studio/lyrics.test.ts",
+      "kind": "test",
+      "lines": 110,
+      "type": "file"
+    },
+    {
+      "app": "apps/ttb-studio",
+      "id": "apps/ttb-studio/src/lib/server/studio/lyrics.ts",
+      "kind": "module",
+      "lines": 271,
+      "type": "file"
+    },
+    {
+      "app": "apps/ttb-studio",
+      "id": "apps/ttb-studio/src/lib/server/studio/master.ts",
+      "kind": "module",
+      "lines": 172,
+      "type": "file"
+    },
+    {
+      "app": "apps/ttb-studio",
+      "id": "apps/ttb-studio/src/lib/server/studio/paths.ts",
+      "kind": "module",
+      "lines": 26,
+      "type": "file"
+    },
+    {
+      "app": "apps/ttb-studio",
+      "id": "apps/ttb-studio/src/lib/server/studio/range.ts",
+      "kind": "module",
+      "lines": 61,
+      "type": "file"
+    },
+    {
+      "app": "apps/ttb-studio",
+      "id": "apps/ttb-studio/src/lib/server/studio/replicate.ts",
+      "kind": "module",
+      "lines": 275,
+      "type": "file"
+    },
+    {
+      "app": "apps/ttb-studio",
+      "id": "apps/ttb-studio/src/lib/server/studio/review.test.ts",
+      "kind": "test",
+      "lines": 307,
+      "type": "file"
+    },
+    {
+      "app": "apps/ttb-studio",
+      "id": "apps/ttb-studio/src/lib/server/studio/runners/capabilities.test.ts",
+      "kind": "test",
+      "lines": 29,
+      "type": "file"
+    },
+    {
+      "app": "apps/ttb-studio",
+      "id": "apps/ttb-studio/src/lib/server/studio/runners/capabilities.ts",
+      "kind": "module",
+      "lines": 38,
+      "type": "file"
+    },
+    {
+      "app": "apps/ttb-studio",
+      "id": "apps/ttb-studio/src/lib/server/studio/runners/direct.test.ts",
+      "kind": "test",
+      "lines": 74,
+      "type": "file"
+    },
+    {
+      "app": "apps/ttb-studio",
+      "id": "apps/ttb-studio/src/lib/server/studio/runners/direct.ts",
+      "kind": "module",
+      "lines": 152,
+      "type": "file"
+    },
+    {
+      "app": "apps/ttb-studio",
+      "id": "apps/ttb-studio/src/lib/server/studio/runners/engine.test.ts",
+      "kind": "test",
+      "lines": 148,
+      "type": "file"
+    },
+    {
+      "app": "apps/ttb-studio",
+      "id": "apps/ttb-studio/src/lib/server/studio/runners/engine.ts",
+      "kind": "module",
+      "lines": 175,
+      "type": "file"
+    },
+    {
+      "app": "apps/ttb-studio",
+      "id": "apps/ttb-studio/src/lib/server/studio/runners/models.ts",
+      "kind": "module",
+      "lines": 283,
+      "type": "file"
+    },
+    {
+      "app": "apps/ttb-studio",
+      "id": "apps/ttb-studio/src/lib/server/studio/runners/routed.ts",
+      "kind": "module",
+      "lines": 181,
+      "type": "file"
+    },
+    {
+      "app": "apps/ttb-studio",
+      "id": "apps/ttb-studio/src/lib/server/studio/runners/router.test.ts",
+      "kind": "test",
+      "lines": 83,
+      "type": "file"
+    },
+    {
+      "app": "apps/ttb-studio",
+      "id": "apps/ttb-studio/src/lib/server/studio/runners/router.ts",
+      "kind": "module",
+      "lines": 127,
+      "type": "file"
+    },
+    {
+      "app": "apps/ttb-studio",
+      "id": "apps/ttb-studio/src/lib/server/studio/seal.test.ts",
+      "kind": "test",
+      "lines": 174,
+      "type": "file"
+    },
+    {
+      "app": "apps/ttb-studio",
+      "id": "apps/ttb-studio/src/lib/server/studio/seal.ts",
+      "kind": "module",
+      "lines": 45,
+      "type": "file"
+    },
+    {
+      "app": "apps/ttb-studio",
+      "id": "apps/ttb-studio/src/lib/server/studio/seance.test.ts",
+      "kind": "test",
+      "lines": 366,
+      "type": "file"
+    },
+    {
+      "app": "apps/ttb-studio",
+      "id": "apps/ttb-studio/src/lib/server/studio/seance.ts",
+      "kind": "module",
+      "lines": 378,
+      "type": "file"
+    },
+    {
+      "app": "apps/ttb-studio",
+      "id": "apps/ttb-studio/src/lib/server/studio/studio.test.ts",
+      "kind": "test",
+      "lines": 772,
+      "type": "file"
+    },
+    {
+      "app": "apps/ttb-studio",
+      "id": "apps/ttb-studio/src/lib/server/studio/voices.ts",
+      "kind": "module",
+      "lines": 41,
+      "type": "file"
+    },
+    {
+      "app": "apps/ttb-studio",
+      "id": "apps/ttb-studio/src/lib/server/studio/voicesummon.ts",
+      "kind": "module",
+      "lines": 119,
+      "type": "file"
+    },
+    {
+      "app": "apps/ttb-studio",
+      "id": "apps/ttb-studio/src/routes/+error.svelte",
+      "kind": "svelte-component",
+      "lines": 71,
+      "type": "file"
+    },
+    {
+      "app": "apps/ttb-studio",
       "id": "apps/ttb-studio/src/routes/+layout.svelte",
       "kind": "svelte-component",
-      "lines": 14,
+      "lines": 50,
       "type": "file"
     },
     {
       "app": "apps/ttb-studio",
       "id": "apps/ttb-studio/src/routes/+page.svelte",
       "kind": "svelte-component",
-      "lines": 399,
+      "lines": 589,
       "type": "file"
     },
     {
       "app": "apps/ttb-studio",
       "id": "apps/ttb-studio/src/routes/api/capabilities/+server.ts",
       "kind": "module",
-      "lines": 16,
+      "lines": 17,
       "type": "file"
     },
     {
@@ -742,6 +4634,174 @@
     },
     {
       "app": "apps/ttb-studio",
+      "id": "apps/ttb-studio/src/routes/api/studio/capabilities/+server.ts",
+      "kind": "module",
+      "lines": 41,
+      "type": "file"
+    },
+    {
+      "app": "apps/ttb-studio",
+      "id": "apps/ttb-studio/src/routes/api/studio/jobs/[id]/+server.ts",
+      "kind": "module",
+      "lines": 35,
+      "type": "file"
+    },
+    {
+      "app": "apps/ttb-studio",
+      "id": "apps/ttb-studio/src/routes/api/studio/lyrics/+server.ts",
+      "kind": "module",
+      "lines": 28,
+      "type": "file"
+    },
+    {
+      "app": "apps/ttb-studio",
+      "id": "apps/ttb-studio/src/routes/api/studio/seances/+server.ts",
+      "kind": "module",
+      "lines": 26,
+      "type": "file"
+    },
+    {
+      "app": "apps/ttb-studio",
+      "id": "apps/ttb-studio/src/routes/api/studio/seances/[id]/+server.ts",
+      "kind": "module",
+      "lines": 18,
+      "type": "file"
+    },
+    {
+      "app": "apps/ttb-studio",
+      "id": "apps/ttb-studio/src/routes/api/studio/seances/[id]/rank/+server.ts",
+      "kind": "module",
+      "lines": 23,
+      "type": "file"
+    },
+    {
+      "app": "apps/ttb-studio",
+      "id": "apps/ttb-studio/src/routes/api/studio/seances/_deps.ts",
+      "kind": "module",
+      "lines": 54,
+      "type": "file"
+    },
+    {
+      "app": "apps/ttb-studio",
+      "id": "apps/ttb-studio/src/routes/api/studio/seances/leaderboard/+server.ts",
+      "kind": "module",
+      "lines": 14,
+      "type": "file"
+    },
+    {
+      "app": "apps/ttb-studio",
+      "id": "apps/ttb-studio/src/routes/api/studio/songs/+server.ts",
+      "kind": "module",
+      "lines": 36,
+      "type": "file"
+    },
+    {
+      "app": "apps/ttb-studio",
+      "id": "apps/ttb-studio/src/routes/api/studio/songs/[id]/+server.ts",
+      "kind": "module",
+      "lines": 65,
+      "type": "file"
+    },
+    {
+      "app": "apps/ttb-studio",
+      "id": "apps/ttb-studio/src/routes/api/studio/songs/[id]/audio/+server.ts",
+      "kind": "module",
+      "lines": 30,
+      "type": "file"
+    },
+    {
+      "app": "apps/ttb-studio",
+      "id": "apps/ttb-studio/src/routes/api/studio/songs/[id]/cover/+server.ts",
+      "kind": "module",
+      "lines": 39,
+      "type": "file"
+    },
+    {
+      "app": "apps/ttb-studio",
+      "id": "apps/ttb-studio/src/routes/api/studio/songs/[id]/edit/+server.ts",
+      "kind": "module",
+      "lines": 40,
+      "type": "file"
+    },
+    {
+      "app": "apps/ttb-studio",
+      "id": "apps/ttb-studio/src/routes/api/studio/songs/[id]/master/+server.ts",
+      "kind": "module",
+      "lines": 22,
+      "type": "file"
+    },
+    {
+      "app": "apps/ttb-studio",
+      "id": "apps/ttb-studio/src/routes/api/studio/songs/[id]/reimagine/+server.ts",
+      "kind": "module",
+      "lines": 25,
+      "type": "file"
+    },
+    {
+      "app": "apps/ttb-studio",
+      "id": "apps/ttb-studio/src/routes/api/studio/songs/[id]/stems/+server.ts",
+      "kind": "module",
+      "lines": 22,
+      "type": "file"
+    },
+    {
+      "app": "apps/ttb-studio",
+      "id": "apps/ttb-studio/src/routes/api/studio/songs/[id]/voice/+server.ts",
+      "kind": "module",
+      "lines": 32,
+      "type": "file"
+    },
+    {
+      "app": "apps/ttb-studio",
+      "id": "apps/ttb-studio/src/routes/api/studio/voices/+server.ts",
+      "kind": "module",
+      "lines": 22,
+      "type": "file"
+    },
+    {
+      "app": "apps/ttb-studio",
+      "id": "apps/ttb-studio/src/routes/arcana/+page.svelte",
+      "kind": "svelte-component",
+      "lines": 19,
+      "type": "file"
+    },
+    {
+      "app": "apps/ttb-studio",
+      "id": "apps/ttb-studio/src/routes/grimoire/+page.svelte",
+      "kind": "svelte-component",
+      "lines": 374,
+      "type": "file"
+    },
+    {
+      "app": "apps/ttb-studio",
+      "id": "apps/ttb-studio/src/routes/library/+page.svelte",
+      "kind": "svelte-component",
+      "lines": 261,
+      "type": "file"
+    },
+    {
+      "app": "apps/ttb-studio",
+      "id": "apps/ttb-studio/src/routes/library/[id]/+page.svelte",
+      "kind": "svelte-component",
+      "lines": 570,
+      "type": "file"
+    },
+    {
+      "app": "apps/ttb-studio",
+      "id": "apps/ttb-studio/src/routes/lyrics/+page.svelte",
+      "kind": "svelte-component",
+      "lines": 178,
+      "type": "file"
+    },
+    {
+      "app": "apps/ttb-studio",
+      "id": "apps/ttb-studio/src/routes/seance/+page.svelte",
+      "kind": "svelte-component",
+      "lines": 659,
+      "type": "file"
+    },
+    {
+      "app": "apps/ttb-studio",
       "id": "apps/ttb-studio/vite.config.ts",
       "kind": "module",
       "lines": 8,
@@ -770,6 +4830,27 @@
     },
     {
       "app": "apps/vocal-fix",
+      "id": "apps/vocal-fix/src/env.ts",
+      "kind": "module",
+      "lines": 12,
+      "type": "file"
+    },
+    {
+      "app": "apps/vocal-fix",
+      "id": "apps/vocal-fix/src/hooks.server.ts",
+      "kind": "module",
+      "lines": 12,
+      "type": "file"
+    },
+    {
+      "app": "apps/vocal-fix",
+      "id": "apps/vocal-fix/src/lib/client.ts",
+      "kind": "module",
+      "lines": 88,
+      "type": "file"
+    },
+    {
+      "app": "apps/vocal-fix",
       "id": "apps/vocal-fix/src/lib/server/backend.ts",
       "kind": "module",
       "lines": 25,
@@ -777,23 +4858,149 @@
     },
     {
       "app": "apps/vocal-fix",
+      "id": "apps/vocal-fix/src/lib/server/chain.ts",
+      "kind": "module",
+      "lines": 188,
+      "type": "file"
+    },
+    {
+      "app": "apps/vocal-fix",
+      "id": "apps/vocal-fix/src/lib/server/context.ts",
+      "kind": "module",
+      "lines": 11,
+      "type": "file"
+    },
+    {
+      "app": "apps/vocal-fix",
+      "id": "apps/vocal-fix/src/lib/server/diagnose.ts",
+      "kind": "module",
+      "lines": 251,
+      "type": "file"
+    },
+    {
+      "app": "apps/vocal-fix",
+      "id": "apps/vocal-fix/src/lib/server/errors.ts",
+      "kind": "module",
+      "lines": 17,
+      "type": "file"
+    },
+    {
+      "app": "apps/vocal-fix",
+      "id": "apps/vocal-fix/src/lib/server/forge.ts",
+      "kind": "module",
+      "lines": 160,
+      "type": "file"
+    },
+    {
+      "app": "apps/vocal-fix",
+      "id": "apps/vocal-fix/src/lib/server/gate.ts",
+      "kind": "module",
+      "lines": 97,
+      "type": "file"
+    },
+    {
+      "app": "apps/vocal-fix",
+      "id": "apps/vocal-fix/src/lib/server/gold.ts",
+      "kind": "module",
+      "lines": 205,
+      "type": "file"
+    },
+    {
+      "app": "apps/vocal-fix",
+      "id": "apps/vocal-fix/src/lib/server/jobs.ts",
+      "kind": "module",
+      "lines": 240,
+      "type": "file"
+    },
+    {
+      "app": "apps/vocal-fix",
+      "id": "apps/vocal-fix/src/lib/server/media.ts",
+      "kind": "module",
+      "lines": 187,
+      "type": "file"
+    },
+    {
+      "app": "apps/vocal-fix",
+      "id": "apps/vocal-fix/src/lib/server/paths.ts",
+      "kind": "module",
+      "lines": 19,
+      "type": "file"
+    },
+    {
+      "app": "apps/vocal-fix",
+      "id": "apps/vocal-fix/src/lib/server/profile.ts",
+      "kind": "module",
+      "lines": 199,
+      "type": "file"
+    },
+    {
+      "app": "apps/vocal-fix",
+      "id": "apps/vocal-fix/src/lib/server/range.ts",
+      "kind": "module",
+      "lines": 62,
+      "type": "file"
+    },
+    {
+      "app": "apps/vocal-fix",
+      "id": "apps/vocal-fix/src/lib/server/replicate.ts",
+      "kind": "module",
+      "lines": 212,
+      "type": "file"
+    },
+    {
+      "app": "apps/vocal-fix",
+      "id": "apps/vocal-fix/src/lib/server/server.test.ts",
+      "kind": "test",
+      "lines": 613,
+      "type": "file"
+    },
+    {
+      "app": "apps/vocal-fix",
+      "id": "apps/vocal-fix/src/lib/server/service.ts",
+      "kind": "module",
+      "lines": 801,
+      "type": "file"
+    },
+    {
+      "app": "apps/vocal-fix",
+      "id": "apps/vocal-fix/src/lib/server/storage.ts",
+      "kind": "module",
+      "lines": 160,
+      "type": "file"
+    },
+    {
+      "app": "apps/vocal-fix",
+      "id": "apps/vocal-fix/src/lib/server/svc.ts",
+      "kind": "module",
+      "lines": 5,
+      "type": "file"
+    },
+    {
+      "app": "apps/vocal-fix",
+      "id": "apps/vocal-fix/src/routes/+error.svelte",
+      "kind": "svelte-component",
+      "lines": 71,
+      "type": "file"
+    },
+    {
+      "app": "apps/vocal-fix",
       "id": "apps/vocal-fix/src/routes/+layout.svelte",
       "kind": "svelte-component",
-      "lines": 11,
+      "lines": 45,
       "type": "file"
     },
     {
       "app": "apps/vocal-fix",
       "id": "apps/vocal-fix/src/routes/+page.svelte",
       "kind": "svelte-component",
-      "lines": 194,
+      "lines": 287,
       "type": "file"
     },
     {
       "app": "apps/vocal-fix",
       "id": "apps/vocal-fix/src/routes/api/capabilities/+server.ts",
       "kind": "module",
-      "lines": 17,
+      "lines": 29,
       "type": "file"
     },
     {
@@ -807,14 +5014,119 @@
       "app": "apps/vocal-fix",
       "id": "apps/vocal-fix/src/routes/api/references/+server.ts",
       "kind": "module",
-      "lines": 52,
+      "lines": 55,
       "type": "file"
     },
     {
       "app": "apps/vocal-fix",
       "id": "apps/vocal-fix/src/routes/api/references/[session_id]/+server.ts",
       "kind": "module",
-      "lines": 46,
+      "lines": 48,
+      "type": "file"
+    },
+    {
+      "app": "apps/vocal-fix",
+      "id": "apps/vocal-fix/src/routes/api/sessions/+server.ts",
+      "kind": "module",
+      "lines": 40,
+      "type": "file"
+    },
+    {
+      "app": "apps/vocal-fix",
+      "id": "apps/vocal-fix/src/routes/api/sessions/[id]/+server.ts",
+      "kind": "module",
+      "lines": 28,
+      "type": "file"
+    },
+    {
+      "app": "apps/vocal-fix",
+      "id": "apps/vocal-fix/src/routes/api/sessions/[id]/audio/[area]/[file]/+server.ts",
+      "kind": "module",
+      "lines": 41,
+      "type": "file"
+    },
+    {
+      "app": "apps/vocal-fix",
+      "id": "apps/vocal-fix/src/routes/api/sessions/[id]/diagnose/+server.ts",
+      "kind": "module",
+      "lines": 15,
+      "type": "file"
+    },
+    {
+      "app": "apps/vocal-fix",
+      "id": "apps/vocal-fix/src/routes/api/sessions/[id]/forge/+server.ts",
+      "kind": "module",
+      "lines": 17,
+      "type": "file"
+    },
+    {
+      "app": "apps/vocal-fix",
+      "id": "apps/vocal-fix/src/routes/api/sessions/[id]/gold/+server.ts",
+      "kind": "module",
+      "lines": 17,
+      "type": "file"
+    },
+    {
+      "app": "apps/vocal-fix",
+      "id": "apps/vocal-fix/src/routes/api/sessions/[id]/jobs/[job]/+server.ts",
+      "kind": "module",
+      "lines": 25,
+      "type": "file"
+    },
+    {
+      "app": "apps/vocal-fix",
+      "id": "apps/vocal-fix/src/routes/api/sessions/[id]/repair/+server.ts",
+      "kind": "module",
+      "lines": 17,
+      "type": "file"
+    },
+    {
+      "app": "apps/vocal-fix",
+      "id": "apps/vocal-fix/src/routes/api/voices/+server.ts",
+      "kind": "module",
+      "lines": 10,
+      "type": "file"
+    },
+    {
+      "app": "apps/vocal-fix",
+      "id": "apps/vocal-fix/src/routes/api/voices/[voice_id]/+server.ts",
+      "kind": "module",
+      "lines": 16,
+      "type": "file"
+    },
+    {
+      "app": "apps/vocal-fix",
+      "id": "apps/vocal-fix/src/routes/arcana/+page.svelte",
+      "kind": "svelte-component",
+      "lines": 19,
+      "type": "file"
+    },
+    {
+      "app": "apps/vocal-fix",
+      "id": "apps/vocal-fix/src/routes/session/[id]/+page.svelte",
+      "kind": "svelte-component",
+      "lines": 447,
+      "type": "file"
+    },
+    {
+      "app": "apps/vocal-fix",
+      "id": "apps/vocal-fix/src/routes/session/[id]/forge/+page.svelte",
+      "kind": "svelte-component",
+      "lines": 293,
+      "type": "file"
+    },
+    {
+      "app": "apps/vocal-fix",
+      "id": "apps/vocal-fix/src/routes/session/[id]/gold/+page.svelte",
+      "kind": "svelte-component",
+      "lines": 426,
+      "type": "file"
+    },
+    {
+      "app": "apps/vocal-fix",
+      "id": "apps/vocal-fix/src/routes/voices/+page.svelte",
+      "kind": "svelte-component",
+      "lines": 239,
       "type": "file"
     },
     {
@@ -923,7 +5235,86 @@
       "type": "python-endpoint"
     },
     {
+      "app": "services/audio-engine",
+      "id": "endpoint:services/audio-engine:DELETE /v1/jobs/{job_id}",
+      "method": "DELETE",
+      "path": "/v1/jobs/{job_id}",
+      "type": "python-endpoint"
+    },
+    {
+      "app": "services/audio-engine",
+      "id": "endpoint:services/audio-engine:GET /v1/health",
+      "method": "GET",
+      "path": "/v1/health",
+      "type": "python-endpoint"
+    },
+    {
+      "app": "services/audio-engine",
+      "id": "endpoint:services/audio-engine:GET /v1/jobs/{job_id}",
+      "method": "GET",
+      "path": "/v1/jobs/{job_id}",
+      "type": "python-endpoint"
+    },
+    {
+      "app": "services/audio-engine",
+      "id": "endpoint:services/audio-engine:GET /v1/jobs/{job_id}/audio",
+      "method": "GET",
+      "path": "/v1/jobs/{job_id}/audio",
+      "type": "python-endpoint"
+    },
+    {
+      "app": "services/audio-engine",
+      "id": "endpoint:services/audio-engine:POST /v1/jobs",
+      "method": "POST",
+      "path": "/v1/jobs",
+      "type": "python-endpoint"
+    },
+    {
+      "id": "external:ai.google.dev",
+      "type": "external-service"
+    },
+    {
+      "id": "external:api.anthropic.com",
+      "type": "external-service"
+    },
+    {
+      "id": "external:api.elevenlabs.io",
+      "type": "external-service"
+    },
+    {
+      "id": "external:api.minimax.io",
+      "type": "external-service"
+    },
+    {
+      "id": "external:api.openai.com",
+      "type": "external-service"
+    },
+    {
+      "id": "external:api.replicate.com",
+      "type": "external-service"
+    },
+    {
+      "id": "external:docs.anthropic.com",
+      "type": "external-service"
+    },
+    {
+      "id": "external:elevenlabs.io",
+      "type": "external-service"
+    },
+    {
+      "id": "external:fal.ai",
+      "type": "external-service"
+    },
+    {
       "id": "external:generativelanguage.googleapis.com",
+      "type": "external-service"
+    },
+    {
+      "id": "external:platform.minimax.io",
+      "type": "external-service"
+    },
+    {
+      "id": "external:platform.openai.com",
       "type": "external-service"
     },
     {
@@ -946,8 +5337,22 @@
     },
     {
       "app": "packages/contracts",
-      "id": "packages/contracts/src/index.test.ts",
+      "id": "packages/contracts/src/engine.test.ts",
+      "kind": "test",
+      "lines": 23,
+      "type": "file"
+    },
+    {
+      "app": "packages/contracts",
+      "id": "packages/contracts/src/engine.ts",
       "kind": "module",
+      "lines": 182,
+      "type": "file"
+    },
+    {
+      "app": "packages/contracts",
+      "id": "packages/contracts/src/index.test.ts",
+      "kind": "test",
       "lines": 28,
       "type": "file"
     },
@@ -955,7 +5360,21 @@
       "app": "packages/contracts",
       "id": "packages/contracts/src/index.ts",
       "kind": "module",
-      "lines": 92,
+      "lines": 95,
+      "type": "file"
+    },
+    {
+      "app": "packages/contracts",
+      "id": "packages/contracts/src/studio.ts",
+      "kind": "module",
+      "lines": 412,
+      "type": "file"
+    },
+    {
+      "app": "packages/contracts",
+      "id": "packages/contracts/src/voice.ts",
+      "kind": "module",
+      "lines": 58,
       "type": "file"
     },
     {
@@ -967,9 +5386,163 @@
     },
     {
       "app": "packages/ui",
+      "id": "packages/ui/src/ABCompare.svelte",
+      "kind": "svelte-component",
+      "lines": 332,
+      "type": "file"
+    },
+    {
+      "app": "packages/ui",
+      "id": "packages/ui/src/ArcaneInput.svelte",
+      "kind": "svelte-component",
+      "lines": 83,
+      "type": "file"
+    },
+    {
+      "app": "packages/ui",
+      "id": "packages/ui/src/ArcanePanel.svelte",
+      "kind": "svelte-component",
+      "lines": 138,
+      "type": "file"
+    },
+    {
+      "app": "packages/ui",
+      "id": "packages/ui/src/ArcaneSelect.svelte",
+      "kind": "svelte-component",
+      "lines": 97,
+      "type": "file"
+    },
+    {
+      "app": "packages/ui",
+      "id": "packages/ui/src/ArcaneShell.svelte",
+      "kind": "svelte-component",
+      "lines": 229,
+      "type": "file"
+    },
+    {
+      "app": "packages/ui",
+      "id": "packages/ui/src/ArcaneTextarea.svelte",
+      "kind": "svelte-component",
+      "lines": 90,
+      "type": "file"
+    },
+    {
+      "app": "packages/ui",
       "id": "packages/ui/src/BrandHeader.svelte",
       "kind": "svelte-component",
       "lines": 63,
+      "type": "file"
+    },
+    {
+      "app": "packages/ui",
+      "id": "packages/ui/src/DesignCodex.svelte",
+      "kind": "svelte-component",
+      "lines": 146,
+      "type": "file"
+    },
+    {
+      "app": "packages/ui",
+      "id": "packages/ui/src/EmptyState.svelte",
+      "kind": "svelte-component",
+      "lines": 27,
+      "type": "file"
+    },
+    {
+      "app": "packages/ui",
+      "id": "packages/ui/src/GrimoirePlayer.svelte",
+      "kind": "svelte-component",
+      "lines": 209,
+      "type": "file"
+    },
+    {
+      "app": "packages/ui",
+      "id": "packages/ui/src/MermaidDiagram.svelte",
+      "kind": "svelte-component",
+      "lines": 223,
+      "type": "file"
+    },
+    {
+      "app": "packages/ui",
+      "id": "packages/ui/src/OracleStatus.svelte",
+      "kind": "svelte-component",
+      "lines": 57,
+      "type": "file"
+    },
+    {
+      "app": "packages/ui",
+      "id": "packages/ui/src/PitchTrace.svelte",
+      "kind": "svelte-component",
+      "lines": 118,
+      "type": "file"
+    },
+    {
+      "app": "packages/ui",
+      "id": "packages/ui/src/RegionSelect.svelte",
+      "kind": "svelte-component",
+      "lines": 217,
+      "type": "file"
+    },
+    {
+      "app": "packages/ui",
+      "id": "packages/ui/src/RitualProgress.svelte",
+      "kind": "svelte-component",
+      "lines": 152,
+      "type": "file"
+    },
+    {
+      "app": "packages/ui",
+      "id": "packages/ui/src/RuneButton.svelte",
+      "kind": "svelte-component",
+      "lines": 138,
+      "type": "file"
+    },
+    {
+      "app": "packages/ui",
+      "id": "packages/ui/src/RuneDropzone.svelte",
+      "kind": "svelte-component",
+      "lines": 277,
+      "type": "file"
+    },
+    {
+      "app": "packages/ui",
+      "id": "packages/ui/src/RuneMeter.svelte",
+      "kind": "svelte-component",
+      "lines": 130,
+      "type": "file"
+    },
+    {
+      "app": "packages/ui",
+      "id": "packages/ui/src/RuneRecorder.svelte",
+      "kind": "svelte-component",
+      "lines": 327,
+      "type": "file"
+    },
+    {
+      "app": "packages/ui",
+      "id": "packages/ui/src/RuneToggle.svelte",
+      "kind": "svelte-component",
+      "lines": 108,
+      "type": "file"
+    },
+    {
+      "app": "packages/ui",
+      "id": "packages/ui/src/Sigil.svelte",
+      "kind": "svelte-component",
+      "lines": 60,
+      "type": "file"
+    },
+    {
+      "app": "packages/ui",
+      "id": "packages/ui/src/SigilLoader.svelte",
+      "kind": "svelte-component",
+      "lines": 79,
+      "type": "file"
+    },
+    {
+      "app": "packages/ui",
+      "id": "packages/ui/src/Spectrogram.svelte",
+      "kind": "svelte-component",
+      "lines": 110,
       "type": "file"
     },
     {
@@ -980,7 +5553,103 @@
       "type": "file"
     },
     {
+      "app": "packages/ui",
+      "id": "packages/ui/src/SummoningCircle.svelte",
+      "kind": "svelte-component",
+      "lines": 162,
+      "type": "file"
+    },
+    {
+      "app": "packages/ui",
+      "id": "packages/ui/src/VoiceSigil.svelte",
+      "kind": "svelte-component",
+      "lines": 173,
+      "type": "file"
+    },
+    {
+      "app": "packages/ui",
+      "id": "packages/ui/src/Waveform.svelte",
+      "kind": "svelte-component",
+      "lines": 206,
+      "type": "file"
+    },
+    {
+      "app": "packages/ui",
+      "id": "packages/ui/src/audio-graph.ts",
+      "kind": "module",
+      "lines": 27,
+      "type": "file"
+    },
+    {
+      "app": "packages/ui",
+      "id": "packages/ui/src/audio.test.ts",
+      "kind": "test",
+      "lines": 92,
+      "type": "file"
+    },
+    {
+      "app": "packages/ui",
+      "id": "packages/ui/src/audio.ts",
+      "kind": "module",
+      "lines": 268,
+      "type": "file"
+    },
+    {
+      "app": "packages/ui",
+      "id": "packages/ui/src/canvas.ts",
+      "kind": "module",
+      "lines": 61,
+      "type": "file"
+    },
+    {
+      "app": "packages/ui",
+      "id": "packages/ui/src/mermaid-doc.test.ts",
+      "kind": "test",
+      "lines": 50,
+      "type": "file"
+    },
+    {
+      "app": "packages/ui",
+      "id": "packages/ui/src/mermaid-doc.ts",
+      "kind": "module",
+      "lines": 61,
+      "type": "file"
+    },
+    {
+      "app": "packages/ui",
+      "id": "packages/ui/src/region.test.ts",
+      "kind": "test",
+      "lines": 39,
+      "type": "file"
+    },
+    {
+      "app": "packages/ui",
+      "id": "packages/ui/src/region.ts",
+      "kind": "module",
+      "lines": 65,
+      "type": "file"
+    },
+    {
+      "app": "packages/ui",
+      "id": "packages/ui/src/theme.css",
+      "kind": "stylesheet",
+      "lines": 184,
+      "type": "file"
+    },
+    {
       "id": "pkg:$app/env/private",
+      "type": "external-package"
+    },
+    {
+      "id": "pkg:$app/navigation",
+      "type": "external-package"
+    },
+    {
+      "id": "pkg:$app/paths",
+      "type": "external-package"
+    },
+    {
+      "id": "pkg:$app/state",
       "type": "external-package"
     },
     {
@@ -996,11 +5665,35 @@
       "type": "external-package"
     },
     {
+      "id": "pkg:@sveltejs/kit/hooks",
+      "type": "external-package"
+    },
+    {
       "id": "pkg:@sveltejs/kit/vite",
       "type": "external-package"
     },
     {
       "id": "pkg:bun:test",
+      "type": "external-package"
+    },
+    {
+      "id": "pkg:node:crypto",
+      "type": "external-package"
+    },
+    {
+      "id": "pkg:node:fs",
+      "type": "external-package"
+    },
+    {
+      "id": "pkg:node:fs/promises",
+      "type": "external-package"
+    },
+    {
+      "id": "pkg:node:os",
+      "type": "external-package"
+    },
+    {
+      "id": "pkg:node:path",
       "type": "external-package"
     },
     {
@@ -1010,6 +5703,20 @@
     {
       "id": "pkg:vite",
       "type": "external-package"
+    },
+    {
+      "app": "apps/ttb-studio",
+      "id": "route:apps/ttb-studio:DELETE /api/studio/jobs/[id]",
+      "method": "DELETE",
+      "path": "/api/studio/jobs/[id]",
+      "type": "sveltekit-route"
+    },
+    {
+      "app": "apps/ttb-studio",
+      "id": "route:apps/ttb-studio:DELETE /api/studio/songs/[id]",
+      "method": "DELETE",
+      "path": "/api/studio/songs/[id]",
+      "type": "sveltekit-route"
     },
     {
       "app": "apps/ttb-studio",
@@ -1041,9 +5748,135 @@
     },
     {
       "app": "apps/ttb-studio",
+      "id": "route:apps/ttb-studio:GET /api/studio/capabilities",
+      "method": "GET",
+      "path": "/api/studio/capabilities",
+      "type": "sveltekit-route"
+    },
+    {
+      "app": "apps/ttb-studio",
+      "id": "route:apps/ttb-studio:GET /api/studio/jobs/[id]",
+      "method": "GET",
+      "path": "/api/studio/jobs/[id]",
+      "type": "sveltekit-route"
+    },
+    {
+      "app": "apps/ttb-studio",
+      "id": "route:apps/ttb-studio:GET /api/studio/seances",
+      "method": "GET",
+      "path": "/api/studio/seances",
+      "type": "sveltekit-route"
+    },
+    {
+      "app": "apps/ttb-studio",
+      "id": "route:apps/ttb-studio:GET /api/studio/seances/[id]",
+      "method": "GET",
+      "path": "/api/studio/seances/[id]",
+      "type": "sveltekit-route"
+    },
+    {
+      "app": "apps/ttb-studio",
+      "id": "route:apps/ttb-studio:GET /api/studio/seances/leaderboard",
+      "method": "GET",
+      "path": "/api/studio/seances/leaderboard",
+      "type": "sveltekit-route"
+    },
+    {
+      "app": "apps/ttb-studio",
+      "id": "route:apps/ttb-studio:GET /api/studio/songs",
+      "method": "GET",
+      "path": "/api/studio/songs",
+      "type": "sveltekit-route"
+    },
+    {
+      "app": "apps/ttb-studio",
+      "id": "route:apps/ttb-studio:GET /api/studio/songs/[id]",
+      "method": "GET",
+      "path": "/api/studio/songs/[id]",
+      "type": "sveltekit-route"
+    },
+    {
+      "app": "apps/ttb-studio",
+      "id": "route:apps/ttb-studio:GET /api/studio/songs/[id]/audio",
+      "method": "GET",
+      "path": "/api/studio/songs/[id]/audio",
+      "type": "sveltekit-route"
+    },
+    {
+      "app": "apps/ttb-studio",
+      "id": "route:apps/ttb-studio:GET /api/studio/songs/[id]/cover",
+      "method": "GET",
+      "path": "/api/studio/songs/[id]/cover",
+      "type": "sveltekit-route"
+    },
+    {
+      "app": "apps/ttb-studio",
+      "id": "route:apps/ttb-studio:GET /api/studio/songs/[id]/edit",
+      "method": "GET",
+      "path": "/api/studio/songs/[id]/edit",
+      "type": "sveltekit-route"
+    },
+    {
+      "app": "apps/ttb-studio",
+      "id": "route:apps/ttb-studio:GET /api/studio/voices",
+      "method": "GET",
+      "path": "/api/studio/voices",
+      "type": "sveltekit-route"
+    },
+    {
+      "app": "apps/ttb-studio",
       "id": "route:apps/ttb-studio:PAGE /",
       "method": "PAGE",
       "path": "/",
+      "type": "sveltekit-route"
+    },
+    {
+      "app": "apps/ttb-studio",
+      "id": "route:apps/ttb-studio:PAGE /arcana",
+      "method": "PAGE",
+      "path": "/arcana",
+      "type": "sveltekit-route"
+    },
+    {
+      "app": "apps/ttb-studio",
+      "id": "route:apps/ttb-studio:PAGE /grimoire",
+      "method": "PAGE",
+      "path": "/grimoire",
+      "type": "sveltekit-route"
+    },
+    {
+      "app": "apps/ttb-studio",
+      "id": "route:apps/ttb-studio:PAGE /library",
+      "method": "PAGE",
+      "path": "/library",
+      "type": "sveltekit-route"
+    },
+    {
+      "app": "apps/ttb-studio",
+      "id": "route:apps/ttb-studio:PAGE /library/[id]",
+      "method": "PAGE",
+      "path": "/library/[id]",
+      "type": "sveltekit-route"
+    },
+    {
+      "app": "apps/ttb-studio",
+      "id": "route:apps/ttb-studio:PAGE /lyrics",
+      "method": "PAGE",
+      "path": "/lyrics",
+      "type": "sveltekit-route"
+    },
+    {
+      "app": "apps/ttb-studio",
+      "id": "route:apps/ttb-studio:PAGE /seance",
+      "method": "PAGE",
+      "path": "/seance",
+      "type": "sveltekit-route"
+    },
+    {
+      "app": "apps/ttb-studio",
+      "id": "route:apps/ttb-studio:PATCH /api/studio/songs/[id]",
+      "method": "PATCH",
+      "path": "/api/studio/songs/[id]",
       "type": "sveltekit-route"
     },
     {
@@ -1054,10 +5887,101 @@
       "type": "sveltekit-route"
     },
     {
+      "app": "apps/ttb-studio",
+      "id": "route:apps/ttb-studio:POST /api/studio/lyrics",
+      "method": "POST",
+      "path": "/api/studio/lyrics",
+      "type": "sveltekit-route"
+    },
+    {
+      "app": "apps/ttb-studio",
+      "id": "route:apps/ttb-studio:POST /api/studio/seances",
+      "method": "POST",
+      "path": "/api/studio/seances",
+      "type": "sveltekit-route"
+    },
+    {
+      "app": "apps/ttb-studio",
+      "id": "route:apps/ttb-studio:POST /api/studio/seances/[id]/rank",
+      "method": "POST",
+      "path": "/api/studio/seances/[id]/rank",
+      "type": "sveltekit-route"
+    },
+    {
+      "app": "apps/ttb-studio",
+      "id": "route:apps/ttb-studio:POST /api/studio/songs",
+      "method": "POST",
+      "path": "/api/studio/songs",
+      "type": "sveltekit-route"
+    },
+    {
+      "app": "apps/ttb-studio",
+      "id": "route:apps/ttb-studio:POST /api/studio/songs/[id]/cover",
+      "method": "POST",
+      "path": "/api/studio/songs/[id]/cover",
+      "type": "sveltekit-route"
+    },
+    {
+      "app": "apps/ttb-studio",
+      "id": "route:apps/ttb-studio:POST /api/studio/songs/[id]/edit",
+      "method": "POST",
+      "path": "/api/studio/songs/[id]/edit",
+      "type": "sveltekit-route"
+    },
+    {
+      "app": "apps/ttb-studio",
+      "id": "route:apps/ttb-studio:POST /api/studio/songs/[id]/master",
+      "method": "POST",
+      "path": "/api/studio/songs/[id]/master",
+      "type": "sveltekit-route"
+    },
+    {
+      "app": "apps/ttb-studio",
+      "id": "route:apps/ttb-studio:POST /api/studio/songs/[id]/reimagine",
+      "method": "POST",
+      "path": "/api/studio/songs/[id]/reimagine",
+      "type": "sveltekit-route"
+    },
+    {
+      "app": "apps/ttb-studio",
+      "id": "route:apps/ttb-studio:POST /api/studio/songs/[id]/stems",
+      "method": "POST",
+      "path": "/api/studio/songs/[id]/stems",
+      "type": "sveltekit-route"
+    },
+    {
+      "app": "apps/ttb-studio",
+      "id": "route:apps/ttb-studio:POST /api/studio/songs/[id]/voice",
+      "method": "POST",
+      "path": "/api/studio/songs/[id]/voice",
+      "type": "sveltekit-route"
+    },
+    {
       "app": "apps/vocal-fix",
       "id": "route:apps/vocal-fix:DELETE /api/references/[session_id]",
       "method": "DELETE",
       "path": "/api/references/[session_id]",
+      "type": "sveltekit-route"
+    },
+    {
+      "app": "apps/vocal-fix",
+      "id": "route:apps/vocal-fix:DELETE /api/sessions/[id]",
+      "method": "DELETE",
+      "path": "/api/sessions/[id]",
+      "type": "sveltekit-route"
+    },
+    {
+      "app": "apps/vocal-fix",
+      "id": "route:apps/vocal-fix:DELETE /api/sessions/[id]/jobs/[job]",
+      "method": "DELETE",
+      "path": "/api/sessions/[id]/jobs/[job]",
+      "type": "sveltekit-route"
+    },
+    {
+      "app": "apps/vocal-fix",
+      "id": "route:apps/vocal-fix:DELETE /api/voices/[voice_id]",
+      "method": "DELETE",
+      "path": "/api/voices/[voice_id]",
       "type": "sveltekit-route"
     },
     {
@@ -1083,9 +6007,72 @@
     },
     {
       "app": "apps/vocal-fix",
+      "id": "route:apps/vocal-fix:GET /api/sessions/[id]",
+      "method": "GET",
+      "path": "/api/sessions/[id]",
+      "type": "sveltekit-route"
+    },
+    {
+      "app": "apps/vocal-fix",
+      "id": "route:apps/vocal-fix:GET /api/sessions/[id]/audio/[area]/[file]",
+      "method": "GET",
+      "path": "/api/sessions/[id]/audio/[area]/[file]",
+      "type": "sveltekit-route"
+    },
+    {
+      "app": "apps/vocal-fix",
+      "id": "route:apps/vocal-fix:GET /api/sessions/[id]/jobs/[job]",
+      "method": "GET",
+      "path": "/api/sessions/[id]/jobs/[job]",
+      "type": "sveltekit-route"
+    },
+    {
+      "app": "apps/vocal-fix",
+      "id": "route:apps/vocal-fix:GET /api/voices",
+      "method": "GET",
+      "path": "/api/voices",
+      "type": "sveltekit-route"
+    },
+    {
+      "app": "apps/vocal-fix",
       "id": "route:apps/vocal-fix:PAGE /",
       "method": "PAGE",
       "path": "/",
+      "type": "sveltekit-route"
+    },
+    {
+      "app": "apps/vocal-fix",
+      "id": "route:apps/vocal-fix:PAGE /arcana",
+      "method": "PAGE",
+      "path": "/arcana",
+      "type": "sveltekit-route"
+    },
+    {
+      "app": "apps/vocal-fix",
+      "id": "route:apps/vocal-fix:PAGE /session/[id]",
+      "method": "PAGE",
+      "path": "/session/[id]",
+      "type": "sveltekit-route"
+    },
+    {
+      "app": "apps/vocal-fix",
+      "id": "route:apps/vocal-fix:PAGE /session/[id]/forge",
+      "method": "PAGE",
+      "path": "/session/[id]/forge",
+      "type": "sveltekit-route"
+    },
+    {
+      "app": "apps/vocal-fix",
+      "id": "route:apps/vocal-fix:PAGE /session/[id]/gold",
+      "method": "PAGE",
+      "path": "/session/[id]/gold",
+      "type": "sveltekit-route"
+    },
+    {
+      "app": "apps/vocal-fix",
+      "id": "route:apps/vocal-fix:PAGE /voices",
+      "method": "PAGE",
+      "path": "/voices",
       "type": "sveltekit-route"
     },
     {
@@ -1094,6 +6081,195 @@
       "method": "POST",
       "path": "/api/references",
       "type": "sveltekit-route"
+    },
+    {
+      "app": "apps/vocal-fix",
+      "id": "route:apps/vocal-fix:POST /api/sessions",
+      "method": "POST",
+      "path": "/api/sessions",
+      "type": "sveltekit-route"
+    },
+    {
+      "app": "apps/vocal-fix",
+      "id": "route:apps/vocal-fix:POST /api/sessions/[id]/diagnose",
+      "method": "POST",
+      "path": "/api/sessions/[id]/diagnose",
+      "type": "sveltekit-route"
+    },
+    {
+      "app": "apps/vocal-fix",
+      "id": "route:apps/vocal-fix:POST /api/sessions/[id]/forge",
+      "method": "POST",
+      "path": "/api/sessions/[id]/forge",
+      "type": "sveltekit-route"
+    },
+    {
+      "app": "apps/vocal-fix",
+      "id": "route:apps/vocal-fix:POST /api/sessions/[id]/gold",
+      "method": "POST",
+      "path": "/api/sessions/[id]/gold",
+      "type": "sveltekit-route"
+    },
+    {
+      "app": "apps/vocal-fix",
+      "id": "route:apps/vocal-fix:POST /api/sessions/[id]/repair",
+      "method": "POST",
+      "path": "/api/sessions/[id]/repair",
+      "type": "sveltekit-route"
+    },
+    {
+      "app": "services/audio-engine",
+      "id": "services/audio-engine/modal_app.py",
+      "kind": "module",
+      "lines": 123,
+      "type": "file"
+    },
+    {
+      "app": "services/audio-engine",
+      "id": "services/audio-engine/tests/__init__.py",
+      "kind": "test",
+      "lines": 1,
+      "type": "file"
+    },
+    {
+      "app": "services/audio-engine",
+      "id": "services/audio-engine/tests/conftest.py",
+      "kind": "test",
+      "lines": 32,
+      "type": "file"
+    },
+    {
+      "app": "services/audio-engine",
+      "id": "services/audio-engine/tests/fake_backend.py",
+      "kind": "test",
+      "lines": 44,
+      "type": "file"
+    },
+    {
+      "app": "services/audio-engine",
+      "id": "services/audio-engine/tests/test_backends.py",
+      "kind": "test",
+      "lines": 100,
+      "type": "file"
+    },
+    {
+      "app": "services/audio-engine",
+      "id": "services/audio-engine/tests/test_protocol.py",
+      "kind": "test",
+      "lines": 225,
+      "type": "file"
+    },
+    {
+      "app": "services/audio-engine",
+      "id": "services/audio-engine/tests/test_validation_parity.py",
+      "kind": "test",
+      "lines": 23,
+      "type": "file"
+    },
+    {
+      "app": "services/audio-engine",
+      "id": "services/audio-engine/vbm_engine/__init__.py",
+      "kind": "module",
+      "lines": 5,
+      "type": "file"
+    },
+    {
+      "app": "services/audio-engine",
+      "id": "services/audio-engine/vbm_engine/__main__.py",
+      "kind": "module",
+      "lines": 45,
+      "type": "file"
+    },
+    {
+      "app": "services/audio-engine",
+      "id": "services/audio-engine/vbm_engine/app.py",
+      "kind": "module",
+      "lines": 297,
+      "type": "file"
+    },
+    {
+      "app": "services/audio-engine",
+      "id": "services/audio-engine/vbm_engine/audio.py",
+      "kind": "module",
+      "lines": 36,
+      "type": "file"
+    },
+    {
+      "app": "services/audio-engine",
+      "id": "services/audio-engine/vbm_engine/backends/__init__.py",
+      "kind": "module",
+      "lines": 31,
+      "type": "file"
+    },
+    {
+      "app": "services/audio-engine",
+      "id": "services/audio-engine/vbm_engine/backends/ace_step.py",
+      "kind": "module",
+      "lines": 181,
+      "type": "file"
+    },
+    {
+      "app": "services/audio-engine",
+      "id": "services/audio-engine/vbm_engine/backends/base.py",
+      "kind": "module",
+      "lines": 77,
+      "type": "file"
+    },
+    {
+      "app": "services/audio-engine",
+      "id": "services/audio-engine/vbm_engine/backends/common.py",
+      "kind": "module",
+      "lines": 42,
+      "type": "file"
+    },
+    {
+      "app": "services/audio-engine",
+      "id": "services/audio-engine/vbm_engine/backends/diffrhythm.py",
+      "kind": "module",
+      "lines": 131,
+      "type": "file"
+    },
+    {
+      "app": "services/audio-engine",
+      "id": "services/audio-engine/vbm_engine/backends/heartmula.py",
+      "kind": "module",
+      "lines": 98,
+      "type": "file"
+    },
+    {
+      "app": "services/audio-engine",
+      "id": "services/audio-engine/vbm_engine/backends/yue2.py",
+      "kind": "module",
+      "lines": 76,
+      "type": "file"
+    },
+    {
+      "app": "services/audio-engine",
+      "id": "services/audio-engine/vbm_engine/device.py",
+      "kind": "module",
+      "lines": 35,
+      "type": "file"
+    },
+    {
+      "app": "services/audio-engine",
+      "id": "services/audio-engine/vbm_engine/download.py",
+      "kind": "module",
+      "lines": 52,
+      "type": "file"
+    },
+    {
+      "app": "services/audio-engine",
+      "id": "services/audio-engine/vbm_engine/jobs.py",
+      "kind": "module",
+      "lines": 279,
+      "type": "file"
+    },
+    {
+      "app": "services/audio-engine",
+      "id": "services/audio-engine/vbm_engine/validation.py",
+      "kind": "module",
+      "lines": 92,
+      "type": "file"
     },
     {
       "app": "tests",

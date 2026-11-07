@@ -10,7 +10,6 @@ language: ts
 depends_on:
   - "[[entities/env-vocal-fix-api-url]]"
 used_by:
-  - "[[entities/route-vf-get-capabilities]]"
   - "[[entities/route-vf-post-references]]"
   - "[[entities/route-vf-get-reference]]"
   - "[[entities/route-vf-delete-reference]]"
@@ -22,15 +21,19 @@ tags:
   - vocal-fix
 related:
   - "[[entities/mod-vocal-fix-python-app]]"
+  - "[[questions/vocal-fix-legacy-reference-routes]]"
 sources:
   - "apps/vocal-fix/src/lib/server/backend.ts"
 ---
 
 # vocal-fix backend.ts (Python bridge)
 
+> [!contradiction]
+> Updated at commit `f88cc09` (2026-11-06). Prior contract: used by four routes including capabilities. New contract: used by the three reference routes only; capabilities is local since `f88cc09`.
+
 ## Overview
 
-Loopback bridge used by Vocal Fix routes to reach the private Python prototype (`apps/vocal-fix/src/lib/server/backend.ts:1-24`).
+Loopback bridge to the private Python prototype (`apps/vocal-fix/src/lib/server/backend.ts:1-24`).
 
 ## Signature / Definition
 
@@ -43,14 +46,21 @@ export function passthrough(upstream: Response): Response
 ## Behavior
 
 - `upstreamUrl` reads `process.env[envKey]` with a fallback, strips trailing slashes and rejects non-http(s) protocols (`apps/vocal-fix/src/lib/server/backend.ts:2-8`).
-- `upstreamUnavailable` logs the error message and returns 503 (`apps/vocal-fix/src/lib/server/backend.ts:9-18`).
-- `passthrough` streams the upstream body with its status and `no-store` (`apps/vocal-fix/src/lib/server/backend.ts:19-24`).
+- `upstreamUnavailable` logs and returns 503 (`apps/vocal-fix/src/lib/server/backend.ts:9-18`); `passthrough` streams the upstream body with `no-store` (`apps/vocal-fix/src/lib/server/backend.ts:19-24`).
+- Only the three legacy reference routes import it now; the new pipeline does not use Python.
+
+## Prior behavior (stale)
+
+> [!stale]
+> Behavior changed in commit `f88cc09` (2026-11-06). Reason: capabilities no longer proxies.
+
+- used_by included [[entities/route-vf-get-capabilities]].
 
 ## Connections
 
 - **depends_on:** [[entities/env-vocal-fix-api-url]]
-- **used_by:** [[entities/route-vf-get-capabilities]], [[entities/route-vf-post-references]], [[entities/route-vf-get-reference]], [[entities/route-vf-delete-reference]]
-- **related:** [[entities/mod-vocal-fix-python-app]]
+- **used_by:** [[entities/route-vf-post-references]], [[entities/route-vf-get-reference]], [[entities/route-vf-delete-reference]]
+- **related:** [[entities/mod-vocal-fix-python-app]], [[questions/vocal-fix-legacy-reference-routes]]
 
 ## Tested by
 

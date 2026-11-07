@@ -22,8 +22,9 @@ Should apps/ttb-studio/src/lib/server/backend.ts be kept, given nothing imports 
 
 ## Evidence
 
-- The module exports a Python bridge (`apps/ttb-studio/src/lib/server/backend.ts:2-24`).
-- The code graph has no edge to or from it; generation calls providers directly (`apps/ttb-studio/src/routes/api/generations/+server.ts:9-17`).
+- The module exports a Python bridge (`apps/ttb-studio/src/lib/server/backend.ts:2-24`), unchanged since `3997ab2`.
+- At HEAD `b58d457` a search of `apps/ttb-studio/src` for `server/backend` finds no importer; generation and the new studio routes call providers through studio modules instead (`apps/ttb-studio/src/routes/api/studio/songs/+server.ts:10`).
+- Evidence that it is unreferenced is stronger; whether it should be kept is still an intent question, so this stays unanswered.
 
 ## Needs
 

@@ -26,6 +26,8 @@ flowchart LR
     registry["shared/voices registry"]
   end
   replicate["Replicate hosted models"]
+  providers["Direct provider APIs: fal, Google, MiniMax, ElevenLabs, Anthropic, OpenAI"]
+  engine["Optional self-hosted engine, services/audio-engine"]
   ffmpeg["Local ffmpeg and ffprobe"]
 
   studioUI --> studioSrv
@@ -35,6 +37,8 @@ flowchart LR
   studioSrv -.-> contracts
   vfSrv -.-> contracts
   studioSrv --> replicate
+  studioSrv --> providers
+  studioSrv -- "bearer token, protocol v1" --> engine
   vfSrv --> replicate
   studioSrv --> ffmpeg
   vfSrv --> ffmpeg
@@ -68,8 +72,8 @@ sequenceDiagram
   autonumber
   participant B as Browser
   participant S as Studio server
-  participant L as Lyricist on Replicate
-  participant M as Music engine on Replicate
+  participant L as Lyricist (Anthropic, OpenAI, Gemini or Replicate)
+  participant M as First ready runner (engine, provider API or Replicate)
   participant F as FLUX cover art
   participant D as data/studio/songs
 
@@ -78,11 +82,11 @@ sequenceDiagram
     S->>L: write lyrics and a title from the description
     L-->>S: tagged lyrics
   end
-  S->>M: one prediction per take
-  S-->>B: job id
+  S->>M: one job per take, falling back only if a runner refused before a job existed
+  S-->>B: job id (synchronous runners return the stored songs at once)
   loop until every take is stored or failed
     B->>S: GET job status
-    S->>M: poll prediction
+    S->>M: poll the job
     M-->>S: output link that expires
     S->>S: download, check the audio format
     S->>D: audio file and meta.json
@@ -155,7 +159,7 @@ flowchart TD
 
 ## Job lifecycle
 
-Both apps run long work as jobs that the browser polls. Vocal Fix runs at most two repair or forge jobs at once (one forge), saves job state under `data/vocal-fix/jobs/`, and marks jobs cut off by a restart as failed. TTB Studio refuses new paid work while three jobs are running.
+Both apps run long work as jobs that the browser polls. Vocal Fix runs at most two repair or forge jobs at once (one forge), saves job state under `data/vocal-fix/jobs/`, and marks jobs cut off by a restart as failed. TTB Studio saves jobs under `data/studio/jobs/`, starts them as running (no queue), refuses new paid work while three jobs are running (four for Séance takes) and fails a job after 20 minutes. The self-hosted engine queues jobs behind its GPU slots and marks interrupted jobs failed.
 
 ```mermaid
 stateDiagram-v2
@@ -181,6 +185,7 @@ flowchart TD
   data --> vfDir["vocal-fix/sessions/id/"]
   vfDir --> vfFiles["originals/, derived/, manifest.json with sha256 and provenance"]
   data --> jobsDir["vocal-fix/jobs/id.json"]
+  data --> studioJobs["studio/jobs/id.json and studio/seances/"]
   data --> voicesDir["shared/voices/"]
   voicesDir --> voiceFiles["voice-id.json and voice-id.model.zip"]
 ```

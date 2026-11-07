@@ -12,15 +12,19 @@ sources: []
 
 # Hot pages
 
-Most load-bearing pages at `29c84e47`:
+Most load-bearing pages at `b58d4574`:
 
+- [[concepts/studio-models-and-runners]]: how every song request picks a model and runner
+- [[concepts/studio-job-lifecycle]]: studio jobs, caps and deadlines
+- [[concepts/ttb-studio-api-surface]]: the `/api/studio/*` routes the browser uses
+- [[concepts/vocal-fix-repair-pipeline]]: Vocal Fix intake, repair and derived files
+- [[concepts/vocal-fix-mutation-guard]]: localhost, dev-only and intent checks (not authentication)
+- [[concepts/engine-job-lifecycle]]: the self-hosted engine's job states
 - [[concepts/production-403-guard]]
-- [[concepts/dev-only-generation-gate]]
-- [[concepts/hosted-generation-flow]]
-- [[entities/route-ttb-post-generations]]
-- [[entities/route-vf-post-references]]
-- [[entities/mod-music-fal]]
-- [[entities/mod-music-lyria]]
-- [[entities/mod-music-audio]]
-- [[entities/contract-validate-generation-request]]
+- [[entities/mod-studio-runner-router]]
+- [[entities/mod-studio-jobs]]
+- [[entities/mod-vf-service]]
+- [[entities/mod-engine-app]]
+- [[entities/contract-engine-job-request]]
+- [[meta/2026-11-06-contradiction-report]]: what changed since `29c84e47`
 - [[codegraph]]

@@ -4,7 +4,7 @@
 One public monorepo, two **independently runnable apps**. Avoid merging user workflows into a single UI.
 
 ### App A — Vocal Fix (vocal-fix)
-- Upload **exactly five** recordings of a single authorized vocal performer, each MP3/WAV/FLAC/M4A (initial prototype supports upload and secure local storage; processing is pending).
+- Upload **exactly five** recordings of a single authorized vocal performer, each MP3/WAV/FLAC/M4A. Today (development only) the SvelteKit app also accepts a single take for repair, decodes every upload, and runs diagnosis, repair, Gold Vocal assembly and consented voice training; storage is local disk without per-user access control.
 - Explicit rights/performer consent attestation before accepting recordings.
 - Job stages: ingest, transcode/inspect, source separation, voice activity detection, noise and reverb assessment, de-clip/de-noise (when safe), segment quality ranking, Gold Vocal assembly, characteristics extraction, QA, export.
 - **Gold Vocal** is a curated, representative, cleaned reference with linked segment provenance, not an average of five waveforms and not automatically a cloned voice.
@@ -16,7 +16,7 @@ One public monorepo, two **independently runnable apps**. Avoid merging user wor
 ### App B — TTB Studio (ttb-studio)
 - **Modular monolith:** one app for projects, generation, editor, playback, export and model configuration.
 - Prompt-to-beat, lyrics-to-song, prompt-to-instrumental and full-song generation; custom lyrics, voice role and expressive controls.
-- Engine adapters: ACE-Step (hosted on fal, development only today), Google Lyria 3.5 (hosted, development only today), HeartMuLa and a configurable third-party 'V2' adapter, **only after provider/API/model rights have been verified**.
+- Engine adapters: today, development only, hosted ACE-Step (fal, Replicate), Lyria 3.5 and Lyria 3 Pro (Google), MiniMax, ElevenLabs, Stable Audio 2.5, Lyria 2, HeartMuLa, DiffRhythm and YuE (Replicate), plus a self-hosted engine for ACE-Step 1.5, HeartMuLa, DiffRhythm 2 and YuE2. A configurable third-party 'V2' adapter is not integrated and is added **only after provider/API/model rights have been verified**.
 - Character presets: Raw / Underground; Vintage / Analog; Live / Organic; Studio Clean; Custom.
 - 'Premium Studio' optional switch *independent* of sound preset. Never conflate premium with higher musical authenticity.
 - Sliders: rawness/texture, human variation, vocal performance, arrangement complexity, mastering intensity, reference strength and seed where engines support them. Avoid promising controls unsupported by a chosen model; UI must indicate per-engine support.

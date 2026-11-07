@@ -12,7 +12,7 @@ Releases are manual. CI verifies changes but does not publish releases or deploy
 
 ## Verify the exact release candidate
 
-Use a clean checkout of the reviewed candidate commit, Bun 1.4.0, Node 22.17.0 and Python 3.11, matching `.github/workflows/ci.yml`. Do not use an existing working directory containing user recordings as the build workspace.
+Use a clean checkout of the reviewed candidate commit, Bun 1.4.0, Node 22.17.0, Python 3.11 (Python 3.12 for `services/audio-engine`) and `ffmpeg`/`ffprobe` (needed by `bun run test`), matching `.github/workflows/ci.yml`. Do not use an existing working directory containing user recordings as the build workspace.
 
 ```bash
 bun install --minimum-release-age=172800 --frozen-lockfile
@@ -23,11 +23,13 @@ python3 -m venv .venv
 . .venv/bin/activate
 python -m pip install -r requirements.txt
 python -m pytest -q
+# services/audio-engine, in its own Python 3.12 environment (fake backend only, no model weights):
+(cd services/audio-engine && python -m pip install -r requirements-base.txt -r requirements-dev.txt && python -m pytest -q && python -m ruff check . && python -m ruff format --check . && python -m mypy)
 ```
 
 Stop on any failure or unexpected tracked-file change. Review warnings. Require successful CI for this exact commit, not merely the latest green run. Python dependencies currently use version ranges, so record the resolved environment for the release; byte-for-byte reproducibility is not guaranteed.
 
-Smoke-test each built app independently on loopback using the commands in [SaaS stack](SAAS_STACK.md). Confirm the UI and health endpoint respond, unavailable audio services are reported honestly, and production upload/generation remain blocked. Never expose the unauthenticated Python prototypes.
+Smoke-test each built app independently on loopback using the commands in [SaaS stack](SAAS_STACK.md). Confirm the UI and health endpoint respond, unavailable audio services are reported honestly, and production upload/generation remain blocked. Never expose the unauthenticated Python prototypes. The engine tests do not run a real model, so they are not evidence of generated audio.
 
 ## Publish only with maintainer approval
 

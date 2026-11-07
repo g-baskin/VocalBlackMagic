@@ -18,6 +18,22 @@ used_by:
   - "[[entities/route-ttb-get-generation-audio]]"
   - "[[entities/test-music]]"
   - "[[entities/test-lyrics]]"
+  - "[[entities/mod-studio-context]]"
+  - "[[entities/mod-studio-cover]]"
+  - "[[entities/mod-studio-create]]"
+  - "[[entities/mod-studio-derive]]"
+  - "[[entities/mod-studio-edit]]"
+  - "[[entities/mod-studio-gold]]"
+  - "[[entities/mod-studio-jobs]]"
+  - "[[entities/mod-studio-lyrics]]"
+  - "[[entities/mod-studio-master]]"
+  - "[[entities/mod-studio-replicate]]"
+  - "[[entities/mod-studio-seance]]"
+  - "[[entities/mod-studio-voicesummon]]"
+  - "[[entities/mod-studio-runner-direct]]"
+  - "[[entities/mod-studio-runner-engine]]"
+  - "[[entities/mod-studio-runner-routed]]"
+  - "[[entities/mod-studio-runner-router]]"
 last_commit_hash: "29c84e4"
 tested_by:
   - "[[entities/test-music]]"
@@ -50,10 +66,12 @@ export function errorResponse(error: unknown): Response
 - A `ProviderError` logs `logDetail` to the console and returns `{detail: publicMessage}` with its own status (`apps/ttb-studio/src/lib/server/music/errors.ts:12-15`).
 - Any other error is logged by message; a `DOMException` named `TimeoutError` maps to 504, everything else to 502 (`apps/ttb-studio/src/lib/server/music/errors.ts:16-28`).
 
+- Since `f88cc09` the studio modules also import `ProviderError`/`errorResponse` (for example `apps/ttb-studio/src/lib/server/studio/context.ts:12`, `apps/ttb-studio/src/lib/server/studio/runners/router.ts:1`); the module itself is unchanged since `29c84e4`.
+
 ## Connections
 
 - **depends_on:** none found in source
-- **used_by:** [[entities/mod-music-audio]], [[entities/mod-music-fal]], [[entities/mod-music-lyria]], [[entities/mod-music-lyricist]], [[entities/route-ttb-post-generations]], [[entities/route-ttb-get-generation]], [[entities/route-ttb-get-generation-audio]], [[entities/test-music]], [[entities/test-lyrics]]
+- **used_by:** [[entities/mod-music-audio]], [[entities/mod-music-fal]], [[entities/mod-music-lyria]], [[entities/mod-music-lyricist]], [[entities/route-ttb-post-generations]], [[entities/route-ttb-get-generation]], [[entities/route-ttb-get-generation-audio]], [[entities/test-music]], [[entities/test-lyrics]], [[entities/mod-studio-context]], [[entities/mod-studio-cover]], [[entities/mod-studio-create]], [[entities/mod-studio-derive]], [[entities/mod-studio-edit]], [[entities/mod-studio-gold]], [[entities/mod-studio-jobs]], [[entities/mod-studio-lyrics]], [[entities/mod-studio-master]], [[entities/mod-studio-replicate]], [[entities/mod-studio-seance]], [[entities/mod-studio-voicesummon]], [[entities/mod-studio-runner-direct]], [[entities/mod-studio-runner-engine]], [[entities/mod-studio-runner-routed]], [[entities/mod-studio-runner-router]]
 - **related:** [[concepts/hosted-generation-flow]]
 
 ## Tested by

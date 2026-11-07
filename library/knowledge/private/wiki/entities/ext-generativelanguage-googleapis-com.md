@@ -1,6 +1,6 @@
 ---
 type: entity
-title: "generativelanguage.googleapis.com (Gemini interactions API)"
+title: "generativelanguage.googleapis.com"
 entity_type: service
 status: developing
 created: "2026-11-06"
@@ -11,43 +11,53 @@ depends_on: []
 used_by:
   - "[[entities/mod-music-lyria]]"
   - "[[entities/mod-music-lyricist]]"
-last_commit_hash: "29c84e4"
+  - "[[entities/mod-studio-lyrics]]"
+  - "[[entities/mod-studio-runner-direct]]"
+last_commit_hash: "09057ad"
 tested_by: []
-env_vars:
-  - "[[entities/env-gemini-api-key]]"
 tags:
-  - entity
-  - service
-  - external
+  - "entity"
+  - "service"
+  - "external"
+  - "api"
 related:
-  - "[[concepts/hosted-generation-flow]]"
-  - "[[codegraph]]"
+  - "[[entities/env-gemini-api-key]]"
 sources:
   - "apps/ttb-studio/src/lib/server/music/lyria.ts"
+  - "apps/ttb-studio/src/lib/server/music/lyricist.ts"
+  - "apps/ttb-studio/src/lib/server/studio/lyrics.ts"
 ---
 
-# generativelanguage.googleapis.com (Gemini interactions API)
+# generativelanguage.googleapis.com
+
+> [!contradiction]
+> Updated in place at HEAD `b58d457`; change introduced in commit `f88cc09`.
+> Prior claim: callers are `music/lyria.ts` and `music/lyricist.ts`.
+> New claim: the studio lyricist chain also calls `:generateContent` (`apps/ttb-studio/src/lib/server/studio/lyrics.ts:166-170`).
 
 ## Overview
 
-External Google host used for Lyria 3.5 song generation and Gemini lyric drafting via `/v1beta/interactions` (`apps/ttb-studio/src/lib/server/music/lyria.ts:6`, `apps/ttb-studio/src/lib/server/music/lyricist.ts:6`).
+Google Gemini API host for Lyria music and Gemini lyricists (`apps/ttb-studio/src/lib/server/music/lyria.ts:6`).
 
 ## Signature / Definition
 
-```ts
-POST https://generativelanguage.googleapis.com/v1beta/interactions  (api-revision 2026-05-20)
+```text
+https://generativelanguage.googleapis.com
 ```
 
 ## Behavior
 
-- Lyria call: model `lyria-3.5`, 300 s timeout (`apps/ttb-studio/src/lib/server/music/lyria.ts:79-88`). Lyricist call: model `gemini-3.5-flash-lite`, `store: false`, 60 s (`apps/ttb-studio/src/lib/server/music/lyricist.ts:98-112`).
-- Both send `api-revision` `2026-05-20` (`apps/ttb-studio/src/lib/server/music/lyria.ts:8`).
+- Kind: Real API call target: the server sends requests to this host.
+- Caller: Lyria Interactions POST, 300 s (`apps/ttb-studio/src/lib/server/music/lyria.ts:80-89`), also used for Lyria 3 Pro by the direct runner (`apps/ttb-studio/src/lib/server/studio/runners/direct.ts:120-128`)
+- Caller: Gemini lyricist Interactions POST, 60 s (`apps/ttb-studio/src/lib/server/music/lyricist.ts:98-112`)
+- Caller: studio lyricist chain `models/<model>:generateContent` (`apps/ttb-studio/src/lib/server/studio/lyrics.ts:166-186`)
+- Caller: header `api-revision: 2026-05-20` on Interactions calls (`apps/ttb-studio/src/lib/server/music/lyria.ts:8`, `:85`)
 
 ## Connections
 
 - **depends_on:** none found in source
-- **used_by:** [[entities/mod-music-lyria]], [[entities/mod-music-lyricist]]
-- **related:** [[concepts/hosted-generation-flow]], [[codegraph]]
+- **used_by:** [[entities/mod-music-lyria]], [[entities/mod-music-lyricist]], [[entities/mod-studio-lyrics]], [[entities/mod-studio-runner-direct]]
+- **related:** [[entities/env-gemini-api-key]]
 
 ## Tested by
 
@@ -56,8 +66,14 @@ POST https://generativelanguage.googleapis.com/v1beta/interactions  (api-revisio
 ## History
 
 - **Created:** commit `12fb6e8` ("Add hosted song generation to TTB Studio via fal ACE-Step and Google Lyria 3.5 (#2)") on 2026-11-05
-- **Last touched:** commit `29c84e4` ("Update main with local quality tooling, ADRs and UI restyle from 3997ab2") on 2026-11-05
+- **Last touched:** commit `09057ad` ("Self-hosted music engine and provider-agnostic routing (checkpoint) (#9)") on 2026-11-06
 
 ## Sources
 
 - `apps/ttb-studio/src/lib/server/music/lyria.ts`
+- `apps/ttb-studio/src/lib/server/music/lyricist.ts`
+- `apps/ttb-studio/src/lib/server/studio/lyrics.ts`
+
+> [!stale]
+> The prior version of this page (built at `29c84e4`) said: callers are `music/lyria.ts` and `music/lyricist.ts`.
+> See the [!contradiction] callout above for the HEAD state.

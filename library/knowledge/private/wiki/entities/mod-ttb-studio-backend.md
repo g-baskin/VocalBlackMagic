@@ -27,7 +27,7 @@ sources:
 
 ## Overview
 
-A loopback bridge helper to the Python TTB Studio prototype, reading `TTB_STUDIO_API_URL` (`apps/ttb-studio/src/lib/server/backend.ts:1-8`). The code graph records no importer for this file, and a source search found none.
+A loopback bridge helper to the Python TTB Studio prototype, reading `TTB_STUDIO_API_URL` (`apps/ttb-studio/src/lib/server/backend.ts:1-8`). Unchanged since `3997ab2`.
 
 ## Signature / Definition
 
@@ -40,9 +40,9 @@ export function passthrough(upstream: Response): Response
 ## Behavior
 
 - `upstreamUrl` defaults to `http://127.0.0.1:8002`, strips trailing slashes and rejects non-http(s) protocols (`apps/ttb-studio/src/lib/server/backend.ts:2-8`).
-- `upstreamUnavailable` returns a 503 JSON response (`apps/ttb-studio/src/lib/server/backend.ts:9-18`); `passthrough` copies status and body with JSON and `no-store` headers (`apps/ttb-studio/src/lib/server/backend.ts:19-24`).
+- `upstreamUnavailable` returns 503 JSON (`apps/ttb-studio/src/lib/server/backend.ts:9-18`); `passthrough` copies status and body with JSON and `no-store` headers (`apps/ttb-studio/src/lib/server/backend.ts:19-24`).
 - > [!gap]
-  > No SvelteKit route imports this module at 29c84e47; see [[questions/is-ttb-studio-backend-ts-dead-code]].
+  > Still no importer at HEAD `b58d457`: a search of `apps/ttb-studio/src` for `server/backend` finds none, including the new `/api/studio/*` routes. See [[questions/is-ttb-studio-backend-ts-dead-code]].
 
 ## Connections
 

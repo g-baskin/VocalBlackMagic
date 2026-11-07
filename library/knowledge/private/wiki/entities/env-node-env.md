@@ -10,27 +10,34 @@ language: unknown
 depends_on: []
 used_by:
   - "[[entities/mod-music-gate]]"
+  - "[[entities/mod-vf-gate]]"
   - "[[entities/route-vf-post-references]]"
-  - "[[entities/route-vf-get-reference]]"
-  - "[[entities/route-vf-delete-reference]]"
 last_commit_hash: "29c84e4"
 tested_by: []
 tags:
-  - entity
-  - env-var
-  - config
+  - "entity"
+  - "env-var"
+  - "config"
 related:
   - "[[concepts/dev-only-generation-gate]]"
   - "[[concepts/production-403-guard]]"
 sources:
   - "apps/ttb-studio/src/lib/server/music/gate.ts"
+  - "apps/vocal-fix/src/lib/server/gate.ts"
+  - "infra/systemd/vbm-ttb-studio.service"
+  - "infra/systemd/vbm-vocal-fix.service"
 ---
 
 # NODE_ENV
 
+> [!contradiction]
+> Updated in place at HEAD `b58d457`; change introduced in commit `f88cc09`.
+> Prior claim: readers are the TTB Studio gate and the two Vocal Fix reference routes.
+> New claim: Vocal Fix also has its own gate module reading it (`apps/vocal-fix/src/lib/server/gate.ts:3`).
+
 ## Overview
 
-Node environment mode; the sole switch for the development-only gates.
+Only `development` enables hosted generation and Vocal Fix reference uploads (`apps/ttb-studio/src/lib/server/music/gate.ts:1-4`).
 
 ## Signature / Definition
 
@@ -40,14 +47,15 @@ NODE_ENV
 
 ## Behavior
 
-- Hosted generation is allowed only when it equals `development` (`apps/ttb-studio/src/lib/server/music/gate.ts:3`).
-- Vocal Fix reference routes return 403 otherwise (`apps/vocal-fix/src/routes/api/references/+server.ts:7`, `apps/vocal-fix/src/routes/api/references/[session_id]/+server.ts:7`).
-- Both systemd units set `NODE_ENV=production` (`infra/systemd/vbm-ttb-studio.service:10`, `infra/systemd/vbm-vocal-fix.service:10`).
+- Readers: `apps/ttb-studio/src/lib/server/music/gate.ts:3`; `apps/vocal-fix/src/lib/server/gate.ts:3`; `apps/vocal-fix/src/routes/api/references/+server.ts:7`; `apps/vocal-fix/src/routes/api/references/[session_id]/+server.ts:7`, `:27`; set to `production` by both units (`infra/systemd/vbm-ttb-studio.service:10`, `infra/systemd/vbm-vocal-fix.service:10`).
+- Default: unset is treated as not development (403).
+- Validation: strict equality with `development`.
+- Secrecy: not a secret.
 
 ## Connections
 
 - **depends_on:** none found in source
-- **used_by:** [[entities/mod-music-gate]], [[entities/route-vf-post-references]], [[entities/route-vf-get-reference]], [[entities/route-vf-delete-reference]]
+- **used_by:** [[entities/mod-music-gate]], [[entities/mod-vf-gate]], [[entities/route-vf-post-references]]
 - **related:** [[concepts/dev-only-generation-gate]], [[concepts/production-403-guard]]
 
 ## Tested by
@@ -62,5 +70,10 @@ NODE_ENV
 ## Sources
 
 - `apps/ttb-studio/src/lib/server/music/gate.ts`
+- `apps/vocal-fix/src/lib/server/gate.ts`
 - `infra/systemd/vbm-ttb-studio.service`
 - `infra/systemd/vbm-vocal-fix.service`
+
+> [!stale]
+> The prior version of this page (built at `29c84e4`) said: readers are the TTB Studio gate and the two Vocal Fix reference routes.
+> See the [!contradiction] callout above for the HEAD state.

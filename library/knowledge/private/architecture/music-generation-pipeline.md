@@ -1,10 +1,13 @@
 # Music Generation Pipeline
 
-> Category: Architecture | Version: 1.0 | Date: November 2026 | Status: Active
+> Category: Architecture | Version: 1.1 | Date: November 2026 | Status: Active (legacy route)
 
 For engineers working on TTB Studio: how a song request travels from the browser through validation, optional lyric writing, fal ACE-Step 1.5 or Google Lyria 3.5, and back as verified audio. Pinned to commit 29c84e47. This path is development-only and stores nothing.
 
+> **Status at b58d4574.** The TTB Studio page no longer calls `/api/generations`; it uses the studio API described in [`song-studio.md`](song-studio.md). The route and the `lib/server/music` adapters still exist and behave as described below. The studio reuses the fal and Lyria adapters, now with exported `falHeaders`/`falFailure` and optional app or model parameters (`apps/ttb-studio/src/lib/server/music/fal.ts`, `lyria.ts:75-79`). Line numbers in `fal.ts` and `lyria.ts` may be off by a few lines from those cited here. The route has the development and JSON checks but not the studio Host guard (`apps/ttb-studio/src/routes/api/generations/+server.ts:23-26`). Capabilities `generation_ready` now also counts `replicateConfigured` (`apps/ttb-studio/src/lib/server/music/capabilities.ts:35-37`).
+
 **Related:**
+- [`song-studio.md`](song-studio.md)
 - [`test-strategy.md`](test-strategy.md)
 - [`../security/trust-boundaries.md`](../security/trust-boundaries.md)
 - [`../auth/session-and-tenancy-model.md`](../auth/session-and-tenancy-model.md)

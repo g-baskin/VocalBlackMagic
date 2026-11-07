@@ -19,11 +19,17 @@ SRC_GLOBS = [
     "apps/**/*.svelte",
     "packages/**/*.ts",
     "packages/**/*.svelte",
+    "packages/**/*.css",
     "tests/*.py",
     "apps/*/index.html",
+    "services/**/*.py",
 ]
 IMPORT_RE = re.compile(r"""^\s*import\s+(?:type\s+)?(?:[^'"]*?\s+from\s+)?['"]([^'"]+)['"]""", re.M)
-FETCH_RE = re.compile(r"""fetch\(\s*['"](/api/[^'"]*)['"](\s*\+)?""")
+_TOKEN = r"""(?:'[^']*'|"[^"]*"|`[^`]*`|[\w.]+(?:\([^()]*\))?)"""
+# fetch(...) or the app's api(...) helper with a literal, template or `+` chain starting at /api/.
+FETCH_RE = re.compile(r"\b(?:fetch|api)(?:<[^()]*?>)?\(\s*(?=['\"`]/api/)(" + _TOKEN + r"(?:\s*\+\s*" + _TOKEN + r")*)")
+ENGINE_RE = re.compile(r"\bat\(\s*deps,\s*(" + _TOKEN + r"(?:\s*\+\s*" + _TOKEN + r")*)\)")
+PART_RE = re.compile(r"""'([^']*)'|"([^"]*)"|`([^`]*)`|(\S+)""")
 UPSTREAM_RE = re.compile(
     r"""upstreamUrl\(\s*(?:'([A-Z_]+)',\s*'[^']*',\s*)?['"`](/api/[^'"`$]*)(\$\{|['"`]\s*\+)?""",
     re.S,
@@ -58,7 +64,37 @@ def add(node_id: str, **attrs: object) -> None:
 
 def app_of(path: str) -> str:
     parts = path.split("/")
-    return "/".join(parts[:2]) if parts[0] in {"apps", "packages"} else parts[0]
+    return "/".join(parts[:2]) if parts[0] in {"apps", "packages", "services"} else parts[0]
+
+
+def call_path(chain: str) -> str:
+    """Join a string-concatenation chain into a path, with each dynamic part as `*`."""
+    out = ""
+    for piece in re.split(r"\s*\+\s*", chain):
+        m = PART_RE.fullmatch(piece.strip())
+        literal = next((g for g in m.groups()[:3] if g is not None), None) if m else None
+        out += re.sub(r"\$\{[^}]*\}", "*", literal) if literal is not None else "*"
+    return re.sub(r"\*+", "*", out.split("?", 1)[0]).rstrip("/") or "/"
+
+
+def call_method(text: str, end: int) -> str:
+    opts = re.search(r"method:\s*'([A-Z]+)'", text[end : end + 200].split(")", 1)[0])
+    return opts.group(1) if opts else "GET"
+
+
+def py_module_file(f: str, module: str, level: int) -> list[str]:
+    """Candidate repo files for a Python import, rooted at the repo, its service, or the file's package."""
+    parts = f.split("/")
+    if level:
+        roots = ["/".join(parts[: len(parts) - level])]
+    else:
+        roots = [""] + (["/".join(parts[:2])] if parts[0] == "services" else [])
+    rel = module.replace(".", "/") if module else ""
+    out = []
+    for root in roots:
+        stem = "/".join(x for x in (root, rel) if x)
+        out += [stem + ".py", stem + "/__init__.py"]
+    return out
 
 
 def sveltekit_route(path: str) -> str | None:
@@ -70,14 +106,18 @@ for f in files:
     text = (REPO / f).read_text(encoding="utf-8")
     kind = (
         "test"
-        if f.startswith("tests/")
+        if f.startswith("tests/") or "/tests/" in f or f.endswith(".test.ts")
         else "svelte-component"
         if f.endswith(".svelte")
         else "static-page"
         if f.endswith(".html")
+        else "stylesheet"
+        if f.endswith(".css")
         else "module"
     )
     add(f, type="file", kind=kind, app=app_of(f), lines=text.count("\n") + 1)
+    if kind == "stylesheet":
+        continue
     route = sveltekit_route(f)
     if route is not None:
         methods = HTTP_METHOD_RE.findall(text) if f.endswith("+server.ts") else ["PAGE"]
@@ -87,12 +127,23 @@ for f in files:
             edges.add((rid, f, "defined_in"))
     if f.endswith(".py"):
         tree = ast.parse(text)
-        for node in tree.body:
-            if isinstance(node, (ast.Import, ast.ImportFrom)):
-                mod = node.module if isinstance(node, ast.ImportFrom) else node.names[0].name
-                if mod and mod.startswith("apps."):
-                    target = mod.replace(".", "/") + ".py"
-                    edges.add((f, target, "imports"))
+        # Walk the whole tree: backends import their model libraries lazily inside functions.
+        for node in ast.walk(tree):
+            if isinstance(node, ast.Import):
+                wanted = [(a.name, 0) for a in node.names]
+            elif isinstance(node, ast.ImportFrom):
+                base = node.module or ""
+                # `from pkg import sub` may name a submodule; prefer it when that file exists.
+                wanted = [(".".join(x for x in (base, a.name) if x), node.level) for a in node.names]
+                wanted.append((base, node.level))
+            else:
+                continue
+            for mod, level in wanted:
+                hit = next((c for c in py_module_file(f, mod, level) if c in files and c != f), None)
+                if hit:
+                    edges.add((f, hit, "imports"))
+                    if isinstance(node, ast.ImportFrom):
+                        break
         for method, path in PY_ROUTE_RE.findall(text):
             eid = f"endpoint:{app_of(f)}:{method.upper()} {path}"
             add(eid, type="python-endpoint", app=app_of(f), method=method.upper(), path=path)
@@ -102,7 +153,9 @@ for f in files:
         if spec in PKG_ALIAS:
             edges.add((f, PKG_ALIAS[spec], "imports"))
         elif spec.startswith("@vbm/ui/"):
-            edges.add((f, "packages/ui/src/" + spec.split("/")[-1], "imports"))
+            target = "packages/ui/src/" + spec.split("/")[-1]
+            target = next((c for c in (target, target + ".ts") if c in files), target)
+            edges.add((f, target, "imports"))
         elif spec.startswith("."):
             target = (Path(f).parent / spec).as_posix()
             target = str(Path(target)).replace("\\", "/")
@@ -123,13 +176,12 @@ for f in files:
             add(f"pkg:{spec}", type="external-package")
             edges.add((f, f"pkg:{spec}", "imports"))
     for m in FETCH_RE.finditer(text):
-        path, concat = m.group(1), m.group(2)
-        opts = re.search(r"method:\s*'([A-Z]+)'", text[m.end() : m.end() + 200].split(")", 1)[0])
-        method = opts.group(1) if opts else "GET"
         rel = "static_page_fetch" if f.endswith(".html") else "browser_fetch"
-        edges.add(
-            (f, f"api-path:{app_of(f)}:{method}:{path.rstrip('/') + ('/*' if concat else '')}", rel)
-        )
+        method = call_method(text, m.end())
+        edges.add((f, f"api-path:{app_of(f)}:{method}:{call_path(m.group(1))}", rel))
+    for m in ENGINE_RE.finditer(text):
+        method = call_method(text, m.end())
+        edges.add((f, f"api-path:services/audio-engine:{method}:{call_path(m.group(1))}", "engine_call"))
     if not f.endswith((".test.ts", ".html")):
         for host in sorted(set(re.findall(r"https://([a-z0-9.-]+\.[a-z]{2,})", text))):
             add(f"external:{host}", type="external-service")
@@ -212,6 +264,7 @@ arrow = {
     "proxies_to": "==>",
     "static_page_fetch": "==>",
     "calls_external": "==>",
+    "engine_call": "==>",
 }
 for e in internal:
     rel = e["relation"]

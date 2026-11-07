@@ -5,28 +5,32 @@ entity_type: env-var
 status: developing
 created: "2026-11-06"
 updated: "2026-11-06"
-path: "apps/ttb-studio/src/routes/+page.svelte"
+path: "apps/ttb-studio/src/routes/+layout.svelte"
 language: unknown
 depends_on: []
-used_by:
-  - "[[entities/route-ttb-page]]"
-last_commit_hash: "29c84e4"
+used_by: []
+last_commit_hash: "b58d457"
 tested_by: []
 tags:
-  - entity
-  - env-var
-  - config
-related:
-  - "[[entities/ui-brand-header]]"
+  - "entity"
+  - "env-var"
+  - "config"
+related: []
 sources:
-  - "apps/ttb-studio/src/routes/+page.svelte"
+  - "apps/ttb-studio/src/routes/+layout.svelte"
+  - "apps/ttb-studio/src/routes/library/[id]/+page.svelte"
 ---
 
 # VITE_VOCAL_FIX_URL
 
+> [!contradiction]
+> Updated in place at HEAD `b58d457`; change introduced in commit `f88cc09`.
+> Prior claim: read in `apps/ttb-studio/src/routes/+page.svelte:20`.
+> New claim: read in `apps/ttb-studio/src/routes/+layout.svelte:7` and `apps/ttb-studio/src/routes/library/[id]/+page.svelte:24`; `+page.svelte` no longer reads it (grep).
+
 ## Overview
 
-Build-time link from TTB Studio to Vocal Fix (`apps/ttb-studio/src/routes/+page.svelte:20`).
+Build-time link from TTB Studio to Vocal Fix (`apps/ttb-studio/src/routes/+layout.svelte:7`).
 
 ## Signature / Definition
 
@@ -36,13 +40,16 @@ VITE_VOCAL_FIX_URL
 
 ## Behavior
 
-- Falls back to `http://localhost:5173` and is passed to the brand header (`apps/ttb-studio/src/routes/+page.svelte:20`, `apps/ttb-studio/src/routes/+page.svelte:247`). As an `import.meta.env` value it is fixed at build time.
+- Readers: `apps/ttb-studio/src/routes/+layout.svelte:7`; `apps/ttb-studio/src/routes/library/[id]/+page.svelte:24`.
+- Default: `http://localhost:5173`.
+- Validation: none.
+- Secrecy: public: inlined into the browser bundle at build time.
 
 ## Connections
 
 - **depends_on:** none found in source
-- **used_by:** [[entities/route-ttb-page]]
-- **related:** [[entities/ui-brand-header]]
+- **used_by:** none found in source
+- **related:** none found in source
 
 ## Tested by
 
@@ -50,9 +57,14 @@ VITE_VOCAL_FIX_URL
 
 ## History
 
-- **Created:** commit `88c699c` ("Build responsive SvelteKit 3 Vocal Fix and TTB Studio interfaces with CI") on 2026-11-05
-- **Last touched:** commit `29c84e4` ("Update main with local quality tooling, ADRs and UI restyle from 3997ab2") on 2026-11-05
+- **Created:** commit `42cd7f7` ("Add two SvelteKit 3 Bun app skeletons and protected local audio API bridges") on 2026-11-05
+- **Last touched:** commit `b58d457` ("Studio: model picker, Suno-style editing, the Séance; engine packaging and CI (#10)") on 2026-11-06
 
 ## Sources
 
-- `apps/ttb-studio/src/routes/+page.svelte`
+- `apps/ttb-studio/src/routes/+layout.svelte`
+- `apps/ttb-studio/src/routes/library/[id]/+page.svelte`
+
+> [!stale]
+> The prior version of this page (built at `29c84e4`) said: read in `apps/ttb-studio/src/routes/+page.svelte:20`.
+> See the [!contradiction] callout above for the HEAD state.

@@ -12,9 +12,9 @@ depends_on:
 used_by:
   - "[[entities/contract-generation-job]]"
   - "[[entities/mod-music-lyria]]"
-  - "[[entities/route-ttb-page]]"
 last_commit_hash: "29c84e4"
-tested_by: []
+tested_by:
+  - "[[entities/test-music]]"
 tags:
   - entity
   - data-model
@@ -26,9 +26,14 @@ sources:
 
 # InlineAudio
 
+> [!contradiction]
+> Updated in place at HEAD `b58d457` (wiki previously built at `29c84e4`).
+> Prior contract: decoded in the browser (`apps/ttb-studio/src/routes/+page.svelte:94-97`); used_by [[entities/route-ttb-page]].
+> New contract: no browser decoder; `apps/ttb-studio/src/routes/+page.svelte` no longer references `data_base64`.
+
 ## Overview
 
-Base64 audio carried inside a job reply (`packages/contracts/src/index.ts:28-32`).
+Base64 audio carried inside a legacy job reply (`packages/contracts/src/index.ts:28-32`).
 
 ## Signature / Definition
 
@@ -38,17 +43,24 @@ interface InlineAudio { content_type: 'audio/mpeg' | 'audio/wav'; data_base64: s
 
 ## Behavior
 
-- Produced only by the Lyria adapter after verification (`apps/ttb-studio/src/lib/server/music/lyria.ts:62-71`); decoded in the browser (`apps/ttb-studio/src/routes/+page.svelte:94-97`).
+- Produced by the Lyria adapter after format verification (`apps/ttb-studio/src/lib/server/music/lyria.ts:62-71`); asserted in `apps/ttb-studio/src/lib/server/music/music.test.ts:237`.
+- The same `data_base64` field shape is read by studio code (`apps/ttb-studio/src/lib/server/studio/create.ts:247`, `apps/ttb-studio/src/lib/server/studio/runners/direct.ts:138`), but no page decodes it any more.
 
 ## Connections
 
 - **depends_on:** [[entities/mod-contracts]]
-- **used_by:** [[entities/contract-generation-job]], [[entities/mod-music-lyria]], [[entities/route-ttb-page]]
+- **used_by:** [[entities/contract-generation-job]], [[entities/mod-music-lyria]]
 - **related:** none
 
 ## Tested by
 
-- No test found in the repository for this entity.
+- [[entities/test-music]]
+
+## Prior claims
+
+> [!stale]
+> Superseded at HEAD `b58d457` (change landed in commit `f88cc09`, 2026-11-06); see the [!contradiction] callout above.
+> Prior claim (wiki built at `29c84e4`): Decoded in the browser (`apps/ttb-studio/src/routes/+page.svelte:94-97`); used_by [[entities/route-ttb-page]].
 
 ## History
 

@@ -1,10 +1,13 @@
 # Vocal Reference Storage
 
-> Category: Architecture | Version: 1.0 | Date: November 2026 | Status: Active
+> Category: Architecture | Version: 1.1 | Date: November 2026 | Status: Active (legacy path)
 
-For engineers working on Vocal Fix: how five reference recordings move from the browser through the SvelteKit proxy into the Python API, how they are laid out on disk, what the manifest records, and how deletion works. Pinned to commit 29c84e47. Intake only: no processing exists.
+For engineers working on Vocal Fix: how five reference recordings move from the browser through the SvelteKit proxy into the Python API, how they are laid out on disk, what the manifest records, and how deletion works. Pinned to commit 29c84e47. Intake only: no processing exists in this path.
+
+> **Status at b58d4574.** This is the legacy path. The Vocal Fix UI now posts to `/api/sessions` and the pipeline runs in SvelteKit (ADR 0004, [`vocal-fix-pipeline.md`](vocal-fix-pipeline.md)), with decoded validation, sha256, a different on-disk layout (`<data>/vocal-fix/sessions/<id>/{originals,derived}`) and `VBM_DATA_DIR` rather than `VFM_DATA_DIR`. The proxy below still exists. Since this doc was written, it also requires an `x-vbm-intent` header (415 otherwise) before parsing the form (`apps/vocal-fix/src/routes/api/references/+server.ts:14-16`), and the app-wide localhost Host guard applies (`apps/vocal-fix/src/hooks.server.ts:5-10`). Proxy line numbers below are shifted by about three lines. The Python app is unchanged.
 
 **Related:**
+- [`vocal-fix-pipeline.md`](vocal-fix-pipeline.md)
 - [`test-strategy.md`](test-strategy.md)
 - [`../security/trust-boundaries.md`](../security/trust-boundaries.md)
 - [`../auth/session-and-tenancy-model.md`](../auth/session-and-tenancy-model.md)

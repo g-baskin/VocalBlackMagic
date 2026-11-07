@@ -6,11 +6,9 @@ status: developing
 created: "2026-11-06"
 updated: "2026-11-06"
 path: "packages/ui/src/StatusPanel.svelte"
-language: ts
+language: svelte
 depends_on: []
-used_by:
-  - "[[entities/route-ttb-page]]"
-  - "[[entities/route-vf-page]]"
+used_by: []
 last_commit_hash: "3997ab2"
 tested_by: []
 tags:
@@ -18,16 +16,23 @@ tags:
   - module
   - package
   - ui
-related: []
+related:
+  - "[[entities/ui-oracle-status]]"
+  - "[[questions/ui-unused-legacy-components]]"
 sources:
   - "packages/ui/src/StatusPanel.svelte"
 ---
 
 # StatusPanel.svelte (@vbm/ui)
 
+> [!contradiction]
+> Updated in place at HEAD `b58d457` (wiki previously built at `29c84e4`).
+> Prior contract: used_by [[entities/route-ttb-page]] (`apps/ttb-studio/src/routes/+page.svelte:367`) and [[entities/route-vf-page]] (`apps/vocal-fix/src/routes/+page.svelte:159`).
+> New contract: no importer at HEAD.
+
 ## Overview
 
-Shared live-region status box (`packages/ui/src/StatusPanel.svelte:1-18`).
+Legacy live-region status box (`packages/ui/src/StatusPanel.svelte:1-18`). Still exported, but no app imports it at HEAD.
 
 ## Signature / Definition
 
@@ -38,17 +43,23 @@ props: { title?: string = 'Status'; message: string; tone?: 'neutral' | 'warning
 ## Behavior
 
 - Renders `role="status"` with `aria-live="polite"` and tone classes (`packages/ui/src/StatusPanel.svelte:9-18`).
-- Used for generation status in TTB Studio (`apps/ttb-studio/src/routes/+page.svelte:367`) and reference status in Vocal Fix (`apps/vocal-fix/src/routes/+page.svelte:159`).
+- No import in `apps/*/src` (grep); pages use [[entities/ui-oracle-status]] (10 importers).
 
 ## Connections
 
 - **depends_on:** none found in source
-- **used_by:** [[entities/route-ttb-page]], [[entities/route-vf-page]]
-- **related:** none
+- **used_by:** no importer or caller found in source
+- **related:** [[entities/ui-oracle-status]], [[questions/ui-unused-legacy-components]]
 
 ## Tested by
 
 - No test found in the repository for this entity.
+
+## Prior claims
+
+> [!stale]
+> Superseded at HEAD `b58d457` (change landed in commit `f88cc09`, 2026-11-06); see the [!contradiction] callout above.
+> Prior claim (wiki built at `29c84e4`): Used for generation status in TTB Studio (`apps/ttb-studio/src/routes/+page.svelte:367`) and reference status in Vocal Fix (`apps/vocal-fix/src/routes/+page.svelte:159`).
 
 ## History
 

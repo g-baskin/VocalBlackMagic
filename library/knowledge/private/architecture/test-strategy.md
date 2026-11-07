@@ -1,89 +1,70 @@
 # Test Strategy
 
-> Category: Architecture | Version: 1.0 | Date: November 2026 | Status: Active
+> Category: Architecture | Version: 2.0 | Date: November 2026 | Status: Active
 
-For engineers changing either app: how the automated checks are split between the Bun/TypeScript side and the Python side, what each check proves, and what nothing tests today. Pinned to commit 29c84e47.
+For engineers changing any app or the engine: how the automated checks are split across Bun/TypeScript, the legacy Python prototypes and the self-hosted engine, what each proves, and what nothing tests. Pinned to commit b58d4574 (version 1.0 was pinned to 29c84e47).
 
 **Related:**
-- [`music-generation-pipeline.md`](music-generation-pipeline.md)
-- [`vocal-reference-storage.md`](vocal-reference-storage.md)
+- [`song-studio.md`](song-studio.md)
+- [`vocal-fix-pipeline.md`](vocal-fix-pipeline.md)
+- [`audio-engine.md`](audio-engine.md)
 - [`../security/trust-boundaries.md`](../security/trust-boundaries.md)
 - [`../../../../docs/decisions/0003-runtime-boundary.md`](../../../../docs/decisions/0003-runtime-boundary.md)
 
 ---
 
-## Why the suite is split in two
+## Three independent CI jobs
 
-The repository holds two runtimes: SvelteKit apps run by Bun, and FastAPI prototypes run by Python. CI mirrors that with two independent jobs, `bun-svelte` (`.github/workflows/ci.yml:8`) and `python-audio-prototypes` (`.github/workflows/ci.yml:25`). Neither job starts the other runtime, so no automated check exercises a SvelteKit route talking to a live Python process.
+CI runs on every push and pull request with read-only permissions (`.github/workflows/ci.yml:1-6`). Its three jobs never start each other's runtimes. No automated check runs TTB Studio against a live engine or a real provider.
 
 ```mermaid
 flowchart TD
-    ci[CI on push and pull_request] --> bunJob[bun-svelte job]
-    ci --> pyJob[python-audio-prototypes job]
-    bunJob --> eslint[eslint lint:web]
-    bunJob --> prettier[prettier format:check:web]
-    bunJob --> bunTest[bun test packages apps/ttb-studio/src]
-    bunJob --> svelteCheck[svelte-check via bun run check]
-    bunJob --> viteBuild[vite build both apps]
-    pyJob --> ruffLint[ruff check apps tests]
-    pyJob --> ruffFmt[ruff format --check]
-    pyJob --> mypyStrict[mypy strict]
-    pyJob --> pytestRun[pytest -q]
+    ci[CI on push and pull_request] --> bunJob[bun-svelte]
+    ci --> pyJob[python-audio-prototypes]
+    ci --> engJob[audio-engine]
+    bunJob --> lint[eslint and prettier]
+    bunJob --> ffmpegInstall[apt install ffmpeg]
+    ffmpegInstall --> bunTest[bun test packages and both app src trees]
+    bunTest --> check[svelte-check]
+    check --> build[vite build both apps]
+    pyJob --> pyChecks[ruff, mypy strict, pytest on apps and tests]
+    engJob --> engChecks[pytest, ruff, mypy in services/audio-engine, no torch]
 ```
 
-CI triggers on every push and pull request with read-only repository permissions (`.github/workflows/ci.yml:2-6`).
+## bun-svelte
 
-## The Bun and Svelte job
+The job pins Node 22.17.0 and Bun 1.4.0 and runs plain `bun install`, not `--frozen-lockfile` (`.github/workflows/ci.yml:12-19`). It then runs lint, format check, an ffmpeg install, tests, type check and build (`ci.yml:20-26`). The test command is `bun test packages apps/ttb-studio/src apps/vocal-fix/src` (`package.json:19`), so Vocal Fix is now covered.
 
-The job pins Node 22.17.0 and Bun 1.4.0 (`.github/workflows/ci.yml:12-17`), then runs, in order, lint, format check, unit tests, type check and build (`.github/workflows/ci.yml:19-24`).
+| Area | Files | Highlights |
+|---|---|---|
+| Contracts | `packages/contracts/src/index.test.ts`, `engine.test.ts` | legacy validator; engine request fixture |
+| UI helpers | `packages/ui/src/audio.test.ts`, `region.test.ts`, `mermaid-doc.test.ts` | audio maths; `docs/DESIGN.md` must contain at least 8 valid diagrams (`mermaid-doc.test.ts:40-48`) |
+| Legacy music | `apps/ttb-studio/src/lib/server/music/music.test.ts`, `lyrics.test.ts` | as in version 1.0 |
+| Studio | `apps/ttb-studio/src/lib/server/studio/{studio,edit,lyrics,review,seal,seance}.test.ts`, `runners/{router,engine,direct,capabilities}.test.ts` | library, jobs, router fallback, engine client, direct adapters, sealing |
+| Vocal Fix | `apps/vocal-fix/src/lib/server/server.test.ts` | storage, ffprobe validation on generated audio, diagnosis, polish chain, Gold Vocal, consent and registry, host guard, job limits and restart, never-worse guard (`server.test.ts:47-587`) |
+| Client | `apps/ttb-studio/src/lib/client/seance-time.test.ts` | séance timing |
 
-**ESLint.** `lint:web` lints both app folders and `packages` with zero warnings allowed (`package.json:21`). The config applies the recommended JavaScript, typescript-eslint and Svelte rule sets (`eslint.config.mjs:18-20`) and parses Svelte script blocks with the TypeScript parser (`eslint.config.mjs:24-27`).
+These tests use injected `fetch` and mocks. The Vocal Fix block named "replicate regressions (live e2e)" also uses a stubbed fetch (`server.test.ts:318-330`). Not every test body was read, so "no network in any test" is unverified.
 
-**Prettier.** `format:check:web` checks formatting of app and package sources (`package.json:24`). It proves style only.
+## python-audio-prototypes
 
-**bun test.** The command is `bun test packages apps/ttb-studio/src` (`.github/workflows/ci.yml:22`, `package.json:19`). It therefore discovers tests in `packages/` and in TTB Studio source only; `apps/vocal-fix` is outside the path. Three test files exist on the ref:
+Python 3.11 runs ruff, `mypy` strict and `pytest -q` over `apps` and `tests` (`ci.yml:27-39`). `tests/test_apps.py` covers only the legacy FastAPI prototypes, with synthetic `RIFF` bytes, as in version 1.0.
 
-| File | What it covers |
-|---|---|
-| `packages/contracts/src/index.test.ts` | `validateGenerationRequest`: valid request, out-of-range intensity, short prompts, Lyria engine accepted, song length outside 10 to 240 seconds (`packages/contracts/src/index.test.ts:15-23`) |
-| `apps/ttb-studio/src/lib/server/music/music.test.ts` | Audio sniffing and verified streaming (`music.test.ts:50-118`), fal adapter submission, status mapping, credit and key errors, media host allow-list, job id round trip (`music.test.ts:128-204`), Lyria prompt, parsing and billing error (`music.test.ts:211-261`), capabilities (`music.test.ts:286`) and the JSON content-type gate (`music.test.ts:308-320`) |
-| `apps/ttb-studio/src/lib/server/music/lyrics.test.ts` | Lyricist prompt shape, request headers, filler rejection, prompt-injection framing, truncation, error mapping (`lyrics.test.ts:47-116`), ACE-Step limits (`lyrics.test.ts:131-132`) and Lyria lyric prompt (`lyrics.test.ts:142-143`) |
+## audio-engine
 
-These tests target the `lib/server/music` modules with injected `fetch` dependencies (the `FalDeps`, `LyriaDeps` and `LyricistDeps` interfaces at `apps/ttb-studio/src/lib/server/music/fal.ts:12-15`, `lyria.ts:10-13`, `lyricist.ts:11-14`). They never contact fal or Google (inferred from the dependency injection design; individual test bodies beyond the listed lines were not re-read line by line, so treat "no network" as unverified for every case).
+Python 3.12 in `services/audio-engine` installs `requirements-base.txt` and `requirements-dev.txt` only (no torch or model code) and runs pytest, ruff and mypy (`ci.yml:40-56`). The tests use a fake sine-wave backend (`services/audio-engine/tests/fake_backend.py`):
 
-**svelte-check.** `bun run check` runs `svelte-kit sync` and `svelte-check` in each app (`package.json:18`, `apps/ttb-studio/package.json:10`, `apps/vocal-fix/package.json:10`). This is the only automated check that touches `apps/vocal-fix` TypeScript and Svelte files beyond lint.
+- `test_protocol.py`: 17 tests.
+- `test_backends.py`: 5 tests.
+- `test_validation_parity.py`: fixture parity with the TypeScript validator.
 
-**Build.** `bun run build` builds Vocal Fix then TTB Studio (`package.json:15`). A passing build proves compilation, not runtime behavior.
-
-## The Python job
-
-The job uses Python 3.11 and installs `requirements-dev.txt` (`.github/workflows/ci.yml:31-33`).
-
-**Ruff.** Lint and format checks run over `apps` and `tests` (`.github/workflows/ci.yml:34-35`). The selected lint rules are the narrow `E4`, `E7`, `E9`, `F` and `I` families (`pyproject.toml:6`).
-
-**mypy.** `mypy` runs in strict mode over `apps/__init__.py`, `apps/vocal_fix`, `apps/ttb_studio` and `tests` (`pyproject.toml:8-11`).
-
-**pytest.** `pytest.ini` sets `pythonpath = .` and `testpaths = tests` (`pytest.ini:1-3`). The single file `tests/test_apps.py` describes itself as HTTP contract tests with no inference and no GPU (`tests/test_apps.py:1`). It uses FastAPI's in-process `TestClient` (`tests/test_apps.py:11-12`) and covers:
-
-- Health names and homepage for both Python apps (`tests/test_apps.py:15-19`).
-- Vocal Fix refuses an upload without rights acknowledgement with 403 (`tests/test_apps.py:26-31`) and four files with 422 (`tests/test_apps.py:34-41`).
-- Vocal Fix upload, fetch, 501 process, delete, then 404 (`tests/test_apps.py:44-59`).
-- Legacy TTB Python capabilities and its 503 generation refusal (`tests/test_apps.py:62-76`) and 422 on invalid values (`tests/test_apps.py:79-81`).
-
-Upload fixtures are synthetic: `b"RIFF"` followed by 40 filler bytes (`tests/test_apps.py:22-23`). Each upload test isolates storage by pointing `VFM_DATA_DIR` at `tmp_path` (`tests/test_apps.py:27`).
+Locally, `bun run test:engine`, `lint:engine` and `check:engine` expect a venv at `services/audio-engine/.venv` (`package.json:31-33`).
 
 ## What is untested
 
-The following have no automated test on this ref. Each item is an absence observed from the file list and test contents above.
-
-- **SvelteKit route handlers.** No test imports any `+server.ts` file. The production 403 guards (`apps/ttb-studio/src/lib/server/music/gate.ts:1-12`, `apps/vocal-fix/src/routes/api/references/+server.ts:7-13`) and the request flow in `apps/ttb-studio/src/routes/api/generations/+server.ts:22-114` are exercised only by type checking. `generationAllowed` itself is not tested; the capabilities test passes the flag in directly (`music.test.ts:286-305`).
-- **Vocal Fix SvelteKit proxy.** Its validation and pass-through (`apps/vocal-fix/src/routes/api/references/+server.ts:20-50`) sit outside the `bun test` path.
-- **Real provider calls.** No test hits `queue.fal.run` or `generativelanguage.googleapis.com`.
-- **Real media.** Python fixtures are not decodable audio, and the Python intake never decodes audio (`apps/vocal_fix/app.py:118`).
-- **Browser UI.** No Playwright or component tests exist for either `+page.svelte`.
-- **Cross-process integration.** No test runs a SvelteKit app against a running Python API.
-- **Deployment artifacts.** `compose.yaml`, `Dockerfile` and the systemd units are not exercised by CI (`.github/workflows/ci.yml:19-37` contains no step that uses them).
-
-## Running locally
-
-Run `bun test packages apps/ttb-studio/src` and `bun run check` for the Bun side (`package.json:18-19`). Run `python -m pytest -q` from the repository root in a Python 3.11 environment for the Python side (`package.json:30`, `pyproject.toml:9`).
+- **SvelteKit route handlers.** No test imports a `+server.ts` file (repository grep). The guards are tested only as library functions.
+- **Real providers.** Replicate, fal, Google, MiniMax, ElevenLabs, Anthropic and OpenAI are never contacted.
+- **Real models in the engine.** No backend runs real weights in CI. The Dockerfile and `modal_app.py` are not built or deployed.
+- **Browser UI.** There are no Playwright or component tests. `axe-core` is a dev dependency, but no test using it was found.
+- **Cross-process integration.** The studio is not tested against a running engine.
+- **Deployment artifacts.** `compose.yaml`, the Dockerfiles and the systemd units are not exercised.

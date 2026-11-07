@@ -6,7 +6,7 @@ status: developing
 created: "2026-11-06"
 updated: "2026-11-06"
 path: "apps/vocal_fix/app.py"
-language: unknown
+language: py
 depends_on: []
 used_by:
   - "[[entities/mod-vocal-fix-python-app]]"
@@ -14,20 +14,22 @@ used_by:
 last_commit_hash: "3997ab2"
 tested_by: []
 tags:
-  - entity
-  - env-var
-  - config
+  - "entity"
+  - "env-var"
+  - "config"
 related:
-  - "[[concepts/reference-session]]"
+  - "[[entities/env-vbm-data-dir]]"
 sources:
   - "apps/vocal_fix/app.py"
+  - ".env.example"
+  - "compose.yaml"
 ---
 
 # VFM_DATA_DIR
 
 ## Overview
 
-Directory where the Python Vocal Fix prototype stores reference sessions (`apps/vocal_fix/app.py:29`).
+Data root of the Python Vocal Fix prototype (`apps/vocal_fix/app.py:28-31`).
 
 ## Signature / Definition
 
@@ -37,14 +39,16 @@ VFM_DATA_DIR
 
 ## Behavior
 
-- Default `data/vocal-fix` is resolved relative to the process working directory (`apps/vocal_fix/app.py:29`); `.env.example` sets `./data/vocal-fix` (`.env.example:6`).
-- Compose sets `/app/data/vocal-fix` on a named volume (`compose.yaml:5-8`).
+- Readers: `apps/vocal_fix/app.py:29`; Compose sets `/app/data/vocal-fix` (`compose.yaml:6`).
+- Default: `data/vocal-fix` resolved against the process cwd (`apps/vocal_fix/app.py:29`); example `./data/vocal-fix` (`.env.example:7`).
+- Validation: none; created with mode 0700 (`apps/vocal_fix/app.py:30`).
+- Secrecy: not a secret.
 
 ## Connections
 
 - **depends_on:** none found in source
 - **used_by:** [[entities/mod-vocal-fix-python-app]], [[entities/ep-vf-post-references]]
-- **related:** [[concepts/reference-session]]
+- **related:** [[entities/env-vbm-data-dir]]
 
 ## Tested by
 

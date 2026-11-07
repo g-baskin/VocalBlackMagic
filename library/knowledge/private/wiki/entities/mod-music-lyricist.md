@@ -17,6 +17,7 @@ depends_on:
 used_by:
   - "[[entities/route-ttb-post-generations]]"
   - "[[entities/test-lyrics]]"
+  - "[[entities/mod-studio-lyrics]]"
 last_commit_hash: "29c84e4"
 tested_by:
   - "[[entities/test-lyrics]]"
@@ -53,10 +54,12 @@ export async function writeLyrics(deps, request): Promise<string>
 - `realWordCount` ignores section tags, repeated syllables and filler words (`apps/ttb-studio/src/lib/server/music/lyricist.ts:64-77`); `cleanLyrics` strips code fences, trims to the ACE-Step lyric limit at a line break and rejects text with fewer than 3 real words (`apps/ttb-studio/src/lib/server/music/lyricist.ts:79-95`).
 - `writeLyrics` sends `store: false`, minimal thinking and `max_output_tokens: 1500` with a 60 s timeout (`apps/ttb-studio/src/lib/server/music/lyricist.ts:97-112`), logging only Google status fields on failure (`apps/ttb-studio/src/lib/server/music/lyricist.ts:113-142`).
 
+- `realWordCount` is reused by the studio lyricist chain (`apps/ttb-studio/src/lib/server/studio/lyrics.ts:3`). Module unchanged since `29c84e4`.
+
 ## Connections
 
 - **depends_on:** [[entities/mod-music-errors]], [[entities/mod-music-fal]], [[entities/mod-music-lyria]], [[entities/mod-contracts]], [[entities/ext-generativelanguage-googleapis-com]], [[entities/env-gemini-api-key]]
-- **used_by:** [[entities/route-ttb-post-generations]], [[entities/test-lyrics]]
+- **used_by:** [[entities/route-ttb-post-generations]], [[entities/test-lyrics]], [[entities/mod-studio-lyrics]]
 - **related:** [[concepts/hosted-generation-flow]]
 
 ## Tested by

@@ -10,26 +10,25 @@ language: unknown
 depends_on: []
 used_by:
   - "[[entities/mod-vocal-fix-backend]]"
-  - "[[entities/route-vf-get-capabilities]]"
   - "[[entities/route-vf-post-references]]"
-  - "[[entities/route-vf-get-reference]]"
-  - "[[entities/route-vf-delete-reference]]"
-last_commit_hash: "12fb6e8"
+last_commit_hash: "09057ad"
 tested_by: []
 tags:
-  - entity
-  - env-var
-  - config
-related: []
+  - "entity"
+  - "env-var"
+  - "config"
+related:
+  - "[[entities/mod-vocal-fix-python-app]]"
 sources:
   - ".env.example"
+  - "apps/vocal-fix/src/lib/server/backend.ts"
 ---
 
 # VOCAL_FIX_API_URL
 
 ## Overview
 
-Base URL of the private Python Vocal Fix prototype, read at runtime by the SvelteKit bridge (`.env.example:4`).
+Runtime URL of the private Python Vocal Fix API that the SvelteKit reference routes proxy to (`.env.example:1`, `.env.example:5`).
 
 ## Signature / Definition
 
@@ -39,14 +38,16 @@ VOCAL_FIX_API_URL
 
 ## Behavior
 
-- Example value is loopback port 8001 (`.env.example:4`); routes pass the name and the same fallback to `upstreamUrl` (`apps/vocal-fix/src/routes/api/references/+server.ts:40`, `apps/vocal-fix/src/lib/server/backend.ts:3`).
-- Runtime variable: changing it does not require a rebuild, unlike the `VITE_` link variables.
+- Readers: `apps/vocal-fix/src/lib/server/backend.ts:2-8` via `process.env[envKey]`; `apps/vocal-fix/src/routes/api/references/+server.ts:43`; `apps/vocal-fix/src/routes/api/references/[session_id]/+server.ts:15`, `:37`.
+- Default: `http://127.0.0.1:8001` fallback at each call site; example `.env.example:5`.
+- Validation: must be http or https or the call throws (`apps/vocal-fix/src/lib/server/backend.ts:4-6`); trailing slashes stripped.
+- Secrecy: not a secret. Runtime, no rebuild needed.
 
 ## Connections
 
 - **depends_on:** none found in source
-- **used_by:** [[entities/mod-vocal-fix-backend]], [[entities/route-vf-get-capabilities]], [[entities/route-vf-post-references]], [[entities/route-vf-get-reference]], [[entities/route-vf-delete-reference]]
-- **related:** none
+- **used_by:** [[entities/mod-vocal-fix-backend]], [[entities/route-vf-post-references]]
+- **related:** [[entities/mod-vocal-fix-python-app]]
 
 ## Tested by
 
@@ -55,7 +56,7 @@ VOCAL_FIX_API_URL
 ## History
 
 - **Created:** commit `d181ff0` ("Document two-app architecture, sound profiles and rights-cleared vocals") on 2026-11-05
-- **Last touched:** commit `12fb6e8` ("Add hosted song generation to TTB Studio via fal ACE-Step and Google Lyria 3.5 (#2)") on 2026-11-05
+- **Last touched:** commit `09057ad` ("Self-hosted music engine and provider-agnostic routing (checkpoint) (#9)") on 2026-11-06
 
 ## Sources
 
