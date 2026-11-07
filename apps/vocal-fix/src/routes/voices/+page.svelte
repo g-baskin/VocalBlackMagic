@@ -29,7 +29,7 @@
     try {
       const res = await fetch('/api/voices');
       if (!res.ok)
-        throw new Error((await res.json().catch(() => null))?.error ?? `HTTP ${res.status}`);
+        throw new Error((await res.json().catch(() => null))?.detail ?? `HTTP ${res.status}`);
       voices = (await res.json()) as VoiceModel[];
     } catch (e) {
       error = e instanceof Error ? e.message : 'Could not open the Codex.';
@@ -53,7 +53,7 @@
     try {
       const res = await fetch(`/api/voices/${encodeURIComponent(v.id)}`, { method: 'DELETE' });
       if (!res.ok)
-        throw new Error((await res.json().catch(() => null))?.error ?? `HTTP ${res.status}`);
+        throw new Error((await res.json().catch(() => null))?.detail ?? `HTTP ${res.status}`);
       voices = (voices ?? []).filter((x) => x.id !== v.id);
       notice = `The voice of ${v.performer} was revoked.`;
     } catch (e) {

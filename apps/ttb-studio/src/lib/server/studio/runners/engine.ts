@@ -12,6 +12,7 @@ import {
   type EngineModelId
 } from '@vbm/contracts';
 import { ProviderError } from '../../music/errors';
+import { isLocalHost } from '../paths';
 import { readCapped } from '../replicate';
 
 export interface EngineDeps {
@@ -38,6 +39,9 @@ function base(deps: EngineDeps): URL {
   const url = new URL(deps.url);
   if (url.protocol !== 'http:' && url.protocol !== 'https:')
     throw new ProviderError(503, 'VBM_ENGINE_URL must be an http(s) URL.');
+  // The bearer token must not cross a network in cleartext.
+  if (url.protocol === 'http:' && !isLocalHost(url.host))
+    throw new ProviderError(503, 'VBM_ENGINE_URL must use https unless it is localhost.');
   return url;
 }
 

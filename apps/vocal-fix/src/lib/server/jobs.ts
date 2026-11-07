@@ -3,6 +3,14 @@ import { mkdir, readdir, readFile, rename, rm, writeFile } from 'node:fs/promise
 import { join } from 'node:path';
 import { VocalFixError } from './errors';
 
+const persistFailed = (id: string) => (error: unknown) =>
+  console.error(
+    'Vocal Fix job',
+    id,
+    'status not saved:',
+    error instanceof Error ? error.message : error
+  );
+
 export type JobStatus = 'queued' | 'running' | 'completed' | 'failed' | 'cancelled';
 export type StageState = 'pending' | 'active' | 'done' | 'failed';
 
@@ -166,16 +174,24 @@ export class JobRunner {
       .catch((error: unknown) => {
         const cancelled = ctrl.signal.aborted;
         job.status = cancelled ? 'cancelled' : 'failed';
+        if (!cancelled)
+          console.error(
+            'Vocal Fix job',
+            job.id,
+            job.kind,
+            'failed:',
+            error instanceof VocalFixError ? error.message : error
+          );
         job.error = cancelled
           ? 'Cancelled by user.'
-          : error instanceof Error
+          : error instanceof VocalFixError
             ? error.message
-            : String(error);
+            : 'Processing failed.';
         job.detail = job.error;
         for (const s of job.stages) if (s.state === 'active') s.state = 'failed';
       })
       .finally(async () => {
-        await this.persist(job).catch(() => undefined);
+        await this.persist(job).catch(persistFailed(job.id));
         this.live.delete(job.id);
         this.pump();
       });
@@ -201,7 +217,7 @@ export class JobRunner {
       l.job.error = 'Cancelled by user.';
       l.job.detail = l.job.error;
       this.live.delete(id);
-      void this.persist(l.job).catch(() => undefined);
+      void this.persist(l.job).catch(persistFailed(l.job.id));
     }
     return true;
   }

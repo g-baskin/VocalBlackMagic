@@ -72,7 +72,7 @@
     try {
       const res = await fetch(`/api/sessions/${encodeURIComponent(id)}`);
       if (!res.ok)
-        throw new Error((await res.json().catch(() => null))?.error ?? `HTTP ${res.status}`);
+        throw new Error((await res.json().catch(() => null))?.detail ?? `HTTP ${res.status}`);
       const m = (await res.json()) as Manifest;
       manifest = m;
       if (m.gold)
@@ -168,7 +168,7 @@
         body: JSON.stringify({ included, excluded })
       });
       const body = await res.json().catch(() => null);
-      if (!res.ok) throw new Error(body?.error ?? `HTTP ${res.status}`);
+      if (!res.ok) throw new Error(body?.detail ?? `HTTP ${res.status}`);
       stages = STAGES.map((s) => ({ ...s, state: 'done' }));
       message = {
         tone: 'success',

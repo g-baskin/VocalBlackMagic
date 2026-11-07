@@ -93,6 +93,25 @@
         "Skill loaded: none, as requested. Initial rg unavailable; used grep instead."
       ]
     },
+    "errors-logging": {
+      "checkedAt": "2026-11-07T05:39:38.459Z",
+      "commit": "855be37",
+      "uncommittedChanges": true,
+      "result": "pass",
+      "summary": "Re-check of the 6 recorded findings: all fixed (uncommitted); 5 verified by tests, the engine traceback test is written but not run locally (numpy/soundfile missing, runs in CI).",
+      "findings": [],
+      "evidence": [
+        "Scope: re-check of the 6 findings recorded earlier today only; not a new full errors & logging review.",
+        "Vocal Fix forge/gold/voices pages now read body.detail; grep for '?.error ??' / 'body?.error' in vocal-fix routes: none (RUNTIME).",
+        "vocal-fix jobs.ts: failures logged with job id; non-VocalFixError shown as 'Processing failed.'; persist failures logged. New server.test.ts regression passes.",
+        "ttb client: ApiError carries status; followJob stops on 4xx (not 429) or 8 failed polls; new lib/client/jobs.test.ts (2 tests) passes. Forge page poll gives up after 8.",
+        "music/errors.ts isInternalError (syscall/RangeError/ReferenceError) -> studioError returns 500 'Internal studio error.'; regression test in studio.test.ts passes.",
+        "engine jobs.py: log.exception before failing the job; ruff check/format pass; mypy clean for vbm_engine (only numpy import errors in tests).",
+        "bun run test 243 pass 0 fail; bun run lint (eslint 0 warnings, ruff ok); format:check ok; svelte-check 0 errors both apps; mypy ok; pytest 6 passed (RUNTIME).",
+        "Not checked: engine pytest (new caplog test) could not run locally, numpy/soundfile not installed; it runs in CI audio-engine job. No browser test of the Svelte pages.",
+        "Skill: none applies (own judgment, per instructions)."
+      ]
+    },
     "naming": {
       "checkedAt": "2026-11-06T02:37:13.043Z",
       "commit": "dc28cd0",
@@ -130,6 +149,25 @@
         "Initial Ruff 0.17.4 install blocked by release cooldown; resolved and pinned available 0.17.3. No cooldown bypass.",
         "Not checked: remote CI, production build/deployment, browser behavior or standalone shared-package typing. Earlier docs edits and .gg artifacts preserved.",
         "Skill loaded for CI wiring: ci-release-stinger; read principles and SvelteKit job guide. No release, deployment, commit or push performed."
+      ]
+    },
+    "secrets": {
+      "checkedAt": "2026-11-07T05:05:16.494Z",
+      "commit": "855be37",
+      "uncommittedChanges": true,
+      "result": "pass",
+      "summary": "Re-check of the 2 recorded findings: engine token now needs https off localhost, and gitleaks runs in CI plus an opt-in pre-commit hook. Both fixed and verified (uncommitted).",
+      "findings": [],
+      "evidence": [
+        "Scope: re-check of the 2 findings recorded earlier today only; not a new full secrets review.",
+        "engine.ts base(): http: allowed only when isLocalHost(url.host); else 503 before any fetch (CODE).",
+        "New test 'sends the token over plain http only to localhost' passes; 8 tests using http://engine.test failed until fixtures moved to https (RUNTIME).",
+        "bun run test: 239 pass, 0 fail; lint:web, format:check:web, svelte-check: 0 errors (RUNTIME).",
+        "ci.yml: new 'secrets' job, fetch-depth 0, gitleaks 8.30.1 linux_x64; pinned sha256 verified OK against downloaded release with shasum (RUNTIME).",
+        ".githooks/pre-commit run in a /tmp repo: exit 0 on clean staged file, exit 1 on staged fake ghp_ token (RUNTIME).",
+        "gitleaks git . and gitleaks dir . on the working tree after changes: no leaks found (RUNTIME).",
+        "Not checked: the CI secrets job on GitHub (not pushed); the hook is opt-in via bun run hooks:install, not enabled in this clone.",
+        "Skill: bulletproof (report-only method, secure-defaults.md + verification.md)."
       ]
     }
   }

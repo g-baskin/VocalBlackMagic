@@ -8,6 +8,13 @@ export class ProviderError extends Error {
     this.name = 'ProviderError';
   }
 }
+// File-system and programming errors are ours. TypeError and SyntaxError stay with the
+// provider mapping: fetch reports network failures and bad response bodies with them.
+export function isInternalError(error: unknown): boolean {
+  if (error instanceof ReferenceError || error instanceof RangeError) return true;
+  return error instanceof Error && typeof (error as { syscall?: unknown }).syscall === 'string';
+}
+
 export function errorResponse(error: unknown): Response {
   if (error instanceof ProviderError) {
     if (error.logDetail) console.error('Music provider error:', error.logDetail);

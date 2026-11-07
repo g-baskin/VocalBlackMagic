@@ -9,7 +9,7 @@ import {
   VBM_ENGINE_TOKEN,
   VBM_ENGINE_URL
 } from '$app/env/private';
-import { errorResponse } from '../music/errors';
+import { errorResponse, isInternalError } from '../music/errors';
 import { configuredKey, generationDisabledResponse, isJsonRequest } from '../music/gate';
 import type { CreateDeps } from './create';
 import type { EngineDeps } from './runners/engine';
@@ -70,5 +70,9 @@ export async function readJson(request: Request): Promise<unknown> {
 export function studioError(error: unknown): Response {
   if (error instanceof LibraryError)
     return Response.json({ detail: error.message }, { status: error.status });
+  if (isInternalError(error)) {
+    console.error('Studio internal error:', error);
+    return Response.json({ detail: 'Internal studio error.' }, { status: 500 });
+  }
   return errorResponse(error);
 }

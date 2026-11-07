@@ -610,3 +610,32 @@ describe('adaptive local chain + never-worse guard', () => {
     expect(regressionFinding('noise')).toContain('try AI enhance');
   });
 });
+
+describe('job runner: failure reporting', () => {
+  // Regression: failures were never logged, and raw internal messages reached the user.
+  test('logs every failure; users see VocalFixError text or a generic message', async () => {
+    const { JobRunner } = await import('./jobs');
+    const dir = await mkdtemp(join(tmpdir(), 'vbm-vf-test-jobfail-'));
+    const r = new JobRunner(dir, () => new Date(0));
+    const logged: unknown[][] = [];
+    const realError = console.error;
+    console.error = (...args: unknown[]) => void logged.push(args);
+    try {
+      const internal = await r.start('', 's', 'repair', [], async () => {
+        throw new Error("ENOENT: no such file or directory, open '/srv/vbm/data/secret.wav'");
+      });
+      const known = await r.start('', 's', 'repair', [], async () => {
+        throw new VocalFixError('Audio failed to decode.', 422);
+      });
+      await r.idle('s', 2000);
+      expect((await r.get('', internal.id)).error).toBe('Processing failed.');
+      expect((await r.get('', known.id)).error).toBe('Audio failed to decode.');
+      const lines = logged.map((a) => a.map(String).join(' '));
+      expect(lines.some((l) => l.includes(internal.id) && l.includes('ENOENT'))).toBe(true);
+      expect(lines.some((l) => l.includes(known.id) && l.includes('Audio failed'))).toBe(true);
+    } finally {
+      console.error = realError;
+      await rm(dir, { recursive: true, force: true });
+    }
+  });
+});

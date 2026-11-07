@@ -8,6 +8,7 @@ Layout under VBM_ENGINE_DATA:
 from __future__ import annotations
 
 import json
+import logging
 import os
 import shutil
 import threading
@@ -20,6 +21,8 @@ from typing import Any
 
 from vbm_engine.audio import AudioDecodeError, measure
 from vbm_engine.backends.base import Backend, GenerationInput, JobCancelled, JobContext
+
+log = logging.getLogger(__name__)
 
 TERMINAL = ("succeeded", "failed", "cancelled")
 
@@ -263,6 +266,7 @@ class JobManager:
             self._discard_outputs(wd)
             self._update(job_id, status="failed", stage="failed", error=str(exc))
         except Exception as exc:  # noqa: BLE001 - a backend failure must fail the job, not the slot
+            log.exception("engine job %s failed in backend %s", job_id, model)
             self._discard_outputs(wd)
             msg = f"{type(exc).__name__}: {exc}"[:500]
             self._update(job_id, status="failed", stage="failed", error=msg)

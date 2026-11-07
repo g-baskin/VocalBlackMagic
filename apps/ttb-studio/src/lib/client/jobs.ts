@@ -1,18 +1,28 @@
 import type { StudioJob } from '@vbm/contracts';
-import { api, sleep } from './api';
+import { ApiError, api, sleep } from './api';
+
+const maxPollFailures = 8;
+
+// A missing or forbidden job never recovers; network blips, 429 and 5xx may.
+const permanent = (error: unknown) =>
+  error instanceof ApiError && error.status >= 400 && error.status < 500 && error.status !== 429;
 
 /** Polls a studio job until it leaves the running state, reporting each update. */
 export async function followJob(
   id: string,
   onUpdate: (job: StudioJob) => void,
-  isAlive: () => boolean
+  isAlive: () => boolean,
+  pause: (ms: number) => Promise<unknown> = sleep
 ): Promise<StudioJob | null> {
   let job: StudioJob | null = null;
+  let failures = 0;
   while (isAlive()) {
-    await sleep(4000);
+    await pause(4000);
     try {
       job = (await api<{ job: StudioJob }>('/api/studio/jobs/' + encodeURIComponent(id))).job;
-    } catch {
+      failures = 0;
+    } catch (error) {
+      if (permanent(error) || ++failures >= maxPollFailures) throw error;
       continue;
     }
     onUpdate(job);

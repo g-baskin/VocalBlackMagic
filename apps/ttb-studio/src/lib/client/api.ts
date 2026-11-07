@@ -1,10 +1,24 @@
+export class ApiError extends Error {
+  constructor(
+    message: string,
+    readonly status: number
+  ) {
+    super(message);
+    this.name = 'ApiError';
+  }
+}
+
 export async function api<T>(url: string, init: RequestInit = {}): Promise<T> {
   const headers: Record<string, string> = { accept: 'application/json' };
   if (init.body) headers['content-type'] = 'application/json';
   const response = await fetch(url, { ...init, headers });
   if (response.status === 204) return undefined as T;
   const body = (await response.json().catch(() => ({}))) as T & { detail?: string };
-  if (!response.ok) throw new Error(body.detail || 'The ritual failed (' + response.status + ').');
+  if (!response.ok)
+    throw new ApiError(
+      body.detail || 'The ritual failed (' + response.status + ').',
+      response.status
+    );
   return body;
 }
 

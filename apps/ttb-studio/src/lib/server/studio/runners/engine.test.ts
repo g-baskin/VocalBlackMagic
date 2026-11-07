@@ -136,6 +136,22 @@ describe('engine runner (protocol v1)', () => {
     expect(bad).toBeInstanceOf(RunnerRefused);
   });
 
+  test('sends the token over plain http only to localhost', async () => {
+    const calls: string[] = [];
+    const record = (async (input: string | URL | Request) => {
+      calls.push(String(input));
+      return Response.json(health);
+    }) as typeof fetch;
+    for (const url of ['http://gpu.example:8090', 'http://10.0.0.5:8090']) {
+      const error = await engineHealth({ url, token, fetch: record }).catch((e) => e);
+      expect(error.publicMessage).toContain('https');
+    }
+    expect(calls).toEqual([]);
+    for (const url of ['https://gpu.example', 'http://localhost:8090', 'http://[::1]:8090'])
+      expect((await engineHealth({ url, token, fetch: record })).protocol).toBe(1);
+    expect(calls).toHaveLength(3);
+  });
+
   test('refuses off-origin audio URLs and invalid requests', async () => {
     const job = await submitEngineJob(deps, request, 'k4');
     const evil = { ...job, output: { ...job.output!, audio_url: 'http://evil.example/a.wav' } };

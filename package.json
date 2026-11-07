@@ -28,6 +28,7 @@
     "format:python": "python -m ruff format apps tests",
     "check:python": "python -m mypy",
     "test:python": "python -m pytest -q",
+    "hooks:install": "git config core.hooksPath .githooks",
     "test:engine": "cd services/audio-engine && .venv/bin/python -m pytest -q",
     "lint:engine": "cd services/audio-engine && .venv/bin/python -m ruff check . && .venv/bin/python -m ruff format --check .",
     "check:engine": "cd services/audio-engine && .venv/bin/python -m mypy"

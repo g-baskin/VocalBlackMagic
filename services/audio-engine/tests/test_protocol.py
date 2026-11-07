@@ -222,3 +222,16 @@ def test_restart_recovery(tmp_path: Path) -> None:
             again = c2.post("/v1/jobs", json=BODY, headers={**AUTH, "Idempotency-Key": "k"})
             assert again.json()["id"] == queued
         b.gate.set()
+
+
+def test_backend_failure_is_logged_with_traceback(
+    client: TestClient, backend: FakeBackend, caplog: pytest.LogCaptureFixture
+) -> None:
+    backend.fail = True
+    with caplog.at_level("ERROR", logger="vbm_engine.jobs"):
+        job_id = client.post("/v1/jobs", json=BODY, headers=AUTH).json()["id"]
+        wait(client, job_id, ("failed",))
+    records = [
+        r for r in caplog.records if r.name == "vbm_engine.jobs" and job_id in r.getMessage()
+    ]
+    assert records and records[0].exc_info is not None

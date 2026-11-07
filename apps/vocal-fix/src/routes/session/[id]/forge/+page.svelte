@@ -52,7 +52,7 @@
     fetch(`/api/sessions/${encodeURIComponent(id)}`)
       .then(async (res) => {
         if (!res.ok)
-          throw new Error((await res.json().catch(() => null))?.error ?? `HTTP ${res.status}`);
+          throw new Error((await res.json().catch(() => null))?.detail ?? `HTTP ${res.status}`);
         manifest = (await res.json()) as Manifest;
       })
       .catch(
@@ -74,7 +74,12 @@
     return () => controller.abort();
   });
 
-  // Poll the job until it settles.
+  // Poll the job until it settles; give up after a long run of failed polls.
+  let pollFailures = 0;
+  const pollGaveUp = (j: Job): Job =>
+    ++pollFailures < 8
+      ? { ...j }
+      : { ...j, status: 'failed', error: 'Lost contact with the forge. Reload to check on it.' };
   $effect(() => {
     const j = job;
     if (!j || j.status === 'completed' || j.status === 'failed' || j.status === 'cancelled') return;
@@ -83,10 +88,15 @@
         const res = await fetch(
           `/api/sessions/${encodeURIComponent(id)}/jobs/${encodeURIComponent(j.id)}`
         );
-        if (res.ok) job = (await res.json()) as Job;
-        else job = { ...j };
+        if (res.ok) {
+          pollFailures = 0;
+          job = (await res.json()) as Job;
+        } else if (res.status >= 400 && res.status < 500 && res.status !== 429) {
+          const body = await res.json().catch(() => null);
+          job = { ...j, status: 'failed', error: body?.detail ?? `HTTP ${res.status}` };
+        } else job = pollGaveUp(j);
       } catch {
-        job = { ...j };
+        job = pollGaveUp(j);
       }
     }, 2500);
     return () => clearTimeout(timer);
@@ -104,7 +114,7 @@
         body: JSON.stringify({ attested_name: name, own_voice: true, statement: STATEMENT })
       });
       const body = await res.json().catch(() => null);
-      if (!res.ok) throw new Error(body?.error ?? `HTTP ${res.status}`);
+      if (!res.ok) throw new Error(body?.detail ?? `HTTP ${res.status}`);
       job = body.job as Job;
     } catch (err) {
       error = err instanceof Error ? err.message : 'The forge refused.';

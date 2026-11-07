@@ -3,7 +3,7 @@ import { mkdir, mkdtemp, rm, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import path from 'node:path';
 import { validateCreateSongRequest, type CreateSongRequest, type SongMeta } from '@vbm/contracts';
-import { ProviderError } from '../music/errors';
+import { ProviderError, isInternalError } from '../music/errors';
 import { createSongs, type CreateDeps } from './create';
 import { engineRequestError, fitLyrics, minimaxLyrics, replicateInput } from './engines';
 import { advanceJob, cancelJob, loadJob } from './jobs';
@@ -667,7 +667,7 @@ describe('summon in my voice', () => {
 });
 
 describe('createSongs through the models x runners router', () => {
-  const engineUrl = 'http://engine.test';
+  const engineUrl = 'https://engine.test';
   const health = (ready: boolean) => ({
     ok: true,
     protocol: 1,
@@ -767,5 +767,22 @@ describe('createSongs through the models x runners router', () => {
     });
     await expect(createSongs(routedDeps(fetch), heart)).rejects.toThrow();
     expect(calls.some((c) => c.url.includes('replicate'))).toBe(false);
+  });
+});
+
+describe('studio error mapping', () => {
+  // Regression: a full disk or a code bug was reported as "The music provider could not be reached."
+  test('local failures are internal, network and provider failures are not', () => {
+    const disk = Object.assign(new Error('ENOSPC: no space left on device'), {
+      code: 'ENOSPC',
+      syscall: 'write'
+    });
+    expect(isInternalError(disk)).toBe(true);
+    expect(isInternalError(new RangeError('Invalid array length'))).toBe(true);
+    expect(isInternalError(new TypeError('fetch failed'))).toBe(false);
+    expect(
+      isInternalError(Object.assign(new Error('Unable to connect'), { code: 'ConnectionRefused' }))
+    ).toBe(false);
+    expect(isInternalError(new ProviderError(429, 'Busy.'))).toBe(false);
   });
 });

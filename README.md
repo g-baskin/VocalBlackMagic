@@ -89,6 +89,7 @@ For lint, formatting and strict Python typing, activate the Python environment
 and install `pip install -r requirements-dev.txt` in addition to `bun install --frozen-lockfile`.
 Run `bun run lint`, `bun run format:check` and `bun run check:python`.
 `bun run format` applies the formatters; check commands do not rewrite source.
+To block commits that contain secrets, install [gitleaks](https://github.com/gitleaks/gitleaks) and run `bun run hooks:install` once per clone; CI also scans the full history with gitleaks.
 TypeScript/Svelte checks remain `bun run check`. Python checks cover both legacy APIs and tests. `bun run test` needs ffmpeg (Vocal Fix tests make small audio files). The engine has its own checks, `bun run test:engine`, `lint:engine` and `check:engine`, which expect a venv at `services/audio-engine/.venv`.
 
 ```bash

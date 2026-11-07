@@ -14,7 +14,7 @@ import {
 import { advanceJob, loadJob } from './jobs';
 import { SongLibrary } from './library';
 
-const engineUrl = 'http://engine.test';
+const engineUrl = 'https://engine.test';
 const reqId = '0123abcd-0123-4abc-8def-0123456789ab';
 const mp3 = () => {
   const b = new Uint8Array(4096);
