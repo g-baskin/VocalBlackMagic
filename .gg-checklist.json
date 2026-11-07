@@ -169,6 +169,27 @@
         "Not checked: the CI secrets job on GitHub (not pushed); the hook is opt-in via bun run hooks:install, not enabled in this clone.",
         "Skill: bulletproof (report-only method, secure-defaults.md + verification.md)."
       ]
+    },
+    "tests": {
+      "checkedAt": "2026-11-07T06:04:18.296Z",
+      "commit": "399bd64",
+      "uncommittedChanges": true,
+      "result": "issues",
+      "summary": "Re-check of the 5 recorded gaps: the 4 code-level gaps now have tests (258 pass, uncommitted); UI/browser tests remain open by owner choice.",
+      "findings": [
+        "Low: no UI or browser tests for 49 Svelte files across both apps; only 2 client helper test files. Fix: a Playwright smoke test per app (new dev dependency, needs owner approval)."
+      ],
+      "evidence": [
+        "Scope: re-check of the 5 findings recorded earlier today only; not a new full tests review.",
+        "routes.test.ts: globs all 22 /api/studio route files; each guarded handler 403s off-dev and on a foreign Host, writes 415 on text/plain, no fetch.",
+        "Mutation check: removing guard() from stems/+server.ts made 3 route tests fail; file restored byte-identical to HEAD (git diff --quiet).",
+        "service.test.ts: real ffmpeg intake/repair; gold, startForge consent refusals before any fetch, train+seal, revokeVoice audit, remove cascade.",
+        "derive.test.ts: real ffmpeg masterFile ~-14 LUFS, 30 s MP3 refs, masterSong + silent cleanup, reimagine, voice summon, Lyria 3.5 path.",
+        "Coverage: vocal-fix service.ts 51.9 -> 93.0%, derive.ts 58.7 -> 100%, master.ts 57.0 -> 100%, voicesummon.ts 26.3 -> 96.0%, create.ts 62.0 -> 82.9% lines.",
+        "bun run test: 258 pass 0 fail (56.6 s, was ~17 s); lint, format:check, svelte-check 0 errors, mypy ok, pytest 6 passed (RUNTIME).",
+        "context.ts shows 32% lines: guard() covered, studioContext/studioError are not reached because handlers return early (by design).",
+        "Not checked: these tests in CI (not pushed); UI in a browser. Skill: none applies (own judgment)."
+      ]
     }
   }
 }
