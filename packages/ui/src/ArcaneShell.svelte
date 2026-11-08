@@ -72,6 +72,7 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
+    flex-wrap: wrap;
     gap: 0.75rem;
     padding: calc(0.6rem + var(--vbm-safe-top)) calc(clamp(1rem, 4vw, 3rem) + var(--vbm-safe-right))
       0.6rem calc(clamp(1rem, 4vw, 3rem) + var(--vbm-safe-left));
@@ -96,6 +97,8 @@
   }
   nav {
     display: flex;
+    flex-wrap: wrap;
+    max-width: 100%;
     align-items: center;
     gap: 0.25rem;
     padding: 0.25rem;

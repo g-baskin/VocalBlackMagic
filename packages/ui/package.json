@@ -23,6 +23,7 @@
     "./Spectrogram.svelte": "./src/Spectrogram.svelte",
     "./PitchTrace.svelte": "./src/PitchTrace.svelte",
     "./SummoningCircle.svelte": "./src/SummoningCircle.svelte",
+    "./SignalScope.svelte": "./src/SignalScope.svelte",
     "./GrimoirePlayer.svelte": "./src/GrimoirePlayer.svelte",
     "./Sigil.svelte": "./src/Sigil.svelte",
     "./theme.css": "./src/theme.css",

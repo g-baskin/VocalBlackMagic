@@ -10,6 +10,7 @@
     onseek,
     height = 120,
     color = 'violet',
+    unplayedOpacity = 0.38,
     compareBuffer = null,
     regions = [],
     label = 'Waveform'
@@ -20,6 +21,7 @@
     onseek?: (seconds: number) => void;
     height?: number;
     color?: GlowName;
+    unplayedOpacity?: number;
     compareBuffer?: AudioBuffer | null;
     regions?: { start: number; end: number; label?: string }[];
     label?: string;
@@ -68,6 +70,7 @@
     const ghostData = ghost;
     const p = progress;
     const c = GLOW[color];
+    const opacity = Math.min(1, Math.max(0, unplayedOpacity));
     const regs = regions;
     const t = total;
     return observeCanvas(canvas, (ctx, w, h) => {
@@ -100,7 +103,7 @@
       ctx.save();
       ctx.shadowColor = c.main;
       ctx.shadowBlur = 8;
-      ctx.fillStyle = `rgba(${c.rgb},0.38)`;
+      ctx.fillStyle = `rgba(${c.rgb},${opacity})`;
       drawPeaks(ctx, data, w, h, cols, buffer?.duration ?? 0);
       ctx.beginPath();
       ctx.rect(0, 0, w * p, h);

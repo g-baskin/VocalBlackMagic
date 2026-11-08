@@ -119,7 +119,9 @@
       background: var(--vbm-surface-2);
     }
     :global(#vbm-main) {
-      padding-bottom: calc(var(--vbm-tabbar-h) + 1.5rem + var(--vbm-safe-bottom)) !important;
+      padding-bottom: calc(
+        max(var(--vbm-tabbar-h), 7rem) + 1.5rem + var(--vbm-safe-bottom)
+      ) !important;
     }
     .tabbar {
       position: fixed;
@@ -134,7 +136,13 @@
       backdrop-filter: saturate(140%) blur(14px);
       -webkit-backdrop-filter: saturate(140%) blur(14px);
     }
+    .tabbar span {
+      max-width: 100%;
+      overflow-wrap: anywhere;
+      text-align: center;
+    }
     .tabbar a {
+      min-width: 0;
       display: grid;
       justify-items: center;
       align-content: center;

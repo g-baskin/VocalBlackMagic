@@ -221,26 +221,41 @@
     </header>
 
     {#if song.audio}
-      <ArcanePanel eyebrow="Player" title="Listen" glow="violet">
+      <section class="listening-panel" aria-label="Song player">
         <AbPlayer
+          title={song.title}
           a={audioUrl(song.id)}
           b={song.kind === 'master' && parent?.audio ? audioUrl(parent.id) : null}
-          labelA="Master"
+          labelA={song.kind === 'master' ? 'Master' : 'This song'}
           labelB="Original"
           {buffer}
           downloadHref={audioUrl(song.id) + '?download=1'}
           downloadName={song.title + '.' + ext(song)}
+          downloadBName={parent ? parent.title + '.' + ext(parent) : undefined}
           cover={song.cover ? coverUrl(song.id, String(song.cover.bytes)) : null}
         />
         {#if song.master}
-          <p class="note">
-            Mastered from {song.master.input_lufs?.toFixed(1)} to {song.master.output_lufs?.toFixed(
-              1
-            )} LUFS, true peak
-            {song.master.output_true_peak?.toFixed(1)} dBTP. The original is untouched.
-          </p>
+          <div class="master-report" aria-label="Mastering results">
+            <div>
+              <span>Loudness</span><strong
+                >{song.master.output_lufs?.toFixed(1) ?? 'Unavailable'}<small> LUFS</small></strong
+              >
+            </div>
+            <div>
+              <span>True peak</span><strong
+                >{song.master.output_true_peak?.toFixed(1) ?? 'Unavailable'}<small>
+                  dBTP</small
+                ></strong
+              >
+            </div>
+            <p>
+              Original preserved{song.master.input_lufs != null
+                ? ' at ' + song.master.input_lufs.toFixed(1) + ' LUFS'
+                : ''}.
+            </p>
+          </div>
         {/if}
-      </ArcanePanel>
+      </section>
     {/if}
 
     {#if song.stems?.length}
@@ -529,9 +544,43 @@
     font-size: 1.1rem;
     margin: 0;
   }
-  .note {
-    font-style: italic;
-    opacity: 0.8;
+  .listening-panel {
+    min-width: 0;
+  }
+  .master-report {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 16px 32px;
+    padding: 20px 24px 0;
+  }
+  .master-report div {
+    display: grid;
+    gap: 4px;
+  }
+  .master-report span,
+  .master-report p {
+    color: var(--vbm-muted);
+    font-size: 0.75rem;
+  }
+  .master-report strong {
+    font-size: 1rem;
+    font-weight: 600;
+    font-variant-numeric: tabular-nums;
+  }
+  .master-report small {
+    margin-left: 4px;
+    color: var(--vbm-muted);
+    font-size: 0.75rem;
+    font-weight: 400;
+  }
+  .master-report p {
+    margin: 0;
+  }
+  @media (max-width: 440px) {
+    .master-report {
+      padding-inline: 16px;
+    }
   }
   .lineage {
     margin: 0;
