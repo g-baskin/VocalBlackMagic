@@ -195,6 +195,7 @@ export const styleCategories: readonly StyleCategory[] = [
       'tabla',
       'strings',
       'violin',
+      'stradivari violin',
       'cello',
       'harp',
       'brass',

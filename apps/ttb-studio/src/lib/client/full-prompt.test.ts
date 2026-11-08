@@ -12,6 +12,8 @@ import {
   tagsAfterStylePaste,
   tagsFromStyle
 } from './full-prompt';
+import { searchTags } from './style-tags';
+import { rewritePrompt } from './artist-styles';
 
 const sample = readFileSync(join(import.meta.dir, '__fixtures__/full-prompt.txt'), 'utf8');
 
@@ -156,4 +158,12 @@ describe('tags however the prompt is pasted', () => {
     expect(isPaste('Bright summer po', 'Bright summer pop')).toBe(false);
     expect(isPaste('', splitFullPrompt(sample)!.style)).toBe(true);
   });
+});
+
+test('a Stradivari violin is a tag you can pick, and a prompt naming it selects it', () => {
+  expect(searchTags('strad').flatMap((g) => g.tags)).toEqual(['stradivari violin']);
+  const tags = tagsFromStyle('Cinematic ballad, solo Stradivari violin, warm strings');
+  expect(tags).toContain('stradivari violin');
+  expect(tags).not.toContain('violin'); // already inside "stradivari violin"
+  expect(rewritePrompt('solo Stradivari violin').hits).toEqual([]); // not mistaken for an artist
 });
