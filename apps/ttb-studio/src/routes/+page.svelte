@@ -30,6 +30,7 @@
   import ModelPicker, { type PickerItem } from '../lib/client/ModelPicker.svelte';
   import StyleTagPicker from '../lib/client/StyleTagPicker.svelte';
   import { parseTags } from '../lib/client/style-tags';
+  import { rewritePrompt, rewriteTagText } from '../lib/client/artist-styles';
 
   type Caps = {
     allowed: boolean;
@@ -163,6 +164,20 @@
     { value: '1', label: 'One take' }
   ];
   const tags = $derived(parseTags(tagText));
+  // Song models refuse prompts that name real artists; suggest a description of the sound instead.
+  const artistFix = $derived.by(() => {
+    const prompt = rewritePrompt(mode === 'custom' ? stylePrompt : description);
+    const tagFix = rewriteTagText(tagText, prompt.hits);
+    return { prompt: prompt.text, tags: tagFix.text, names: tagFix.hits.map((h) => h.name) };
+  });
+
+  function useArtistFix() {
+    // Read both before writing: changing the prompt recomputes artistFix.
+    const { prompt, tags: fixedTags } = artistFix;
+    if (mode === 'custom') stylePrompt = prompt;
+    else description = prompt;
+    tagText = fixedTags;
+  }
   const voiceSummon = $derived(mode === 'custom' && !!sungBy && !instrumental);
   const estimate = $derived(
     voiceSummon
@@ -285,6 +300,7 @@
   }
 
   async function summon() {
+    if (artistFix.names.length) return;
     const request = buildRequest();
     const invalid = validateCreateSongRequest(request);
     if (invalid) {
@@ -413,11 +429,25 @@
           hint="No vocals. Some models only make instrumentals."
         />
       </div>
+      {#if artistFix.names.length}
+        <div class="artist-fix" role="status">
+          <p class="artist-why">
+            <strong>Describe the sound instead of naming {artistFix.names.join(', ')}.</strong>
+            Song models refuse prompts that name real artists. Here's the same idea as a style:
+          </p>
+          <p class="artist-suggestion">{artistFix.prompt || '(no description)'}</p>
+          <p class="artist-tags"><span>Tags:</span> {artistFix.tags}</p>
+          <RuneButton variant="ghost" onclick={useArtistFix}>Use this instead</RuneButton>
+        </div>
+      {/if}
       <div class="go">
         <RuneButton
           onclick={summon}
           busy={busy || running}
-          disabled={!caps?.allowed || !spec || spec.status !== 'ready'}
+          disabled={!caps?.allowed ||
+            !spec ||
+            spec.status !== 'ready' ||
+            artistFix.names.length > 0}
         >
           ♪ Create
         </RuneButton>
@@ -605,6 +635,41 @@
     margin: 0;
     color: var(--vbm-muted);
     font-size: 0.9rem;
+  }
+  .artist-fix {
+    display: grid;
+    gap: 0.6rem;
+    justify-items: start;
+    margin-top: 1rem;
+    padding: 0.9rem 1rem;
+    background: rgb(79 139 255 / 10%);
+    border: 1px solid rgb(79 139 255 / 35%);
+    border-radius: var(--vbm-radius);
+  }
+  .artist-fix p {
+    margin: 0;
+  }
+  .artist-why {
+    font-size: 0.9rem;
+    color: var(--vbm-muted);
+  }
+  .artist-why strong {
+    display: block;
+    color: var(--vbm-text);
+  }
+  .artist-suggestion {
+    padding: 0.6rem 0.8rem;
+    background: var(--vbm-surface-2);
+    border-radius: var(--vbm-radius-sm);
+    color: var(--vbm-text);
+    justify-self: stretch;
+  }
+  .artist-tags {
+    font-size: 0.85rem;
+    color: var(--vbm-blue-text);
+  }
+  .artist-tags span {
+    color: var(--vbm-muted);
   }
   .go {
     display: flex;

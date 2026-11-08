@@ -39,6 +39,7 @@ export const styleCategories: readonly StyleCategory[] = [
       'shoegaze',
       'post-rock',
       'progressive rock',
+      'glam rock',
       'metal',
       'heavy metal',
       'metalcore',
