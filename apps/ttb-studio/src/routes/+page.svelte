@@ -1,5 +1,6 @@
 <script lang="ts">
   import { onDestroy, onMount } from 'svelte';
+  import { resolve } from '$app/paths';
   import ArcanePanel from '@vbm/ui/ArcanePanel.svelte';
   import RuneButton from '@vbm/ui/RuneButton.svelte';
   import ArcaneInput from '@vbm/ui/ArcaneInput.svelte';
@@ -14,6 +15,7 @@
     soundCharacterNames,
     validateCreateSongRequest,
     type CreateSongRequest,
+    type LyricSheet,
     type SongMeta,
     type SoundCharacter,
     type StudioEngine,
@@ -24,7 +26,7 @@
     studioModels
   } from '@vbm/contracts';
   import { api, sleep } from '../lib/client/api';
-  import SongTake from '../lib/client/SongTake.svelte';
+  import SongCard from '../lib/client/SongCard.svelte';
   import ModelPicker, { type PickerItem } from '../lib/client/ModelPicker.svelte';
 
   type Caps = {
@@ -35,12 +37,12 @@
   };
 
   let mode = $state<'simple' | 'custom'>('simple');
-  let description = $state('A haunted gothic synth-pop hymn about lighting candles for the lost');
+  let description = $state('An upbeat summer pop song about road trips with friends');
   let title = $state('');
   let stylePrompt = $state(
-    'Dark gothic synth-pop, choir pads, pulsing bass, ethereal female vocal'
+    'Bright summer pop, punchy drums, warm synths, catchy hook, female vocal'
   );
-  let tagText = $state('gothic, synth-pop, cinematic');
+  let tagText = $state('pop, summer, upbeat');
   let lyrics = $state('');
   let instrumental = $state(false);
   let engine = $state<string>('minimax-music-1.5');
@@ -59,6 +61,7 @@
   let error = $state<string | null>(null);
   let busy = $state(false);
   let writtenLyrics = $state<string | null>(null);
+  let lyricsNote = $state(false);
   let alive = true;
   const lyricPlaceholder = ['[Verse]', '…', '[Chorus]', '…'].join('\n');
 
@@ -177,7 +180,7 @@
     ...voices.map((v) => ({
       value: v.id,
       label: v.performer,
-      hint: 'Your forged voice, sung via its Gold Vocal (MiniMax Music-01, ~$0.035, lyrics up to ~380 characters)'
+      hint: 'Your trained voice, sung via its Gold Vocal (MiniMax Music-01, ~$0.035, lyrics up to ~380 characters)'
     }))
   ]);
   const referenceOptions = $derived(
@@ -223,6 +226,19 @@
         // ignore a malformed hand-off
       }
     }
+    const sheetId = new URLSearchParams(location.search).get('lyrics');
+    if (sheetId) {
+      api<{ sheet: LyricSheet }>('/api/studio/uploads/lyrics/' + encodeURIComponent(sheetId))
+        .then(({ sheet }) => {
+          mode = 'custom';
+          lyrics = sheet.text;
+          if (!title.trim()) title = sheet.title;
+          lyricsNote = true;
+        })
+        .catch(
+          (e) => (error = e instanceof Error ? e.message : 'Those lyrics could not be loaded.')
+        );
+    }
     try {
       caps = await api<Caps>('/api/studio/capabilities');
     } catch (e) {
@@ -258,7 +274,7 @@
         const reply = await api<{ job: StudioJob }>('/api/studio/jobs/' + id);
         job = reply.job;
       } catch (e) {
-        error = (e instanceof Error ? e.message : 'Lost contact with the ritual.') + ' Retrying…';
+        error = (e instanceof Error ? e.message : 'Lost contact with the studio.') + ' Retrying…';
         continue;
       }
       error = null;
@@ -266,7 +282,7 @@
     }
     if (!job) return;
     if (job.status === 'failed' || job.status === 'canceled')
-      error = job.detail ?? 'The ritual failed.';
+      error = job.detail ?? 'Generation failed.';
     songs = [];
     for (const songId of job.song_ids)
       songs.push((await api<{ song: SongMeta }>('/api/studio/songs/' + songId)).song);
@@ -294,7 +310,7 @@
       busy = false;
       await poll(reply.job.id);
     } catch (e) {
-      error = e instanceof Error ? e.message : 'The summoning failed.';
+      error = e instanceof Error ? e.message : 'Could not start the song.';
     } finally {
       busy = false;
     }
@@ -314,60 +330,64 @@
   }
 </script>
 
-<svelte:head><title>The Studio · Vocal Black Magic</title></svelte:head>
+<svelte:head><title>Create · VBM Studio</title></svelte:head>
 
-<div class="page">
-  <header class="page-title">
-    <h1>The Studio</h1>
-    <p>
-      Speak a description into the circle, or write every line yourself. Each take is bound to your
-      library.
-    </p>
+<div class="page create">
+  <header class="hero">
+    <h1>Make a song</h1>
+    <p>Describe it in a sentence, or switch to Custom and write your own lyrics.</p>
+    <RuneButton variant="ghost" href={resolve('/upload')}>Upload audio or lyrics</RuneButton>
   </header>
+
+  {#if lyricsNote}
+    <div class="loaded-note" role="status">
+      <span>Lyrics loaded from your upload</span>
+      <button type="button" aria-label="Dismiss" onclick={() => (lyricsNote = false)}>×</button>
+    </div>
+  {/if}
 
   {#if capsError}
     <OracleStatus tone="danger">{capsError}</OracleStatus>
   {:else if caps && !caps.allowed}
-    <OracleStatus tone="warning">Summoning is sealed outside development mode.</OracleStatus>
+    <OracleStatus tone="warning"
+      >Creating songs is turned off outside development mode.</OracleStatus
+    >
   {/if}
 
-  <div class="altar">
-    <ArcanePanel
-      eyebrow="Incantation"
-      title={mode === 'simple' ? 'Simple summoning' : 'Custom ritual'}
-    >
-      {#snippet actions()}
-        <div class="modes" role="radiogroup" aria-label="Creation mode">
-          <button
-            role="radio"
-            aria-checked={mode === 'simple'}
-            class:on={mode === 'simple'}
-            onclick={() => (mode = 'simple')}>Simple</button
-          >
-          <button
-            role="radio"
-            aria-checked={mode === 'custom'}
-            class:on={mode === 'custom'}
-            onclick={() => (mode = 'custom')}>Custom</button
-          >
-        </div>
-      {/snippet}
+  <div class="layout">
+    <section class="composer" aria-label="Song prompt">
+      <div class="modes" role="radiogroup" aria-label="Creation mode">
+        <button
+          role="radio"
+          aria-checked={mode === 'simple'}
+          class:on={mode === 'simple'}
+          onclick={() => (mode = 'simple')}>Simple</button
+        >
+        <button
+          role="radio"
+          aria-checked={mode === 'custom'}
+          class:on={mode === 'custom'}
+          onclick={() => (mode = 'custom')}>Custom</button
+        >
+      </div>
       <div class="fields">
         {#if mode === 'simple'}
-          <ArcaneTextarea
-            label="Describe the song"
-            bind:value={description}
-            rows={4}
-            maxlength={3000}
-            placeholder="A song about…"
-          />
-          <p class="aside">The oracle writes the lyrics and a title, then the engine sings them.</p>
+          <div class="prompt">
+            <ArcaneTextarea
+              label="Song description"
+              bind:value={description}
+              rows={5}
+              maxlength={3000}
+              placeholder="An upbeat pop song about…"
+            />
+          </div>
+          <p class="aside">We write the lyrics and a title, then the model sings them.</p>
         {:else}
           <ArcaneInput
             label="Title (optional)"
             bind:value={title}
             maxlength={120}
-            placeholder="Untitled spell"
+            placeholder="Untitled song"
           />
           <ArcaneTextarea
             label="Style of music"
@@ -377,7 +397,7 @@
           />
           {#if !instrumental}
             <ArcaneTextarea
-              label="Lyrics (leave empty and the oracle writes them)"
+              label="Lyrics (leave empty and we write them)"
               bind:value={lyrics}
               rows={10}
               maxlength={spec?.max_lyrics ?? 15000}
@@ -396,16 +416,27 @@
             {#each tags as tag (tag)}<li>{tag}</li>{/each}
           </ul>
         {/if}
-      </div>
-    </ArcanePanel>
-
-    <ArcanePanel eyebrow="Vessel" title="Model & form" glow="ember">
-      <div class="fields">
         <RuneToggle
           label="Instrumental"
           bind:checked={instrumental}
-          hint="No vocals. Some engines only make instrumentals."
+          hint="No vocals. Some models only make instrumentals."
         />
+      </div>
+      <div class="go">
+        <RuneButton
+          onclick={summon}
+          busy={busy || running}
+          disabled={!caps?.allowed || !spec || spec.status !== 'ready'}
+        >
+          ♪ Create
+        </RuneButton>
+        {#if running}<RuneButton variant="ghost" onclick={cancel}>Cancel</RuneButton>{/if}
+        <p class="price">Estimated cost <strong>${estimate.toFixed(3)}</strong></p>
+      </div>
+    </section>
+
+    <ArcanePanel eyebrow="Settings" title="Model & options" glow="ember">
+      <div class="fields">
         {#if mode === 'custom' && !instrumental}
           <ArcaneSelect label="Sung by" bind:value={sungBy} options={sungByOptions} />
           {#if sungBy}
@@ -417,21 +448,22 @@
               />
             {:else}
               <p class="aside">
-                Summon a song first: a voice summon needs a library song as its music reference.
+                Create a song first: singing with your voice needs a library song as its music
+                reference.
               </p>
             {/if}
           {:else if !voices.length}
             <p class="aside">
-              Forge your own voice in Vocal Fix's Voice Forge to sing with it here.
+              Create your own voice in Vocal Fix's Voice training to sing with it here.
             </p>
           {/if}
         {/if}
         {#if voiceSummon}
-          <p class="aside">Engine: MiniMax Music-01 with your voice's Gold Vocal as reference.</p>
+          <p class="aside">Model: MiniMax Music-01 with your voice's Gold Vocal as reference.</p>
         {:else if caps}
           <ModelPicker items={pickerItems} bind:value={engine} />
         {:else if !capsError}
-          <SigilLoader label="Reading the engines…" size={40} />
+          <SigilLoader label="Loading models…" size={40} />
         {/if}
         {#if spec?.duration}
           <ArcaneInput
@@ -440,26 +472,15 @@
             bind:value={duration}
           />
         {:else if spec}
-          <p class="aside">This engine chooses the song length itself.</p>
+          <p class="aside">This model chooses the song length itself.</p>
         {/if}
         <ArcaneSelect label="Sound character" bind:value={character} options={characterOptions} />
         <RuneToggle
-          label="Conjure cover art"
+          label="Generate cover art"
           bind:checked={coverArt}
-          hint="An arcane cover per take with FLUX Schnell, about $0.003 each."
+          hint="One cover per take with FLUX Schnell, about $0.003 each."
         />
         <ArcaneSelect label="Takes" bind:value={takes} options={takeOptions} />
-        <p class="price">Estimated cost: <strong>${estimate.toFixed(3)}</strong></p>
-        <div class="summon">
-          <RuneButton
-            onclick={summon}
-            busy={busy || running}
-            disabled={!caps?.allowed || !spec || spec.status !== 'ready'}
-          >
-            Summon the song
-          </RuneButton>
-          {#if running}<RuneButton variant="ghost" onclick={cancel}>Banish</RuneButton>{/if}
-        </div>
       </div>
     </ArcanePanel>
   </div>
@@ -467,14 +488,14 @@
   {#if error}<OracleStatus tone="danger">{error}</OracleStatus>{/if}
 
   {#if job}
-    <ArcanePanel eyebrow="Ritual" title="The summoning" glow="teal">
-      <div class="ritual">
-        {#if running}<SigilLoader label="The engine is singing…" />{/if}
+    <ArcanePanel eyebrow="Progress" title="Making your song" glow="teal">
+      <div class="progress">
+        {#if running}<SigilLoader label="Generating…" />{/if}
         <RitualProgress stages={job.stages} detail={job.detail} />
       </div>
       {#if writtenLyrics}
         <details class="written">
-          <summary>Lyrics written by the oracle</summary>
+          <summary>Lyrics we wrote</summary>
           <pre>{writtenLyrics}</pre>
         </details>
       {/if}
@@ -482,45 +503,96 @@
   {/if}
 
   {#if songs.length}
-    <section class="takes" aria-label="Summoned takes">
+    <section class="takes" aria-label="Your new songs">
       {#each songs as song (song.id)}
-        <ArcanePanel eyebrow={'Take ' + (song.params.take ?? 1)} title={song.title} glow="violet">
-          <SongTake {song} />
-        </ArcanePanel>
+        <SongCard {song} eyebrow={'Take ' + (song.params.take ?? 1)} />
       {/each}
     </section>
   {/if}
 </div>
 
 <style>
-  .altar {
+  .loaded-note {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.75rem;
+    margin: 0 0 1rem;
+    padding: 0.6rem 0.9rem;
+    border-radius: 12px;
+    background: var(--vbm-surface-2);
+    border: 1px solid var(--vbm-border);
+    color: var(--vbm-text);
+    font-size: 0.9rem;
+  }
+  .loaded-note button {
+    background: none;
+    border: 0;
+    color: var(--vbm-muted);
+    font-size: 1.2rem;
+    cursor: pointer;
+  }
+  .hero {
+    text-align: center;
+    margin: 0.5rem 0 0;
+  }
+  .hero h1 {
+    margin: 0;
+    font-size: clamp(1.75rem, 6vw, 2.75rem);
+    font-weight: 800;
+    letter-spacing: -0.03em;
+  }
+  .hero p {
+    margin: 0.4rem auto 0;
+    max-width: 36rem;
+    color: var(--vbm-muted);
+  }
+  .layout {
     display: grid;
-    grid-template-columns: minmax(0, 1.6fr) minmax(0, 1fr);
-    gap: 1.5rem;
+    grid-template-columns: minmax(0, 1.5fr) minmax(0, 1fr);
+    gap: 1.25rem;
+    align-items: start;
+  }
+  .composer {
+    display: grid;
+    gap: 1rem;
+    padding: 1.25rem;
+    background: var(--vbm-surface);
+    border: 1px solid var(--vbm-border);
+    border-radius: var(--vbm-radius-lg);
+    box-shadow: var(--vbm-shadow-lg);
   }
   .fields {
     display: grid;
     gap: 1rem;
   }
-  .modes {
-    display: inline-flex;
-    border: 1px solid var(--vbm-violet-deep);
-    border-radius: 999px;
-    overflow: hidden;
+  .prompt :global(textarea) {
+    font-size: 1.15rem;
+    min-height: 8rem;
   }
-  .modes button,
-  .tagbar button {
-    background: transparent;
-    color: inherit;
+  .modes {
+    justify-self: start;
+    display: inline-flex;
+    padding: 0.25rem;
+    gap: 0.25rem;
+    background: var(--vbm-surface-2);
+    border: 1px solid var(--vbm-border);
+    border-radius: var(--vbm-radius-pill);
+  }
+  .modes button {
+    min-height: 40px;
+    min-width: 6rem;
     border: 0;
-    padding: 0.4rem 0.9rem;
-    font-family: var(--vbm-font-display);
-    letter-spacing: 0.1em;
+    border-radius: var(--vbm-radius-pill);
+    background: transparent;
+    color: var(--vbm-muted);
+    font: inherit;
+    font-weight: 600;
     cursor: pointer;
   }
   .modes button.on {
-    background: var(--vbm-violet-deep);
-    color: #fff;
+    background: var(--vbm-text);
+    color: #121216;
   }
   .tagbar {
     display: flex;
@@ -528,11 +600,15 @@
     gap: 0.4rem;
   }
   .tagbar button {
-    border: 1px dashed var(--vbm-violet);
-    border-radius: 4px;
+    min-height: 36px;
+    padding: 0.25rem 0.7rem;
+    background: var(--vbm-surface-2);
+    color: var(--vbm-text);
+    border: 1px solid var(--vbm-border-strong);
+    border-radius: var(--vbm-radius-pill);
     font-family: var(--vbm-font-mono);
     font-size: 0.8rem;
-    padding: 0.25rem 0.5rem;
+    cursor: pointer;
   }
   .chips {
     display: flex;
@@ -543,28 +619,35 @@
     margin: 0;
   }
   .chips li {
-    border: 1px solid var(--vbm-teal-deep);
-    color: var(--vbm-teal);
-    padding: 0.15rem 0.6rem;
-    border-radius: 999px;
+    background: rgb(79 139 255 / 14%);
+    color: var(--vbm-blue-text);
+    padding: 0.2rem 0.7rem;
+    border-radius: var(--vbm-radius-pill);
     font-size: 0.85rem;
+    font-weight: 500;
   }
   .aside {
     margin: 0;
-    opacity: 0.72;
-    font-style: italic;
+    color: var(--vbm-muted);
+    font-size: 0.9rem;
   }
-  .price {
-    margin: 0;
-    font-family: var(--vbm-font-mono);
-    font-size: 0.85rem;
-  }
-  .summon {
+  .go {
     display: flex;
     gap: 0.75rem;
     flex-wrap: wrap;
+    align-items: center;
   }
-  .ritual {
+  .go :global(.summon) {
+    min-height: 52px;
+    padding-inline: 2.25rem;
+    font-size: 1.05rem;
+  }
+  .price {
+    margin: 0 0 0 auto;
+    font-size: 0.85rem;
+    color: var(--vbm-muted);
+  }
+  .progress {
     display: flex;
     gap: 1.5rem;
     align-items: center;
@@ -572,17 +655,28 @@
   }
   .written pre {
     white-space: pre-wrap;
-    font-family: var(--vbm-font-body);
-    font-size: 1.05rem;
+    font-family: var(--vbm-font-sans);
+    font-size: 1rem;
   }
   .takes {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(min(100%, 420px), 1fr));
-    gap: 1.5rem;
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 340px), 1fr));
+    gap: 1rem;
   }
-  @media (max-width: 820px) {
-    .altar {
+  @media (max-width: 860px) {
+    .layout {
       grid-template-columns: 1fr;
+    }
+  }
+  @media (max-width: 520px) {
+    .composer {
+      padding: 1rem;
+    }
+    .go :global(.summon) {
+      flex: 1 1 100%;
+    }
+    .price {
+      margin: 0;
     }
   }
 </style>

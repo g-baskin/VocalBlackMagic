@@ -20,12 +20,12 @@ const maxCoverBytes = 8 * 1024 * 1024;
 const moods: [RegExp, string][] = [
   [/\b(love|heart|kiss|desire)\b/i, 'longing and devotion'],
   [/\b(fire|flame|burn|light|candle)\b/i, 'flickering flame and embers'],
-  [/\b(night|moon|dark|shadow)\b/i, 'moonlit darkness'],
+  [/\b(night|moon|dark|shadow)\b/i, 'calm moonlit night'],
   [/\b(storm|sea|wave|ocean|rain)\b/i, 'storm-tossed water'],
-  [/\b(death|lost|grave|ghost|soul)\b/i, 'mourning and spirits']
+  [/\b(death|lost|grave|ghost|soul)\b/i, 'bittersweet nostalgia']
 ];
 
-/** Art-direction prompt: arcane, symbolic, no text or real people. */
+/** Art-direction prompt: modern, abstract, no text or real people. */
 export function buildCoverPrompt(
   song: Pick<SongMeta, 'title' | 'prompt' | 'style_tags' | 'lyrics'>
 ): string {
@@ -33,11 +33,11 @@ export function buildCoverPrompt(
   const mood = moods.filter(([pattern]) => pattern.test(words)).map(([, m]) => m);
   const style = [song.prompt.slice(0, 160), ...song.style_tags.slice(0, 5)].join(', ');
   return [
-    'Occult album cover art, arcane grimoire illustration, mystical sigils, sacred geometry, alchemical symbols,',
-    'deep violet and ember glow with teal highlights, dramatic chiaroscuro, painterly, rich texture, square composition.',
+    'Modern album cover art, bold abstract illustration, smooth gradients and clean shapes,',
+    'vibrant pink, orange and blue palette, soft lighting, contemporary design, square composition.',
     'Theme inspired by the song "' + song.title.replace(/["<>]/g, '').slice(0, 80) + '".',
     'Musical style: ' + style.replace(/["<>]/g, '') + '.',
-    mood.length ? 'Mood: ' + mood.join(', ') + '.' : 'Mood: mysterious and haunting.',
+    mood.length ? 'Mood: ' + mood.join(', ') + '.' : 'Mood: bright and uplifting.',
     'Symbolic and abstract imagery only. No text, no letters, no words, no logos, no watermark, no real people, no faces of real persons.'
   ].join(' ');
 }
@@ -84,7 +84,7 @@ export async function conjureCover(
   if (prediction.status !== 'succeeded')
     throw new ProviderError(
       502,
-      'The cover could not be conjured.',
+      'The cover could not be generated.',
       'cover ' + prediction.status + ' ' + (prediction.error ?? '')
     );
   return storeCover(library, song.id, await coverBytes(deps.fetch, prediction.output));

@@ -10,11 +10,14 @@
     "check": "bun run --bun svelte-kit sync && bun run --bun svelte-check --tsconfig ./tsconfig.json"
   },
   "dependencies": {
-    "@vbm/contracts": "workspace:*",
-    "@vbm/ui": "workspace:*",
+    "@tonejs/midi": "^2.0.28",
     "@vbm/auth": "workspace:*",
+    "@vbm/billing": "workspace:*",
+    "@vbm/contracts": "workspace:*",
     "@vbm/database": "workspace:*",
-    "@vbm/billing": "workspace:*"
+    "@vbm/ui": "workspace:*",
+    "fflate": "^0.8.3",
+    "unpdf": "^2.1.0"
   },
   "devDependencies": {
     "@sveltejs/adapter-bun": "^1.0.0",

@@ -1,8 +1,6 @@
 <script lang="ts">
   import type { Snippet } from 'svelte';
-  import { onMount } from 'svelte';
   import Sigil from './Sigil.svelte';
-  import { prefersReducedMotion } from './canvas';
 
   let {
     app,
@@ -15,85 +13,18 @@
     vocalFixUrl: string;
     children: Snippet;
   } = $props();
-
-  let canvas: HTMLCanvasElement | undefined = $state();
-
-  onMount(() => {
-    const el = canvas;
-    const ctx = el?.getContext('2d');
-    if (!el || !ctx) return;
-    let raf = 0;
-    let w = 0;
-    let h = 0;
-    const dpr = Math.min(2, window.devicePixelRatio || 1);
-    // Size the backing store from the canvas's own box (fixed, inset 0 = the viewport),
-    // so it follows any viewport change, including ones that fire no window resize.
-    const resize = () => {
-      const rect = el.getBoundingClientRect();
-      w = Math.max(1, rect.width || window.innerWidth);
-      h = Math.max(1, rect.height || window.innerHeight);
-      el.width = Math.round(w * dpr * 0.5);
-      el.height = Math.round(h * dpr * 0.5);
-      ctx.setTransform(dpr * 0.5, 0, 0, dpr * 0.5, 0, 0);
-    };
-    const motes = Array.from({ length: 7 }, (_, i) => ({
-      phase: i * 1.7,
-      speed: 0.00004 + i * 0.000009,
-      hue: ['167,116,255', '255,138,61', '63,240,210'][i % 3],
-      r: 0.35 + (i % 3) * 0.12
-    }));
-    const draw = (t: number) => {
-      ctx.clearRect(0, 0, w, h);
-      for (const m of motes) {
-        const a = m.phase + t * m.speed;
-        const x = w * (0.5 + 0.42 * Math.cos(a * 1.3));
-        const y = h * (0.5 + 0.38 * Math.sin(a));
-        const r = Math.max(w, h) * m.r;
-        const g = ctx.createRadialGradient(x, y, 0, x, y, r);
-        g.addColorStop(0, `rgba(${m.hue},0.10)`);
-        g.addColorStop(1, `rgba(${m.hue},0)`);
-        ctx.fillStyle = g;
-        ctx.fillRect(0, 0, w, h);
-      }
-    };
-    const reduced = prefersReducedMotion();
-    const loop = (t: number) => {
-      draw(t);
-      raf = requestAnimationFrame(loop);
-    };
-    const onResize = () => {
-      resize();
-      if (reduced) draw(0);
-    };
-    resize();
-    const ro = new ResizeObserver(onResize);
-    ro.observe(el);
-    window.addEventListener('resize', onResize);
-    if (reduced) draw(0);
-    else raf = requestAnimationFrame(loop);
-    return () => {
-      cancelAnimationFrame(raf);
-      ro.disconnect();
-      window.removeEventListener('resize', onResize);
-    };
-  });
 </script>
 
-<div class="shell vbm-grain">
-  <div class="void" aria-hidden="true"></div>
-  <canvas class="smoke" bind:this={canvas} aria-hidden="true"></canvas>
+<div class="shell">
+  <div class="backdrop" aria-hidden="true"></div>
   <a class="skip" href="#vbm-main">Skip to content</a>
   <header class="chrome">
     <a class="mark" href={app === 'studio' ? studioUrl : vocalFixUrl}>
-      <Sigil size={40} spin />
-      <span class="word">
-        <span class="vbm">VBM</span>
-        <span class="full">Vocal Black Magic</span>
-      </span>
+      <Sigil size={34} />
+      <span class="word">VBM <span class="vbm-gradient-text">Studio</span></span>
     </a>
-    <nav aria-label="Vocal Black Magic apps">
-      <a href={studioUrl} aria-current={app === 'studio' ? 'page' : undefined}>The Studio</a>
-      <span class="rune" aria-hidden="true">ᛟ</span>
+    <nav aria-label="VBM Studio apps">
+      <a href={studioUrl} aria-current={app === 'studio' ? 'page' : undefined}>Studio</a>
       <a href={vocalFixUrl} aria-current={app === 'vocal-fix' ? 'page' : undefined}>Vocal Fix</a>
     </nav>
   </header>
@@ -108,121 +39,103 @@
     display: flow-root;
     max-width: 100vw;
     min-height: 100vh;
+    min-height: 100dvh;
     isolation: isolate;
-    background: transparent;
+    overflow-x: clip;
   }
-  /* Both layers are pinned to the viewport, so the page never runs past them at any height. */
-  .void,
-  .smoke {
+  .backdrop {
     position: fixed;
     inset: 0;
-    width: 100%;
-    height: 100%;
-    pointer-events: none;
-  }
-  .void {
-    z-index: -2;
-    background:
-      radial-gradient(ellipse at 50% -10%, rgb(91 43 196 / 28%), transparent 60%),
-      radial-gradient(ellipse at 0% 100%, rgb(255 138 61 / 8%), transparent 55%),
-      radial-gradient(ellipse at 100% 60%, rgb(63 240 210 / 7%), transparent 55%), var(--vbm-void);
-  }
-  .smoke {
     z-index: -1;
     pointer-events: none;
-    filter: blur(30px);
+    background:
+      radial-gradient(60rem 30rem at 85% -10%, rgb(255 79 139 / 10%), transparent 70%),
+      radial-gradient(50rem 30rem at -10% 0%, rgb(79 139 255 / 8%), transparent 70%), var(--vbm-bg);
   }
   .skip {
     position: absolute;
     left: 1rem;
     top: -4rem;
-    background: var(--vbm-teal);
-    color: var(--vbm-void);
+    background: var(--vbm-blue);
+    color: #0b1020;
     padding: 0.5rem 1rem;
-    z-index: 10;
+    border-radius: var(--vbm-radius-sm);
+    z-index: 50;
   }
   .skip:focus {
-    top: 1rem;
+    top: calc(1rem + var(--vbm-safe-top));
   }
   .chrome {
+    position: sticky;
+    top: 0;
+    z-index: 30;
     display: flex;
     justify-content: space-between;
     align-items: center;
-    gap: 1rem;
-    flex-wrap: wrap;
-    padding: 1rem clamp(1rem, 5vw, 4rem);
-    border-bottom: 1px solid var(--vbm-line);
-    background: linear-gradient(180deg, rgb(5 4 10 / 85%), rgb(5 4 10 / 40%));
-    backdrop-filter: blur(6px);
+    gap: 0.75rem;
+    padding: calc(0.6rem + var(--vbm-safe-top)) calc(clamp(1rem, 4vw, 3rem) + var(--vbm-safe-right))
+      0.6rem calc(clamp(1rem, 4vw, 3rem) + var(--vbm-safe-left));
+    background: rgb(18 18 22 / 82%);
+    border-bottom: 1px solid var(--vbm-border);
+    backdrop-filter: saturate(140%) blur(12px);
+    -webkit-backdrop-filter: saturate(140%) blur(12px);
   }
   .mark {
     display: flex;
     align-items: center;
-    gap: 0.75rem;
+    gap: 0.6rem;
+    min-height: var(--vbm-tap);
     text-decoration: none;
     color: var(--vbm-text);
   }
   .word {
-    display: flex;
-    flex-direction: column;
-    line-height: 1.05;
-  }
-  .vbm {
-    font-family: var(--vbm-font-display);
-    font-weight: 700;
-    font-size: 1.4rem;
-    letter-spacing: 0.35em;
-    background: linear-gradient(90deg, var(--vbm-violet), var(--vbm-ember));
-    background-clip: text;
-    color: transparent;
-  }
-  .full {
-    font-family: var(--vbm-font-mono);
-    font-size: 0.62rem;
-    letter-spacing: 0.3em;
-    text-transform: uppercase;
-    color: var(--vbm-muted);
+    font-size: 1.15rem;
+    font-weight: 800;
+    letter-spacing: -0.02em;
+    white-space: nowrap;
   }
   nav {
     display: flex;
     align-items: center;
-    gap: 0.6rem;
+    gap: 0.25rem;
+    padding: 0.25rem;
+    background: var(--vbm-surface);
+    border: 1px solid var(--vbm-border);
+    border-radius: var(--vbm-radius-pill);
   }
   nav a {
-    font-family: var(--vbm-font-display);
-    font-size: 0.85rem;
-    letter-spacing: 0.18em;
-    text-transform: uppercase;
+    display: inline-flex;
+    align-items: center;
+    min-height: 36px;
+    padding: 0.35rem 0.9rem;
+    border-radius: var(--vbm-radius-pill);
+    font-size: 0.875rem;
+    font-weight: 600;
     color: var(--vbm-muted);
     text-decoration: none;
-    padding: 0.45rem 0.9rem;
-    clip-path: polygon(8px 0, 100% 0, calc(100% - 8px) 100%, 0 100%);
+    white-space: nowrap;
     transition:
-      color 0.2s,
-      background 0.2s;
+      color 0.15s,
+      background 0.15s;
   }
   nav a:hover {
     color: var(--vbm-text);
-    background: var(--vbm-obsidian-2);
   }
   nav a[aria-current='page'] {
-    color: var(--vbm-void);
-    background: linear-gradient(90deg, var(--vbm-violet), var(--vbm-teal));
-  }
-  nav a:focus-visible {
-    outline-offset: 4px;
-  }
-  .rune {
-    color: var(--vbm-faint);
+    color: var(--vbm-text);
+    background: var(--vbm-surface-3);
   }
   main {
     min-width: 0;
-    padding: clamp(1rem, 4vw, 3rem) clamp(1rem, 5vw, 4rem) 4rem;
+    padding: clamp(1rem, 3vw, 2rem) calc(clamp(1rem, 4vw, 3rem) + var(--vbm-safe-right))
+      calc(3rem + var(--vbm-safe-bottom)) calc(clamp(1rem, 4vw, 3rem) + var(--vbm-safe-left));
   }
-  @media (max-width: 640px) {
-    main,
-    .chrome {
-      padding-inline: 1rem;
+  @media (max-width: 420px) {
+    .word {
+      font-size: 1.05rem;
+    }
+    nav a {
+      padding: 0.35rem 0.7rem;
     }
   }
 </style>

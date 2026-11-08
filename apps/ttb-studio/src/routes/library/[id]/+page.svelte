@@ -121,10 +121,10 @@
         () => alive
       );
       if (ritual && done && done.status !== 'completed')
-        ritual.error = done.detail ?? 'The ritual failed.';
+        ritual.error = done.detail ?? 'The job failed.';
       if (song) await load(song.id);
     } catch (e) {
-      if (ritual) ritual.error = e instanceof Error ? e.message : 'The ritual failed.';
+      if (ritual) ritual.error = e instanceof Error ? e.message : 'The job failed.';
     }
   }
 
@@ -203,22 +203,25 @@
   const ext = (s: SongMeta) => s.audio?.file.split('.').pop() ?? 'mp3';
 </script>
 
-<svelte:head><title>Song · The Studio · Vocal Black Magic</title></svelte:head>
+<svelte:head><title>Song · VBM Studio</title></svelte:head>
 
 <div class="page">
   {#if error}
     <OracleStatus tone="danger">{error}</OracleStatus>
   {:else if !song}
-    <SigilLoader label="Opening the grimoire…" />
+    <SigilLoader label="Loading song…" />
   {:else}
     <header class="page-title">
       <h1>{song.title}</h1>
       <p>{song.prompt}</p>
-      <p class="tags">{song.kind} · {song.engine} · {new Date(song.created_at).toLocaleString()}</p>
+      <p class="tags">
+        {song.kind === 'upload' ? 'Uploaded ' + (song.upload?.type ?? 'audio') : song.kind} · {song.engine}
+        · {new Date(song.created_at).toLocaleString()}
+      </p>
     </header>
 
     {#if song.audio}
-      <ArcanePanel eyebrow="The vessel" title="Listen" glow="violet">
+      <ArcanePanel eyebrow="Player" title="Listen" glow="violet">
         <AbPlayer
           a={audioUrl(song.id)}
           b={song.kind === 'master' && parent?.audio ? audioUrl(parent.id) : null}
@@ -241,26 +244,26 @@
     {/if}
 
     {#if song.stems?.length}
-      <ArcanePanel eyebrow="Dismembered" title="Stem mixer" glow="teal">
+      <ArcanePanel eyebrow="Stems" title="Stem mixer" glow="teal">
         <StemMixer {song} />
       </ArcanePanel>
     {/if}
 
     <div class="split">
       {#if song.audio}
-        <ArcanePanel eyebrow="Seen" title="Spectrogram & pitch" glow="teal">
+        <ArcanePanel eyebrow="Analysis" title="Spectrogram & pitch" glow="teal">
           <Spectrogram {buffer} height={170} />
           <PitchTrace {buffer} height={120} />
         </ArcanePanel>
       {/if}
       {#if song.lyrics}
-        <ArcanePanel eyebrow="Spoken" title="Lyrics">
+        <ArcanePanel eyebrow="Words" title="Lyrics">
           <pre class="lyrics">{song.lyrics}</pre>
         </ArcanePanel>
       {/if}
     </div>
 
-    <ArcanePanel eyebrow="Lineage" title="Bloodline" glow="ember">
+    <ArcanePanel eyebrow="Lineage" title="Versions" glow="ember">
       <ul class="lineage">
         {#if parent}<li>
             Born of <a href={resolve('/library/[id]', { id: parent.id })}>{parent.title}</a>
@@ -278,18 +281,16 @@
     </ArcanePanel>
 
     {#if song.audio}
-      <ArcanePanel eyebrow="Transmutation" title="Alter the song" glow="ember">
-        <p class="note">
-          Each alteration makes a new song in the bloodline; this one is untouched.
-        </p>
+      <ArcanePanel eyebrow="Edit" title="Alter the song" glow="ember">
+        <p class="note">Each edit makes a new version; this one is untouched.</p>
         {#if editsError}
           <OracleStatus tone="danger">{editsError}</OracleStatus>
         {:else if !edits}
-          <SigilLoader size={32} label="Asking which rituals are possible…" />
+          <SigilLoader size={32} label="Checking which edits are available…" />
         {:else}
           <div class="alter">
             <section class="wide">
-              <h3>ᚱ Replace section</h3>
+              <h3>Replace section</h3>
               {#if editInfo('repaint')?.available}
                 <p>
                   Select a range; only that part is sung again. {runnerLabel(editInfo('repaint'))}
@@ -321,7 +322,7 @@
               {/if}
             </section>
             <section>
-              <h3>ᛖ Extend</h3>
+              <h3>Extend</h3>
               {#if editInfo('extend')?.available}
                 <p>
                   Add music before and/or after (240 s in total at most). {runnerLabel(
@@ -347,7 +348,7 @@
               {/if}
             </section>
             <section>
-              <h3>ᛟ Restyle</h3>
+              <h3>Restyle</h3>
               {#if editInfo('cover')?.available}
                 <p>Same structure, a new style. {runnerLabel(editInfo('cover'))}</p>
                 <ArcaneInput label="New style" bind:value={restyleStyle} />
@@ -366,17 +367,17 @@
         {/if}
       </ArcanePanel>
 
-      <ArcanePanel eyebrow="Rituals" title="Derive" glow="violet">
+      <ArcanePanel eyebrow="Tools" title="Remix & export" glow="violet">
         <div class="rituals">
           <section>
-            <h3>ᛞ Split stems</h3>
+            <h3>Split stems</h3>
             <p>Demucs separates vocals, drums, bass and the rest (~$0.03).</p>
             <RuneButton disabled={busy} onclick={() => startRitual('Split stems', 'stems')}
               >Split</RuneButton
             >
           </section>
           <section>
-            <h3>ᛝ Studio Master</h3>
+            <h3>Studio Master</h3>
             <p>Local, free: gentle EQ, compression, −14 LUFS, −1 dBTP. A/B it against this song.</p>
             {#if masterChild}
               <RuneButton variant="ghost" href={resolve('/library/[id]', { id: masterChild.id })}
@@ -386,17 +387,17 @@
             <RuneButton disabled={busy} busy={mastering} onclick={master}>Master</RuneButton>
           </section>
           <section>
-            <h3>ᛜ Cover art</h3>
+            <h3>Cover art</h3>
             <p>
-              {song.cover?.inherited_from ? 'Inherited from its parent. ' : ''}Conjure a new arcane
-              cover with FLUX Schnell (~$0.003).
+              {song.cover?.inherited_from ? 'Inherited from its parent. ' : ''}Generate a new cover
+              with FLUX Schnell (~$0.003).
             </p>
             <RuneButton disabled={busy} busy={conjuring} onclick={reconjure}>
-              {song.cover ? 'Re-conjure cover' : 'Conjure cover'}
+              {song.cover ? 'New cover' : 'Generate cover'}
             </RuneButton>
           </section>
           <section>
-            <h3>ᛉ Reimagine</h3>
+            <h3>Reimagine</h3>
             <p>
               A new song in the style of this one (MiniMax Music-01, ~$0.035). Up to ~380 characters
               of lyrics.
@@ -414,16 +415,16 @@
             >
           </section>
           <section>
-            <h3>ᛗ Sing in my voice</h3>
+            <h3>Sing in my voice</h3>
             {#if voices === null}
               <SigilLoader size={32} label="Listening for voices…" />
             {:else if voices.length === 0}
               <p>
-                No consented voice is ready. Voices are forged, with your own-voice consent, in
-                Vocal Fix's Voice Forge.
+                No consented voice is ready. Voices are created, with your own-voice consent, in
+                Vocal Fix's Voice training.
               </p>
               <!-- eslint-disable-next-line svelte/no-navigation-without-resolve -- not an app route -->
-              <a class="forge" href={vocalFixUrl}>Go to the Voice Forge →</a>
+              <a class="forge" href={vocalFixUrl}>Go to Voice training →</a>
             {:else}
               <ArcaneSelect
                 label="Voice"
@@ -444,7 +445,7 @@
             {#if ritual.job}
               <RitualProgress stages={ritual.job.stages} detail={ritual.job.detail} />
             {:else if !ritual.error}
-              <SigilLoader label="Beginning the ritual…" size={40} />
+              <SigilLoader label="Starting…" size={40} />
             {/if}
             {#if ritual.error}<OracleStatus tone="danger">{ritual.error}</OracleStatus>{/if}
             {#if ritual.job?.status === 'completed'}

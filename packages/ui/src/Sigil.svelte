@@ -1,58 +1,76 @@
 <script lang="ts">
-  /** Decorative summoning sigil (SVG). Purely presentational. */
+  /** VBM Studio logo mark: a rounded gradient tile with equaliser bars. Purely presentational. */
   let {
     size = 48,
     spin = false,
     dim = false,
     class: className = ''
   }: { size?: number; spin?: boolean; dim?: boolean; class?: string } = $props();
+  const uid = $props.id();
+  const gid = `vbm-logo-${uid}`;
 </script>
 
 <svg
-  class="sigil {className}"
-  class:spin
+  class="logo {className}"
+  class:live={spin}
   class:dim
   width={size}
   height={size}
-  viewBox="0 0 100 100"
+  viewBox="0 0 48 48"
   aria-hidden="true"
   focusable="false"
 >
-  <circle cx="50" cy="50" r="46" />
-  <circle cx="50" cy="50" r="38" class="thin" />
-  <polygon points="50,6 88,72 12,72" />
-  <polygon points="50,94 12,28 88,28" />
-  <circle cx="50" cy="50" r="12" />
-  <path d="M50 4 V16 M50 84 V96 M4 50 H16 M84 50 H96" class="thin" />
+  <defs>
+    <linearGradient id={gid} x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#ff4f8b" />
+      <stop offset="1" stop-color="#ff8a3d" />
+    </linearGradient>
+  </defs>
+  <rect width="48" height="48" rx="13" fill="url(#{gid})" />
+  <g fill="#ffffff">
+    <rect class="b b1" x="10" y="19" width="4" height="10" rx="2" />
+    <rect class="b b2" x="17" y="13" width="4" height="22" rx="2" />
+    <rect class="b b3" x="24" y="9" width="4" height="30" rx="2" />
+    <rect class="b b4" x="31" y="15" width="4" height="18" rx="2" />
+    <rect class="b b5" x="38" y="20" width="2.5" height="8" rx="1.25" />
+  </g>
 </svg>
 
 <style>
-  .sigil {
-    fill: none;
-    stroke: currentColor;
-    stroke-width: 1.6;
-    color: var(--vbm-violet);
-    filter: drop-shadow(0 0 6px rgb(167 116 255 / 55%));
+  .logo {
     flex: none;
-  }
-  .thin {
-    stroke-width: 0.8;
-    stroke-dasharray: 3 4;
+    display: block;
   }
   .dim {
     opacity: 0.35;
-    filter: none;
+    filter: grayscale(1);
   }
-  .spin {
-    animation: rot 24s linear infinite;
+  .b {
+    transform-box: fill-box;
+    transform-origin: center;
   }
-  @keyframes rot {
-    to {
-      transform: rotate(360deg);
+  .live .b {
+    animation: eq 1.4s ease-in-out infinite;
+  }
+  .live .b2 {
+    animation-delay: -0.3s;
+  }
+  .live .b3 {
+    animation-delay: -0.6s;
+  }
+  .live .b4 {
+    animation-delay: -0.9s;
+  }
+  .live .b5 {
+    animation-delay: -1.1s;
+  }
+  @keyframes eq {
+    50% {
+      transform: scaleY(0.6);
     }
   }
   @media (prefers-reduced-motion: reduce) {
-    .spin {
+    .live .b {
       animation: none;
     }
   }

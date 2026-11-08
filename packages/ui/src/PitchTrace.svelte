@@ -51,16 +51,16 @@
       for (let m = Math.ceil(data.minMidi); m <= data.maxMidi; m++) {
         const y = yOf(m);
         const isC = m % 12 === 0;
-        ctx.fillStyle = isC ? 'rgba(167,116,255,0.22)' : 'rgba(167,116,255,0.07)';
+        ctx.fillStyle = isC ? 'rgba(255,79,139,0.22)' : 'rgba(255,79,139,0.07)';
         ctx.fillRect(gutter, y, w - gutter, 1);
         if (m % labelEvery === 0 || isC) {
-          ctx.fillStyle = isC ? '#ece6f7' : '#a99fc2';
+          ctx.fillStyle = isC ? '#f4f4f6' : '#a8a8b6';
           ctx.fillText(hzToNote(440 * 2 ** ((m - 69) / 12)), 4, y);
         }
       }
       ctx.save();
-      ctx.strokeStyle = '#3ff0d2';
-      ctx.shadowColor = '#3ff0d2';
+      ctx.strokeStyle = '#4f8bff';
+      ctx.shadowColor = '#4f8bff';
       ctx.shadowBlur = 8;
       ctx.lineWidth = 2;
       ctx.lineJoin = 'round';
@@ -107,7 +107,7 @@
     position: relative;
     width: 100%;
     background: var(--vbm-void);
-    clip-path: polygon(10px 0, 100% 0, 100% 100%, 0 100%, 0 10px);
+    border-radius: var(--vbm-radius-sm);
   }
   canvas {
     display: block;

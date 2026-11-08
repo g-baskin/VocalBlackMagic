@@ -32,7 +32,7 @@
         throw new Error((await res.json().catch(() => null))?.detail ?? `HTTP ${res.status}`);
       voices = (await res.json()) as VoiceModel[];
     } catch (e) {
-      error = e instanceof Error ? e.message : 'Could not open the Codex.';
+      error = e instanceof Error ? e.message : 'Could not load your voices.';
     }
   }
 
@@ -64,15 +64,14 @@
   }
 </script>
 
-<svelte:head><title>The Codex · Vocal Fix · Vocal Black Magic</title></svelte:head>
+<svelte:head><title>My voices · Vocal Fix · VBM Studio</title></svelte:head>
 
 <div class="page">
   <header class="intro">
-    <p class="eyebrow">Forged voices</p>
-    <h1>The Codex</h1>
+    <p class="eyebrow">Your voices</p>
+    <h1>My voices</h1>
     <p>
-      Every voice bound here was signed for by its own performer. Revoke one and its model is
-      destroyed.
+      Every voice here was consented to by its own performer. Revoke one and its model is deleted.
     </p>
   </header>
 
@@ -80,11 +79,11 @@
   {#if error}<OracleStatus tone="danger">{error}</OracleStatus>{/if}
 
   {#if !voices && !error}
-    <SigilLoader label="Opening the Codex" />
+    <SigilLoader label="Loading voices…" />
   {:else if voices && voices.length === 0}
     <div class="empty">
       <Sigil size={72} dim />
-      <p>The Codex is empty. Forge a voice from a Gold Vocal session to bind the first page.</p>
+      <p>No voices yet. Build a voice from a Gold Vocal session to add the first one.</p>
     </div>
   {:else if voices}
     <ul class="codex">
@@ -112,7 +111,7 @@
                 <dd>{when(v.consent.attested_at)}</dd>
               </div>
               <div class="wide">
-                <dt>Oath</dt>
+                <dt>Consent statement</dt>
                 <dd class="oath">“{v.consent.statement}”</dd>
               </div>
               {#if v.profile}
@@ -162,7 +161,7 @@
   }
   .eyebrow {
     font-family: var(--vbm-font-mono);
-    letter-spacing: 0.3em;
+    letter-spacing: 0.04em;
     text-transform: uppercase;
     font-size: 0.72rem;
     color: var(--vbm-teal) !important;
@@ -186,10 +185,10 @@
   .status {
     font-family: var(--vbm-font-mono);
     font-size: 0.7rem;
-    letter-spacing: 0.2em;
+    letter-spacing: 0.04em;
     text-transform: uppercase;
     padding: 0.3rem 0.8rem;
-    clip-path: polygon(8px 0, 100% 0, calc(100% - 8px) 100%, 0 100%);
+    border-radius: var(--vbm-radius-sm);
     color: var(--vbm-void);
     background: var(--vbm-violet);
   }
@@ -211,7 +210,7 @@
   dt {
     font-family: var(--vbm-font-mono);
     font-size: 0.62rem;
-    letter-spacing: 0.2em;
+    letter-spacing: 0.04em;
     text-transform: uppercase;
     color: var(--vbm-muted);
   }

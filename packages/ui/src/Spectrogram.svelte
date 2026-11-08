@@ -66,9 +66,9 @@
         const y = h - (Math.log(hz / MIN_HZ) / Math.log(data.maxHz / MIN_HZ)) * h;
         ctx.fillStyle = 'rgba(236,230,247,0.18)';
         ctx.fillRect(0, y, w, 1);
-        ctx.fillStyle = 'rgba(5,4,10,0.7)';
+        ctx.fillStyle = 'rgba(18,18,22,0.7)';
         ctx.fillRect(2, y - 7, 34, 14);
-        ctx.fillStyle = '#ece6f7';
+        ctx.fillStyle = '#f4f4f6';
         ctx.fillText(hz >= 1000 ? `${hz / 1000}k` : `${hz}`, 5, y);
       }
     });
@@ -92,14 +92,7 @@
     position: relative;
     width: 100%;
     background: var(--vbm-void);
-    clip-path: polygon(
-      0 0,
-      calc(100% - 10px) 0,
-      100% 10px,
-      100% 100%,
-      10px 100%,
-      0 calc(100% - 10px)
-    );
+    border-radius: var(--vbm-radius-sm);
   }
   canvas {
     display: block;

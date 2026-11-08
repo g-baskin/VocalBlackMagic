@@ -66,7 +66,9 @@ export class SeanceRefused extends ProviderError {
   constructor(readonly refused: { model: StudioModel; reason: string }[]) {
     super(
       422,
-      'The séance cannot begin: ' + refused.map((r) => r.model + ' ' + r.reason).join('; ') + '.'
+      'The comparison cannot start: ' +
+        refused.map((r) => r.model + ' ' + r.reason).join('; ') +
+        '.'
     );
   }
 }
@@ -77,7 +79,7 @@ export const seanceSeconds = 60;
 export const isSeanceId = (id: string) => idPattern.test(id);
 const dir = (deps: Pick<SeanceDeps, 'root'>) => path.join(deps.root, 'studio', 'seances');
 function file(deps: Pick<SeanceDeps, 'root'>, id: string, suffix = '.json'): string {
-  if (!isSeanceId(id)) throw new ProviderError(404, 'Séance not found.');
+  if (!isSeanceId(id)) throw new ProviderError(404, 'Comparison not found.');
   return path.join(dir(deps), id + suffix);
 }
 
@@ -129,7 +131,7 @@ export async function loadSeance(
   try {
     return JSON.parse(await readFile(target, 'utf8')) as StoredSeance;
   } catch {
-    throw new ProviderError(404, 'Séance not found.');
+    throw new ProviderError(404, 'Comparison not found.');
   }
 }
 
@@ -151,7 +153,7 @@ export async function startSeance(deps: SeanceDeps, request: SeanceRequest): Pro
     lyrics = written.lyrics;
     if (!title && written.title) title = written.title;
   }
-  if (!title) title = 'Séance';
+  if (!title) title = 'Comparison';
 
   const labels = shuffledLabels(request.models.length, deps.random);
   const seance: StoredSeance = {
@@ -200,7 +202,7 @@ export async function startSeance(deps: SeanceDeps, request: SeanceRequest): Pro
       entry.job_id = result.job.id;
       entry.runner = await deps.jobRunner(result.job.id).catch(() => null);
     } catch (error) {
-      entry.error = error instanceof ProviderError ? error.publicMessage : 'Summoning failed.';
+      entry.error = error instanceof ProviderError ? error.publicMessage : 'Generation failed.';
     }
     await save(deps, seance);
   }
@@ -275,7 +277,7 @@ export async function rankSeance(
   order: SeanceLabel[]
 ): Promise<Seance> {
   const seance = await loadSeance(deps, id);
-  if (seance.revealed) throw new ProviderError(409, 'This séance is already revealed.');
+  if (seance.revealed) throw new ProviderError(409, 'This comparison is already revealed.');
   const jobs = await jobsFor(deps, seance);
   const current = view(seance, jobs);
   if (current.entries.some((e) => e.status === 'running' || e.status === 'queued'))
@@ -289,7 +291,7 @@ export async function rankSeance(
   try {
     await writeFile(file(deps, id, '.ranked'), order.join(','), { flag: 'wx' });
   } catch {
-    throw new ProviderError(409, 'This séance is already revealed.');
+    throw new ProviderError(409, 'This comparison is already revealed.');
   }
   try {
     for (const e of seance.entries) {

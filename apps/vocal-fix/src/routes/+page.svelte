@@ -26,7 +26,7 @@
   const ready = $derived(files.length === need && performer.trim().length >= 2 && rights && !busy);
   const problem = $derived(
     files.length > need
-      ? 'Too many recordings: this rite takes exactly ' + need + '.'
+      ? 'Too many recordings: this mode takes exactly ' + need + '.'
       : files.length < need
         ? need -
           files.length +
@@ -43,10 +43,10 @@
         id,
         label:
           id === 'upload'
-            ? 'Offer the recordings'
+            ? 'Upload the recordings'
             : id === 'probe'
               ? 'Probe and decode'
-              : 'Read the omens',
+              : 'Diagnose',
         state: failed
           ? ('failed' as const)
           : i < at
@@ -85,18 +85,18 @@
   }
 </script>
 
-<svelte:head><title>Vocal Fix · Vocal Black Magic</title></svelte:head>
+<svelte:head><title>Vocal Fix · VBM Studio</title></svelte:head>
 
 <section class="hero">
-  <p class="eyebrow vbm-mono">Vocal Fix · local ritual</p>
-  <h1>Mend the take. Forge the voice.</h1>
+  <p class="eyebrow vbm-mono">Vocal Fix · part of VBM Studio</p>
+  <h1>Fix your take. Build your voice.</h1>
   <p class="lede">
     Your recordings stay untouched. Every repair is a new, versioned derivative you can audition,
     compare and discard.
   </p>
 </section>
 
-<div class="portals" role="radiogroup" aria-label="Choose a rite">
+<div class="portals" role="radiogroup" aria-label="Choose a mode">
   <button
     type="button"
     role="radio"
@@ -105,7 +105,7 @@
     class:chosen={mode === 'fix'}
     onclick={() => pick('fix')}
   >
-    <span class="glyph" aria-hidden="true">☽</span>
+    <span class="glyph" aria-hidden="true">🎙️</span>
     <span class="portal-title">Fix a take</span>
     <span class="portal-sub"
       >One recording. Diagnose clipping, room noise and level, then repair it.</span
@@ -119,17 +119,18 @@
     class:chosen={mode === 'forge'}
     onclick={() => pick('forge')}
   >
-    <span class="glyph" aria-hidden="true">✶</span>
-    <span class="portal-title">Forge a Gold Vocal</span>
+    <span class="glyph" aria-hidden="true">★</span>
+    <span class="portal-title">Build a Gold Vocal</span>
     <span class="portal-sub"
-      >Exactly five takes of your own voice. Best phrases are chosen and bound into one reference.</span
+      >Exactly five takes of your own voice. Best phrases are chosen and combined into one
+      reference.</span
     >
   </button>
 </div>
 
 <div class="grid">
   <ArcanePanel
-    eyebrow="I · Offering"
+    eyebrow="Step 1 · Upload"
     title={mode === 'fix' ? 'Your take' : 'Your five takes'}
     glow="violet"
   >
@@ -142,14 +143,14 @@
       disabled={busy}
       bind:files={dropped}
     />
-    <div class="or vbm-mono">or record in the circle</div>
+    <div class="or vbm-mono">or record right here</div>
     <RuneRecorder bind:files={recorded} maxSeconds={600} label="Record a take" />
     <p class="count vbm-mono" aria-live="polite">
       {files.length} / {need} recordings{problem ? ' · ' + problem : ''}
     </p>
   </ArcanePanel>
 
-  <ArcanePanel eyebrow="II · Oath" title="Who is singing" glow="teal">
+  <ArcanePanel eyebrow="Step 2 · Consent" title="Who is singing" glow="teal">
     <ArcaneInput label="Performer’s full name" bind:value={performer} maxlength={120} />
     <RuneToggle
       label="I am the performer or have their permission, and I hold the rights to process these recordings."
@@ -158,7 +159,7 @@
     />
     <div class="actions">
       <RuneButton variant="summon" disabled={!ready} {busy} onclick={begin}>
-        {mode === 'fix' ? 'Begin the diagnosis' : 'Begin the forging'}
+        {mode === 'fix' ? 'Start diagnosis' : 'Build Gold Vocal'}
       </RuneButton>
     </div>
     {#if stage}
@@ -176,7 +177,7 @@
   }
   .eyebrow {
     color: var(--vbm-teal);
-    letter-spacing: 0.2em;
+    letter-spacing: 0.04em;
     text-transform: uppercase;
     font-size: 0.75rem;
   }
@@ -192,7 +193,7 @@
   }
   .portals {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 260px), 1fr));
     gap: 1rem;
     margin-bottom: 1.5rem;
   }
@@ -211,14 +212,7 @@
         transparent 70%
       ),
       var(--vbm-obsidian);
-    clip-path: polygon(
-      0 0,
-      calc(100% - 14px) 0,
-      100% 14px,
-      100% 100%,
-      14px 100%,
-      0 calc(100% - 14px)
-    );
+    border-radius: var(--vbm-radius-sm);
     transition:
       border-color 0.2s,
       box-shadow 0.2s;
@@ -240,26 +234,26 @@
     outline: 2px solid var(--vbm-focus);
   }
   .portal.chosen {
-    border-color: var(--vbm-gold);
-    box-shadow: var(--vbm-glow-violet);
+    border-color: var(--vbm-accent);
+    box-shadow: var(--vbm-shadow-accent);
   }
   .portal.ember.chosen {
     box-shadow: var(--vbm-glow-ember);
   }
   .glyph {
-    font-size: 2rem;
-    color: var(--vbm-gold);
+    font-size: 1.75rem;
+    color: var(--vbm-accent-2);
   }
   .portal-title {
-    font-family: var(--vbm-font-display);
-    font-size: 1.5rem;
+    font-weight: 700;
+    font-size: 1.25rem;
   }
   .portal-sub {
     color: var(--vbm-muted);
   }
   .grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 320px), 1fr));
     gap: 1.25rem;
     align-items: start;
   }
@@ -268,7 +262,7 @@
     color: var(--vbm-faint);
     margin: 0.9rem 0;
     font-size: 0.75rem;
-    letter-spacing: 0.15em;
+    letter-spacing: 0.04em;
     text-transform: uppercase;
   }
   .count {

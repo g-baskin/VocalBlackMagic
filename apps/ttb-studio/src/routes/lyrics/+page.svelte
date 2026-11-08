@@ -11,7 +11,7 @@
   import { validateLyricsRequest, type LyricsAction, type LyricsRequest } from '@vbm/contracts';
   import { api } from '../../lib/client/api';
 
-  let description = $state('A haunted gothic synth-pop hymn about lighting candles for the lost');
+  let description = $state('An upbeat summer pop song about road trips with friends');
   let instruction = $state('');
   let title = $state('');
   let lyrics = $state('');
@@ -52,7 +52,7 @@
       lyrics = reply.lyrics;
       if (reply.title && (!title || action === 'write')) title = reply.title;
     } catch (e) {
-      error = e instanceof Error ? e.message : 'The oracle is silent.';
+      error = e instanceof Error ? e.message : 'The lyric writer did not respond.';
     } finally {
       busy = null;
     }
@@ -67,12 +67,12 @@
   }
 </script>
 
-<svelte:head><title>Lyrics · The Studio · Vocal Black Magic</title></svelte:head>
+<svelte:head><title>Lyrics · VBM Studio</title></svelte:head>
 
 <div class="page">
   <header class="page-title">
     <h1>Lyric Workshop</h1>
-    <p>Write, rewrite or extend lyrics with the oracle, then carry them into the Studio.</p>
+    <p>Write, rewrite or extend lyrics with AI, then send them to Create.</p>
   </header>
   <div class="bench">
     <ArcanePanel eyebrow="Inspiration" title="What is it about?" glow="ember">
@@ -87,12 +87,12 @@
           label="Instruction (optional)"
           bind:value={instruction}
           maxlength={1000}
-          placeholder="e.g. darker imagery, add internal rhyme"
+          placeholder="e.g. more vivid imagery, add internal rhyme"
         />
         <ArcaneSelect label="Length" bind:value={target} options={targets} />
         <div class="row">
           <RuneButton busy={busy === 'write'} disabled={!!busy} onclick={() => run('write')}
-            >Write anew</RuneButton
+            >Write new</RuneButton
           >
           <RuneButton
             variant="ghost"
@@ -110,10 +110,10 @@
         <p class="aside">Each call costs under a cent (Claude 3.5 Haiku on Replicate).</p>
       </div>
     </ArcanePanel>
-    <ArcanePanel eyebrow="The page" title="Lyrics" glow="violet">
+    <ArcanePanel eyebrow="Draft" title="Lyrics" glow="violet">
       <div class="fields">
         <ArcaneInput label="Title" bind:value={title} maxlength={120} />
-        {#if busy}<SigilLoader label="The oracle writes…" size={40} />{/if}
+        {#if busy}<SigilLoader label="Writing…" size={40} />{/if}
         <ArcaneTextarea
           label="Lyrics with section tags"
           bind:value={lyrics}
@@ -126,7 +126,7 @@
           </ol>
         {/if}
         <RuneButton disabled={lyrics.trim().length < 10} onclick={sendToStudio}
-          >Send to Studio</RuneButton
+          >Send to Create</RuneButton
         >
       </div>
     </ArcanePanel>

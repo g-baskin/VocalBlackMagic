@@ -125,7 +125,7 @@ describe('Vocal Fix service: gold, consent, revoke and delete', () => {
   test('forge refuses missing or mismatched consent before any paid call, then trains and seals', async () => {
     const { svc, fake, id } = await service('r8_test');
     await expect(svc.startForge(id, { own_voice: true, attested_name: PERFORMER })).rejects.toThrow(
-      'Forge the Gold Vocal first'
+      'Build the Gold Vocal first'
     );
     await svc.gold(id, {});
     for (const body of [

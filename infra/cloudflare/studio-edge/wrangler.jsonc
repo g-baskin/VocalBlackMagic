@@ -1,0 +1,33 @@
+{
+  // VBM Studio: Access-checked Worker -> one studio Container; data mirrored to R2. See infra/cloudflare/README.md
+  "$schema": "https://unpkg.com/wrangler@4/config-schema.json",
+  "name": "vbm-studio",
+  "main": "src/worker.ts",
+  "compatibility_date": "2026-11-01",
+  "workers_dev": true,
+  "preview_urls": false,
+  "observability": { "enabled": true },
+  "vars": {
+    // Filled in from the Cloudflare Access dialog (see README). Empty values keep the Worker closed (503).
+    "ACCESS_TEAM_DOMAIN": "",
+    "ACCESS_AUD": "",
+    "OWNER_EMAILS": "gregory.baskin@gmail.com",
+    // The studio as seen inside the container.
+    "ORIGIN_URL": "http://localhost:3002"
+  },
+  // Secrets: EDGE_SECRET (required) and optional provider keys (REPLICATE_API_TOKEN, FAL_KEY, ...).
+  "containers": [
+    {
+      "class_name": "StudioContainer",
+      "image": "../studio-container/Dockerfile",
+      "image_build_context": "../../..",
+      "instance_type": "standard-1",
+      "max_instances": 1
+    }
+  ],
+  "durable_objects": {
+    "bindings": [{ "name": "CONTAINER", "class_name": "StudioContainer" }]
+  },
+  "migrations": [{ "tag": "v1", "new_sqlite_classes": ["StudioContainer"] }],
+  "r2_buckets": [{ "binding": "DATA", "bucket_name": "vbm-studio-data" }]
+}

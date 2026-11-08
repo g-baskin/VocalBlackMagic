@@ -183,7 +183,7 @@
     cursor: pointer;
     color: var(--vbm-void);
     background: linear-gradient(135deg, var(--vbm-violet), var(--vbm-ember));
-    clip-path: polygon(50% 0, 100% 50%, 50% 100%, 0 50%);
+    border-radius: 50%;
   }
   .play svg {
     width: 1.1rem;
@@ -197,7 +197,7 @@
   .dl {
     font-family: var(--vbm-font-mono);
     font-size: 0.78rem;
-    letter-spacing: 0.15em;
+    letter-spacing: 0.04em;
     text-transform: uppercase;
     color: var(--vbm-teal);
   }

@@ -33,27 +33,21 @@
     gap: 0.35rem;
   }
   label {
-    font-family: var(--vbm-font-mono);
-    font-size: 0.72rem;
-    letter-spacing: 0.22em;
-    text-transform: uppercase;
+    font-size: 0.875rem;
+    font-weight: 600;
     color: var(--vbm-muted);
   }
   .frame {
-    padding: 1px;
-    background: linear-gradient(180deg, var(--vbm-line-bright), var(--vbm-line));
-    clip-path: polygon(
-      14px 0,
-      100% 0,
-      100% calc(100% - 14px),
-      calc(100% - 14px) 100%,
-      0 100%,
-      0 14px
-    );
+    background: var(--vbm-surface-2);
+    border: 1px solid var(--vbm-border-strong);
+    border-radius: var(--vbm-radius-sm);
+    transition:
+      border-color 0.15s,
+      box-shadow 0.15s;
   }
   .frame:focus-within {
-    background: linear-gradient(180deg, var(--vbm-teal), var(--vbm-violet));
-    padding: 2px;
+    border-color: var(--vbm-accent);
+    box-shadow: 0 0 0 3px rgb(255 79 139 / 22%);
   }
   textarea {
     display: block;
@@ -61,21 +55,15 @@
     border: 0;
     padding: 0.8rem 1rem;
     resize: vertical;
-    background:
-      repeating-linear-gradient(
-        transparent 0 1.7rem,
-        rgb(167 116 255 / 6%) 1.7rem calc(1.7rem + 1px)
-      ),
-      var(--vbm-void);
+    background: transparent;
     color: var(--vbm-text);
     font: inherit;
-    font-size: 1.05rem;
-    line-height: 1.7rem;
-    clip-path: inherit;
+    font-size: 1rem;
+    line-height: 1.5;
+    border-radius: inherit;
   }
   textarea::placeholder {
     color: var(--vbm-faint);
-    font-style: italic;
   }
   textarea:focus {
     outline: none;

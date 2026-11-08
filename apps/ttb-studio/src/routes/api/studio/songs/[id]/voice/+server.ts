@@ -17,7 +17,7 @@ export const POST: RequestHandler = async ({ request, params, fetch }) => {
   const voice = (await usableVoices(ctx.library.root)).find((v) => v.id === body.voice_id);
   if (!voice)
     return Response.json(
-      { detail: 'Choose a ready voice with own-voice consent from Voice Forge.' },
+      { detail: 'Choose a ready voice with own-voice consent from Voice training.' },
       { status: 422 }
     );
   try {

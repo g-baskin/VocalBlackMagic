@@ -72,7 +72,7 @@
     const t = total;
     return observeCanvas(canvas, (ctx, w, h) => {
       ctx.clearRect(0, 0, w, h);
-      ctx.strokeStyle = 'rgba(167,116,255,0.12)';
+      ctx.strokeStyle = 'rgba(255,79,139,0.12)';
       ctx.beginPath();
       ctx.moveTo(0, h / 2);
       ctx.lineTo(w, h / 2);
@@ -171,9 +171,9 @@
     position: relative;
     width: 100%;
     background:
-      linear-gradient(90deg, rgb(167 116 255 / 5%) 1px, transparent 1px) 0 0 / 40px 100%,
+      linear-gradient(90deg, rgb(255 79 139 / 5%) 1px, transparent 1px) 0 0 / 40px 100%,
       var(--vbm-void);
-    clip-path: polygon(8px 0, 100% 0, 100% calc(100% - 8px), calc(100% - 8px) 100%, 0 100%, 0 8px);
+    border-radius: var(--vbm-radius-sm);
   }
   canvas {
     display: block;

@@ -67,7 +67,7 @@ function fallbackTitle(prompt: string): string {
     .split(/\s+/)
     .slice(0, 5)
     .join(' ');
-  return words ? words.charAt(0).toUpperCase() + words.slice(1) : 'Untitled spell';
+  return words ? words.charAt(0).toUpperCase() + words.slice(1) : 'Untitled song';
 }
 
 /** Maps a studio request onto the legacy GenerationRequest used by the fal and Lyria 3.5 adapters. */
@@ -112,7 +112,7 @@ export async function createSongs(
       ? await findVoice(deps.library.root, request.voice_id)
       : null;
   if (request.voice_id && !deps.replicate)
-    throw new ProviderError(503, 'Singing in a forged voice needs REPLICATE_API_TOKEN.');
+    throw new ProviderError(503, 'Singing in a trained voice needs REPLICATE_API_TOKEN.');
   if (!model && spec.needs === 'replicate' && !deps.replicate)
     throw new ProviderError(
       503,

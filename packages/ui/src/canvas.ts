@@ -30,9 +30,9 @@ export function prefersReducedMotion(): boolean {
 }
 
 export const GLOW = {
-  violet: { main: '#a774ff', deep: '#5b2bc4', rgb: '167,116,255' },
-  ember: { main: '#ff8a3d', deep: '#c2410c', rgb: '255,138,61' },
-  teal: { main: '#3ff0d2', deep: '#0f8f7d', rgb: '63,240,210' }
+  violet: { main: '#ff4f8b', deep: '#c8306a', rgb: '255,79,139' },
+  ember: { main: '#ff8a3d', deep: '#d9662a', rgb: '255,138,61' },
+  teal: { main: '#4f8bff', deep: '#2f63d6', rgb: '79,139,255' }
 } as const;
 
 export type GlowName = keyof typeof GLOW;
