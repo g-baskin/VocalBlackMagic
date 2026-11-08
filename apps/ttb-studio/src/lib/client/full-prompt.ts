@@ -192,7 +192,7 @@ export function tagsFromStyle(style: string, limit = MAX_STYLE_TAGS): string[] {
   const catalogue = [...new Set(styleCategories.flatMap((c) => c.tags))];
   // Positive parts only: drop each clause from a negation word onwards.
   const clauses = style
-    .split(/[,;.\n—–:!?()]+|\s\/\s|\s-\s/)
+    .split(/[,;.\n—–:!?()]+|\s\/\s|\s-\s|\s(?:and|plus|&)\s/)
     .map((c) => norm(c))
     .map((c) => {
       const m = NEGATION.exec(c);
@@ -255,4 +255,43 @@ export function tagsFromStyle(style: string, limit = MAX_STYLE_TAGS): string[] {
     return m ? m[0].toLowerCase().replace(/\s+/g, ' ') : tag;
   };
   return [...catalogueTags, ...fresh.map(restore)].slice(0, limit);
+}
+
+/** At least this many characters arriving in one change counts as a paste, not typing. */
+export const PASTE_CHARS = 40;
+
+/** True when `next` came from a paste (or drop) into a box that held `previous`. */
+export function isPaste(previous: string, next: string): boolean {
+  return next.length - previous.length >= PASTE_CHARS;
+}
+
+/**
+ * A whole prompt pasted into the Lyrics box: only when a real style description (a sentence or
+ * a list, at least PASTE_CHARS long) comes before the lyrics, so a song's own first line is not
+ * mistaken for a style.
+ */
+export function splitLyricsPaste(text: string): SplitPrompt | null {
+  const split = splitFullPrompt(text);
+  if (!split || split.style.length < PASTE_CHARS || !/[,.;]/.test(split.style)) return null;
+  return split;
+}
+
+/**
+ * Tags after a style paste: when the paste replaced the box, tags from the new text replace the
+ * old ones; when it added to it, new tags are added after the existing ones (up to the limit).
+ */
+export function tagsAfterStylePaste(
+  previous: string,
+  next: string,
+  currentTags: string[]
+): string[] {
+  const found = tagsFromStyle(next);
+  if (!found.length) return currentTags;
+  const replaced = !previous.trim() || !next.includes(previous.trim());
+  if (replaced) return found;
+  const have = new Set(currentTags.map((t) => t.toLowerCase()));
+  return [...currentTags, ...found.filter((t) => !have.has(t.toLowerCase()))].slice(
+    0,
+    MAX_STYLE_TAGS
+  );
 }

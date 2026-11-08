@@ -25,7 +25,7 @@
     type StudioModelInfo,
     studioModels
   } from '@vbm/contracts';
-  import { api, sleep } from '../lib/client/api';
+  import { ApiError, api, sleep } from '../lib/client/api';
   import SongCard from '../lib/client/SongCard.svelte';
   import ModelPicker, { type PickerItem } from '../lib/client/ModelPicker.svelte';
   import StyleTagPicker from '../lib/client/StyleTagPicker.svelte';
@@ -37,8 +37,12 @@
     fitProblem,
     sentStyle,
     splitFullPrompt,
+    isPaste,
+    splitLyricsPaste,
     suggestTitle,
-    tagsFromStyle
+    tagsAfterStylePaste,
+    tagsFromStyle,
+    type SplitPrompt
   } from '../lib/client/full-prompt';
 
   type Caps = {
@@ -68,6 +72,7 @@
   let character = $state<string>('clean');
   let caps = $state<Caps | null>(null);
   let capsError = $state<string | null>(null);
+  let capsTry = $state(0);
   let job = $state<StudioJob | null>(null);
   let songs = $state<SongMeta[]>([]);
   let error = $state<string | null>(null);
@@ -216,8 +221,7 @@
       : []
   );
 
-  function useSplit() {
-    const split = fullSplit;
+  function useSplit(split: SplitPrompt | null = fullSplit) {
     if (!split) return;
     beforeSplit = {
       mode,
@@ -240,6 +244,7 @@
     const found = tagsFromStyle(split.style);
     tagText = found.join(', ');
     splitTags = found.length;
+    pastedTags = 0;
     character = 'custom';
   }
 
@@ -248,8 +253,41 @@
     if (!b) return;
     beforeSplit = null;
     skipSplit = b.mode === 'custom' ? b.stylePrompt : b.description;
+    skipLyrics = b.lyrics;
     ({ mode, description, stylePrompt, title, lyrics, tagText, character, instrumental } = b);
+    lastText = { simple: description, custom: stylePrompt };
+    lastLyrics = lyrics;
   }
+
+  // A whole prompt pasted into the Lyrics box is split too.
+  let lastLyrics = untrack(() => lyrics);
+  let skipLyrics = '';
+  $effect(() => {
+    const now = lyrics;
+    const before = lastLyrics;
+    lastLyrics = now;
+    if (now === skipLyrics || !isPaste(before, now)) return;
+    const split = splitLyricsPaste(now);
+    if (split) untrack(() => useSplit(split));
+  });
+
+  // A style description pasted on its own (no lyrics) still selects and creates tags.
+  // Compared per box, so switching between Simple and Custom is never mistaken for a paste.
+  let lastText = untrack(() => ({ simple: description, custom: stylePrompt }));
+  $effect(() => {
+    const box = mode;
+    const now = box === 'custom' ? stylePrompt : description;
+    const before = lastText[box];
+    lastText[box] = now;
+    if (fullSplit || !isPaste(before, now)) return;
+    untrack(() => {
+      const next = tagsAfterStylePaste(before, now, tags);
+      if (next.join(', ') === tags.join(', ')) return;
+      tagText = next.join(', ');
+      pastedTags = next.length;
+    });
+  });
+  let pastedTags = $state(0);
 
   // Paste a whole prompt (style, "Lyrics", [Verse]/[Chorus]) and it is split straight away.
   $effect(() => {
@@ -343,12 +381,35 @@
           (e) => (error = e instanceof Error ? e.message : 'Those lyrics could not be loaded.')
         );
     }
-    try {
-      caps = await api<Caps>('/api/studio/capabilities');
-    } catch (e) {
-      capsError = e instanceof Error ? e.message : 'The studio could not be reached.';
-    }
+    await loadCaps();
   });
+
+  // The model list never spins forever: each try gives up after 20 s, a waking server gets three
+  // tries, and then the panel says what is wrong and offers Retry.
+  const CAPS_TRIES = 3;
+  async function loadCaps() {
+    capsError = null;
+    for (let attempt = 1; attempt <= CAPS_TRIES && alive; attempt++) {
+      capsTry = attempt;
+      try {
+        caps = await api<Caps>('/api/studio/capabilities', {
+          signal: AbortSignal.timeout(20_000)
+        });
+        return;
+      } catch (e) {
+        // A real answer from the studio (sign-in, refused) will not change by asking again.
+        if (e instanceof ApiError && e.status < 500) {
+          capsError = e.message;
+          return;
+        }
+        if (attempt < CAPS_TRIES) await sleep(3000);
+      }
+    }
+    if (alive)
+      capsError =
+        "The studio server isn't answering, so the models can't load. If you opened the copy on " +
+        'this computer, its server may be stopped; the online studio still works. Try again in a minute.';
+  }
   onDestroy(() => (alive = false));
 
   function buildRequest(): CreateSongRequest {
@@ -439,7 +500,7 @@
   {#if fullSplit}
     <div class="split-offer" role="status">
       <p>This is a whole prompt with lyrics. Split it into Style, Lyrics and tags?</p>
-      <RuneButton variant="ghost" onclick={useSplit}>Split it</RuneButton>
+      <RuneButton variant="ghost" onclick={() => useSplit()}>Split it</RuneButton>
     </div>
   {:else if beforeSplit}
     <div class="split-offer" role="status">
@@ -449,6 +510,10 @@
       </p>
       <RuneButton variant="ghost" onclick={undoSplit}>Undo</RuneButton>
     </div>
+  {:else if pastedTags}
+    <p class="aside" role="status">
+      Picked {pastedTags} style tags from what you pasted (new ones included). Change them below.
+    </p>
   {/if}
 {/snippet}
 
@@ -603,8 +668,18 @@
           <p class="aside">Model: MiniMax Music-01 with your voice's Gold Vocal as reference.</p>
         {:else if caps}
           <ModelPicker items={pickerItems} bind:value={engine} />
-        {:else if !capsError}
-          <SigilLoader label="Loading models…" size={40} />
+        {:else if capsError}
+          <div class="caps-retry">
+            <p>Models couldn't load.</p>
+            <RuneButton variant="ghost" onclick={loadCaps}>Retry</RuneButton>
+          </div>
+        {:else}
+          <SigilLoader
+            label={capsTry > 1
+              ? 'Waking the studio up, try ' + capsTry + ' of ' + CAPS_TRIES + '…'
+              : 'Loading models…'}
+            size={40}
+          />
         {/if}
         {#if spec?.duration}
           <ArcaneInput
@@ -852,5 +927,15 @@
     margin: 0;
     flex: 1 1 14rem;
     font-size: 0.9rem;
+  }
+  .caps-retry {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    flex-wrap: wrap;
+  }
+  .caps-retry p {
+    margin: 0;
+    color: var(--vbm-muted);
   }
 </style>

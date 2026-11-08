@@ -7,6 +7,9 @@ import {
   sentStyle,
   splitFullPrompt,
   suggestTitle,
+  isPaste,
+  splitLyricsPaste,
+  tagsAfterStylePaste,
   tagsFromStyle
 } from './full-prompt';
 
@@ -113,5 +116,44 @@ describe('tags from a pasted prompt', () => {
       'upbeat',
       'female vocal'
     ]);
+  });
+});
+
+describe('tags however the prompt is pasted', () => {
+  test('a whole prompt pasted into the Lyrics box is split', () => {
+    const split = splitLyricsPaste(sample);
+    expect(split?.style.startsWith('Warm, intimate')).toBe(true);
+    expect(split?.lyrics.startsWith('[Intro]')).toBe(true);
+  });
+
+  test('plain lyrics in the Lyrics box are left alone', () => {
+    expect(
+      splitLyricsPaste('[Verse 1]\nI made my face behave at work\n[Chorus]\nla la')
+    ).toBeNull();
+    expect(splitLyricsPaste('Oh yeah\n[Verse 1]\nI made my face behave at work')).toBeNull();
+  });
+
+  test('a style pasted over the old one replaces the tags', () => {
+    const style = splitFullPrompt(sample)!.style;
+    const tags = tagsAfterStylePaste('Bright summer pop', style, ['pop', 'summer', 'upbeat']);
+    expect(tags).toContain('neo soul');
+    expect(tags).toContain('underwater keys');
+    expect(tags).not.toContain('summer');
+  });
+
+  test('a style pasted onto the end adds tags after the existing ones', () => {
+    const tags = tagsAfterStylePaste(
+      'Bright summer pop',
+      'Bright summer pop, with underwater keys and suspended chords',
+      ['summer']
+    );
+    expect(tags[0]).toBe('summer');
+    expect(tags).toContain('underwater keys');
+    expect(tags).toContain('suspended chords');
+  });
+
+  test('typing is not a paste', () => {
+    expect(isPaste('Bright summer po', 'Bright summer pop')).toBe(false);
+    expect(isPaste('', splitFullPrompt(sample)!.style)).toBe(true);
   });
 });
