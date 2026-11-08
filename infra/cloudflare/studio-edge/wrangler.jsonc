@@ -8,9 +8,9 @@
   "preview_urls": false,
   "observability": { "enabled": true },
   "vars": {
-    // Filled in from the Cloudflare Access dialog (see README). Empty values keep the Worker closed (503).
-    "ACCESS_TEAM_DOMAIN": "",
-    "ACCESS_AUD": "",
+    // Cloudflare Access application protecting the workers.dev URL (not secrets).
+    "ACCESS_TEAM_DOMAIN": "gbaskin.cloudflareaccess.com",
+    "ACCESS_AUD": "7e7d18140e88e5ac6c842d6a7a88679122e167226e90d87244eb3b6293d46f97", // gitleaks:allow (public: it is in every Access login redirect)
     "OWNER_EMAILS": "gregory.baskin@gmail.com",
     // The studio as seen inside the container.
     "ORIGIN_URL": "http://localhost:3002"
