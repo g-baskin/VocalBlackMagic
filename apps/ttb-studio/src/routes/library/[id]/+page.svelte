@@ -7,8 +7,7 @@
   import SigilLoader from '@vbm/ui/SigilLoader.svelte';
   import OracleStatus from '@vbm/ui/OracleStatus.svelte';
   import RitualProgress from '@vbm/ui/RitualProgress.svelte';
-  import Spectrogram from '@vbm/ui/Spectrogram.svelte';
-  import PitchTrace from '@vbm/ui/PitchTrace.svelte';
+  import AnalysisDeck from '../../../lib/client/AnalysisDeck.svelte';
   import ArcaneSelect from '@vbm/ui/ArcaneSelect.svelte';
   import ArcaneTextarea from '@vbm/ui/ArcaneTextarea.svelte';
   import RegionSelect from '@vbm/ui/RegionSelect.svelte';
@@ -22,6 +21,8 @@
 
   type Voice = { id: string; performer: string; created_at: string };
   const vocalFixUrl = import.meta.env.VITE_VOCAL_FIX_URL || 'http://localhost:5173';
+  const openInVocalFix = (songId: string) =>
+    vocalFixUrl.replace(/\/$/, '') + '?studioSong=' + encodeURIComponent(songId);
 
   let song = $state<SongMeta | null>(null);
   let parent = $state<SongMeta | null>(null);
@@ -232,6 +233,8 @@
           downloadHref={audioUrl(song.id) + '?download=1'}
           downloadName={song.title + '.' + ext(song)}
           downloadBName={parent ? parent.title + '.' + ext(parent) : undefined}
+          vocalFixHref={openInVocalFix(song.id)}
+          vocalFixBHref={parent ? openInVocalFix(parent.id) : undefined}
           cover={song.cover ? coverUrl(song.id, String(song.cover.bytes)) : null}
         />
         {#if song.master}
@@ -266,10 +269,7 @@
 
     <div class="split">
       {#if song.audio}
-        <ArcanePanel eyebrow="Analysis" title="Spectrogram & pitch" glow="teal">
-          <Spectrogram {buffer} height={170} />
-          <PitchTrace {buffer} height={120} />
-        </ArcanePanel>
+        <AnalysisDeck {buffer} />
       {/if}
       {#if song.lyrics}
         <ArcanePanel eyebrow="Words" title="Lyrics">

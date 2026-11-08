@@ -13,6 +13,8 @@
     downloadHref,
     downloadName,
     downloadBName,
+    vocalFixHref,
+    vocalFixBHref,
     cover = null,
     title = 'Listen'
   }: {
@@ -24,6 +26,8 @@
     downloadHref: string;
     downloadName: string;
     downloadBName?: string;
+    vocalFixHref?: string;
+    vocalFixBHref?: string;
     cover?: string | null;
     title?: string;
   } = $props();
@@ -253,10 +257,50 @@
       </a>
       <!-- eslint-enable svelte/no-navigation-without-resolve -->
     </div>
+    {#if vocalFixHref}
+      <!-- eslint-disable svelte/no-navigation-without-resolve -- deliberate navigation to the independent Vocal Fix app -->
+      <a
+        class="handoff"
+        href={useB ? (vocalFixBHref ?? vocalFixHref) : vocalFixHref}
+        data-sveltekit-reload
+        aria-label={'Open ' + selectedLabel + ' in Vocal Fix'}
+      >
+        <span>Open in Vocal Fix</span>
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14m-6-6 6 6-6 6" /></svg>
+      </a>
+      <!-- eslint-enable svelte/no-navigation-without-resolve -->
+    {/if}
   </div>
 </div>
 
 <style>
+  .handoff {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    min-height: 48px;
+    margin-top: 12px;
+    padding: 10px 14px;
+    border: 1px solid var(--deck-edge);
+    border-radius: 10px;
+    color: var(--deck-ice);
+    background: transparent;
+    text-decoration: none;
+    font-size: 0.875rem;
+    font-weight: 600;
+  }
+  .handoff:hover {
+    background: var(--deck-raised);
+  }
+  .handoff svg {
+    width: 20px;
+    height: 20px;
+    flex: none;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 1.8;
+  }
   .deck {
     --deck-surface: oklch(0.22 0.014 260);
     --deck-raised: oklch(0.27 0.016 260);

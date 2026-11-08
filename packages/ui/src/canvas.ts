@@ -37,6 +37,30 @@ export const GLOW = {
 
 export type GlowName = keyof typeof GLOW;
 
+/** Signal Deck energy scale: dark graphite to ice to warm white. */
+export function signalColor(t: number): [number, number, number] {
+  const stops = [
+    [0, 15, 20, 27],
+    [0.25, 24, 49, 69],
+    [0.5, 35, 110, 139],
+    [0.7, 72, 177, 198],
+    [0.88, 151, 220, 229],
+    [1, 255, 242, 233]
+  ];
+  const value = Math.max(0, Math.min(1, Number.isFinite(t) ? t : 0));
+  for (let i = 1; i < stops.length; i++) {
+    if (value <= stops[i][0]) {
+      const low = stops[i - 1],
+        high = stops[i];
+      const fraction = (value - low[0]) / (high[0] - low[0]);
+      return [1, 2, 3].map(
+        (channel) => low[channel] + fraction * (high[channel] - low[channel])
+      ) as [number, number, number];
+    }
+  }
+  return [255, 242, 233];
+}
+
 /** Arcane colour map: void → violet → ember → pale gold. t in 0..1. */
 export function arcaneColor(t: number): [number, number, number] {
   const stops: [number, number, number, number][] = [
