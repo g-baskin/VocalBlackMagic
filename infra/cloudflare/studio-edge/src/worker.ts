@@ -1,6 +1,8 @@
 // Worker entry: Cloudflare Access check (index.ts), then the single studio Container instance.
 // The container's own data dir is mirrored to R2 by its sync agent through host r2.vbm (r2-store.ts).
 import { Container, getContainer } from '@cloudflare/containers';
+// Required by @cloudflare/containers for outbound interception (outboundByHost below).
+export { ContainerProxy } from '@cloudflare/containers';
 import { handle, type Env as EdgeEnv } from './index';
 import { handleR2, type R2Like } from './r2-store';
 
