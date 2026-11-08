@@ -28,6 +28,8 @@
   import { api, sleep } from '../lib/client/api';
   import SongCard from '../lib/client/SongCard.svelte';
   import ModelPicker, { type PickerItem } from '../lib/client/ModelPicker.svelte';
+  import StyleTagPicker from '../lib/client/StyleTagPicker.svelte';
+  import { parseTags } from '../lib/client/style-tags';
 
   type Caps = {
     allowed: boolean;
@@ -160,13 +162,7 @@
     { value: '2', label: 'Two takes', hint: 'Like Suno: two variations, double the cost' },
     { value: '1', label: 'One take' }
   ];
-  const tags = $derived(
-    tagText
-      .split(',')
-      .map((t) => t.trim())
-      .filter(Boolean)
-      .slice(0, 20)
-  );
+  const tags = $derived(parseTags(tagText));
   const voiceSummon = $derived(mode === 'custom' && !!sungBy && !instrumental);
   const estimate = $derived(
     voiceSummon
@@ -410,12 +406,7 @@
             </div>
           {/if}
         {/if}
-        <ArcaneInput label="Style tags (comma separated)" bind:value={tagText} maxlength={400} />
-        {#if tags.length}
-          <ul class="chips" aria-label="Style tags">
-            {#each tags as tag (tag)}<li>{tag}</li>{/each}
-          </ul>
-        {/if}
+        <StyleTagPicker bind:value={tagText} />
         <RuneToggle
           label="Instrumental"
           bind:checked={instrumental}
@@ -609,22 +600,6 @@
     font-family: var(--vbm-font-mono);
     font-size: 0.8rem;
     cursor: pointer;
-  }
-  .chips {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 0.4rem;
-    list-style: none;
-    padding: 0;
-    margin: 0;
-  }
-  .chips li {
-    background: rgb(79 139 255 / 14%);
-    color: var(--vbm-blue-text);
-    padding: 0.2rem 0.7rem;
-    border-radius: var(--vbm-radius-pill);
-    font-size: 0.85rem;
-    font-weight: 500;
   }
   .aside {
     margin: 0;
