@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { onDestroy, onMount } from 'svelte';
+  import { onDestroy, onMount, untrack } from 'svelte';
   import { resolve } from '$app/paths';
   import ArcanePanel from '@vbm/ui/ArcanePanel.svelte';
   import RuneButton from '@vbm/ui/RuneButton.svelte';
@@ -31,6 +31,15 @@
   import StyleTagPicker from '../lib/client/StyleTagPicker.svelte';
   import { parseTags } from '../lib/client/style-tags';
   import { rewritePrompt, rewriteTagText } from '../lib/client/artist-styles';
+  import {
+    MAX_LYRICS_CHARS,
+    MAX_STYLE_CHARS,
+    fitProblem,
+    sentStyle,
+    splitFullPrompt,
+    suggestTitle,
+    tagsFromStyle
+  } from '../lib/client/full-prompt';
 
   type Caps = {
     allowed: boolean;
@@ -65,6 +74,20 @@
   let busy = $state(false);
   let writtenLyrics = $state<string | null>(null);
   let lyricsNote = $state(false);
+  // What the form held before a pasted full prompt was split, so Undo can put it back.
+  let beforeSplit = $state<{
+    mode: 'simple' | 'custom';
+    description: string;
+    stylePrompt: string;
+    title: string;
+    lyrics: string;
+    tagText: string;
+    character: string;
+    instrumental: boolean;
+  } | null>(null);
+  let splitTags = $state(0);
+  // A prompt Undo restored, so it is not split again straight away.
+  let skipSplit = '';
   let alive = true;
   const lyricPlaceholder = ['[Verse]', '…', '[Chorus]', '…'].join('\n');
 
@@ -74,6 +97,7 @@
     isModel(engine) ? (caps?.models?.find((m) => m.id === engine) ?? null) : null
   );
   const legacy = $derived(caps?.engines.find((e) => e.id === engine) ?? null);
+  const routedLimits = { max_prompt: 2000, max_lyrics: 4096 };
   // Routed models share one shape with legacy engines so the rest of the form stays the same.
   const spec = $derived(
     picked
@@ -81,8 +105,8 @@
           status: picked.active_runner ? 'ready' : 'unavailable',
           duration: { min: 10, max: 240 },
           est_cost_usd: picked.est_cost_usd,
-          max_prompt: 2000,
-          max_lyrics: 4096 as number | null
+          max_prompt: routedLimits.max_prompt,
+          max_lyrics: routedLimits.max_lyrics as number | null
         }
       : legacy
   );
@@ -118,7 +142,9 @@
             ? instrumental
               ? 'Cannot make instrumentals.'
               : 'Instrumental only.'
-            : null,
+            : mode === 'custom'
+              ? fitFor(routedLimits)
+              : null,
         disabled: !m.active_runner || !fits
       };
     }),
@@ -144,7 +170,9 @@
             ? instrumental
               ? 'Cannot make instrumentals.'
               : 'Instrumental only.'
-            : null,
+            : mode === 'custom'
+              ? fitFor(e)
+              : null,
       disabled: e.status !== 'ready' || (instrumental ? !e.instrumental : !e.vocals)
     }))
   ]);
@@ -164,6 +192,71 @@
     { value: '1', label: 'One take' }
   ];
   const tags = $derived(parseTags(tagText));
+  // A pasted full prompt (style block, then "Lyrics" and [Verse]/[Chorus] sections).
+  const fullSplit = $derived(splitFullPrompt(mode === 'custom' ? stylePrompt : description));
+  const styleSent = $derived(
+    sentStyle(mode === 'custom' ? stylePrompt : description, tags, character as SoundCharacter)
+  );
+  const lyricsSent = $derived(mode === 'custom' && !instrumental ? lyrics.trim().length : 0);
+  const fitFor = (limits: { max_prompt: number; max_lyrics: number | null } | null | undefined) =>
+    fitProblem(limits, styleSent.length, lyricsSent);
+  // Simple mode sends a description to the lyricist, not to the model, so only Custom is checked.
+  // Boxes take a whole pasted prompt (no maxlength cut-off) so it can be split; the limit is here.
+  const overCap = $derived.by(() => {
+    const length = (mode === 'custom' ? stylePrompt : description).length;
+    if (fullSplit || length <= MAX_STYLE_CHARS) return null;
+    return `${mode === 'custom' ? 'Style' : 'The description'} is ${length} characters; the most is ${MAX_STYLE_CHARS}.`;
+  });
+  const tooLong = $derived(overCap ?? (mode === 'custom' && !sungBy ? fitFor(spec) : null));
+  const fitsElsewhere = $derived(
+    tooLong && !overCap
+      ? pickerItems
+          .filter((item) => !item.disabled && item.value !== engine && !item.reason)
+          .map((item) => item.name)
+      : []
+  );
+
+  function useSplit() {
+    const split = fullSplit;
+    if (!split) return;
+    beforeSplit = {
+      mode,
+      description,
+      stylePrompt,
+      title,
+      lyrics,
+      tagText,
+      character,
+      instrumental
+    };
+    if (mode === 'simple') description = '';
+    mode = 'custom';
+    stylePrompt = split.style.slice(0, MAX_STYLE_CHARS);
+    lyrics = split.lyrics.slice(0, MAX_LYRICS_CHARS);
+    instrumental = false;
+    if (!title.trim()) title = split.title ?? suggestTitle(split.lyrics) ?? '';
+    // Tags come from the prompt itself: list tags it names are selected, other sound phrases
+    // become new tags. Earlier tags and the sound character would contradict it, so they go.
+    const found = tagsFromStyle(split.style);
+    tagText = found.join(', ');
+    splitTags = found.length;
+    character = 'custom';
+  }
+
+  function undoSplit() {
+    const b = beforeSplit;
+    if (!b) return;
+    beforeSplit = null;
+    skipSplit = b.mode === 'custom' ? b.stylePrompt : b.description;
+    ({ mode, description, stylePrompt, title, lyrics, tagText, character, instrumental } = b);
+  }
+
+  // Paste a whole prompt (style, "Lyrics", [Verse]/[Chorus]) and it is split straight away.
+  $effect(() => {
+    const split = fullSplit;
+    const source = mode === 'custom' ? stylePrompt : description;
+    if (split && source !== skipSplit) untrack(useSplit);
+  });
   // Song models refuse prompts that name real artists; suggest a description of the sound instead.
   const artistFix = $derived.by(() => {
     const prompt = rewritePrompt(mode === 'custom' ? stylePrompt : description);
@@ -232,7 +325,7 @@
         mode = 'custom';
         title = data.title ?? '';
         lyrics = data.lyrics ?? '';
-        if (data.prompt) stylePrompt = data.prompt.slice(0, 300);
+        if (data.prompt) stylePrompt = data.prompt.slice(0, MAX_STYLE_CHARS);
       } catch {
         // ignore a malformed hand-off
       }
@@ -342,6 +435,23 @@
   }
 </script>
 
+{#snippet splitOffer()}
+  {#if fullSplit}
+    <div class="split-offer" role="status">
+      <p>This is a whole prompt with lyrics. Split it into Style, Lyrics and tags?</p>
+      <RuneButton variant="ghost" onclick={useSplit}>Split it</RuneButton>
+    </div>
+  {:else if beforeSplit}
+    <div class="split-offer" role="status">
+      <p>
+        Your prompt was split into Style and Lyrics, and {splitTags} style tags were picked from it (new
+        ones included). Sound character is Custom so the prompt is sent as written.
+      </p>
+      <RuneButton variant="ghost" onclick={undoSplit}>Undo</RuneButton>
+    </div>
+  {/if}
+{/snippet}
+
 <svelte:head><title>Create · VBM Studio</title></svelte:head>
 
 <div class="page create">
@@ -389,10 +499,10 @@
               label="Song description"
               bind:value={description}
               rows={5}
-              maxlength={3000}
-              placeholder="An upbeat pop song about…"
+              placeholder="An upbeat pop song about… (or paste a whole prompt with lyrics)"
             />
           </div>
+          {@render splitOffer()}
           <p class="aside">We write the lyrics and a title, then the model sings them.</p>
         {:else}
           <ArcaneInput
@@ -404,15 +514,16 @@
           <ArcaneTextarea
             label="Style of music"
             bind:value={stylePrompt}
-            rows={3}
-            maxlength={spec?.max_prompt ?? 3000}
+            rows={fullSplit ? 8 : 3}
+            placeholder="Or paste a whole prompt: style, then Lyrics with [Verse] and [Chorus]"
           />
+          {@render splitOffer()}
           {#if !instrumental}
             <ArcaneTextarea
               label="Lyrics (leave empty and we write them)"
               bind:value={lyrics}
               rows={10}
-              maxlength={spec?.max_lyrics ?? 15000}
+              maxlength={MAX_LYRICS_CHARS}
               placeholder={lyricPlaceholder}
             />
             <div class="tagbar" aria-label="Insert section tag">
@@ -429,6 +540,14 @@
           hint="No vocals. Some models only make instrumentals."
         />
       </div>
+      {#if tooLong}
+        <OracleStatus tone="warning"
+          >{tooLong}
+          {fitsElsewhere.length
+            ? 'These models take it: ' + fitsElsewhere.join(', ') + '.'
+            : 'Shorten the text or pick another model.'}</OracleStatus
+        >
+      {/if}
       {#if artistFix.names.length}
         <div class="artist-fix" role="status">
           <p class="artist-why">
@@ -447,6 +566,7 @@
           disabled={!caps?.allowed ||
             !spec ||
             spec.status !== 'ready' ||
+            !!tooLong ||
             artistFix.names.length > 0}
         >
           ♪ Create
@@ -718,5 +838,19 @@
     .price {
       margin: 0;
     }
+  }
+  .split-offer {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.5rem 0.75rem;
+    padding: 0.75rem;
+    border: 1px solid var(--vbm-border, rgba(255, 255, 255, 0.12));
+    border-radius: 0.75rem;
+  }
+  .split-offer p {
+    margin: 0;
+    flex: 1 1 14rem;
+    font-size: 0.9rem;
   }
 </style>
