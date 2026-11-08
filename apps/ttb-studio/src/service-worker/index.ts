@@ -36,6 +36,8 @@ sw.addEventListener('fetch', (event) => {
   const url = new URL(request.url);
   if (url.origin !== sw.location.origin) return;
   if (url.pathname.startsWith('/api/') || MEDIA.test(url.pathname)) return;
+  // Vocal Fix shares this origin under /vocal-fix (edge Worker) and has its own service worker.
+  if (url.pathname === '/vocal-fix' || url.pathname.startsWith('/vocal-fix/')) return;
   if (request.headers.has('range')) return;
   const dest = request.destination;
   if (dest === 'audio' || dest === 'video') return;

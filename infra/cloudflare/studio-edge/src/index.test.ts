@@ -203,3 +203,79 @@ describe('studio edge worker', () => {
     expect(res.status).toBe(502);
   });
 });
+
+describe('vocal fix routing', () => {
+  const vf = { VOCAL_FIX_BASE: '/vocal-fix', VOCAL_FIX_ORIGIN_URL: 'http://localhost:3001' };
+
+  test('/vocal-fix paths go to the Vocal Fix origin, keeping the base path', async () => {
+    const token = await sign(goodClaims());
+    const res = await handle(
+      req('/vocal-fix/api/voices?x=1', token, {
+        headers: { origin: 'https://vbm-studio.example.workers.dev' }
+      }),
+      env(vf),
+      certFetch
+    );
+    expect(res.status).toBe(200);
+    const forwarded = seen as unknown as Request;
+    expect(forwarded.url).toBe('http://localhost:3001/vocal-fix/api/voices?x=1');
+    expect(forwarded.headers.get('host')).toBe('localhost:3001');
+    expect(forwarded.headers.get('origin')).toBe('http://localhost:3001');
+    expect(forwarded.headers.get('x-vbm-edge-auth')).toBe(SECRET);
+    expect(res.headers.get('cache-control')).toBe('no-store');
+  });
+
+  test('the bare base goes to Vocal Fix; look-alike and other paths go to the studio', async () => {
+    const token = await sign(goodClaims());
+    const e = env(vf);
+    await handle(req('/vocal-fix', token), e, certFetch);
+    expect((seen as unknown as Request).url).toBe('http://localhost:3001/vocal-fix');
+    for (const path of ['/vocal-fixer', '/library', '/api/studio/songs', '/']) {
+      await handle(req(path, token), e, certFetch);
+      expect(new URL((seen as unknown as Request).url).port).toBe('3002');
+    }
+  });
+
+  test('a client cannot pick the container port, and Vocal Fix still needs a login', async () => {
+    const token = await sign(goodClaims());
+    await handle(
+      req('/', token, { headers: { 'cf-container-target-port': '3001' } }),
+      env(vf),
+      certFetch
+    );
+    expect((seen as unknown as Request).headers.get('cf-container-target-port')).toBeNull();
+    seen = null;
+    expect((await handle(req('/vocal-fix/api/voices', null), env(vf), certFetch)).status).toBe(403);
+    expect(seen).toBeNull();
+  });
+
+  test('a half-configured or invalid Vocal Fix setting fails closed', async () => {
+    const token = await sign(goodClaims());
+    for (const bad of [
+      { VOCAL_FIX_BASE: '/vocal-fix' },
+      { VOCAL_FIX_ORIGIN_URL: 'http://localhost:3001' },
+      { ...vf, VOCAL_FIX_BASE: 'vocal-fix' },
+      { ...vf, VOCAL_FIX_BASE: '/../x' },
+      { ...vf, VOCAL_FIX_ORIGIN_URL: 'ftp://x' }
+    ]) {
+      seen = null;
+      expect((await handle(req('/', token), env(bad), certFetch)).status).toBe(503);
+      expect(seen).toBeNull();
+    }
+  });
+});
+
+test('relative redirects resolve against the requested path, not the site root', async () => {
+  const token = await sign(goodClaims());
+  const e = env({
+    VOCAL_FIX_BASE: '/vocal-fix',
+    VOCAL_FIX_ORIGIN_URL: 'http://localhost:3001',
+    STUDIO: {
+      async fetch() {
+        return new Response(null, { status: 308, headers: { location: './x/' } });
+      }
+    }
+  });
+  const res = await handle(req('/vocal-fix/session/abc', token), e, certFetch);
+  expect(res.headers.get('location')).toBe('/vocal-fix/session/x/');
+});

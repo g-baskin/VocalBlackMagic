@@ -7,6 +7,8 @@ import { resolve } from '$app/paths';
 const CACHE = `vbm-shell-${version}`;
 const SHELL = [...immutable, ...assets].map((f) => resolve(f.path as '/'));
 const MEDIA = /\.(mp3|wav|flac|ogg|oga|m4a|aac|opus|webm|mp4)$/i;
+// The app may be served under a base path (e.g. /vocal-fix); its API lives below it.
+const API_PREFIX = resolve('/').replace(/\/$/, '') + '/api/';
 
 sw.addEventListener('install', (event) => {
   event.waitUntil(caches.open(CACHE).then((cache) => cache.addAll(SHELL)));
@@ -35,7 +37,7 @@ sw.addEventListener('fetch', (event) => {
   if (request.method !== 'GET') return;
   const url = new URL(request.url);
   if (url.origin !== sw.location.origin) return;
-  if (url.pathname.startsWith('/api/') || MEDIA.test(url.pathname)) return;
+  if (url.pathname.startsWith(API_PREFIX) || MEDIA.test(url.pathname)) return;
   if (request.headers.has('range')) return;
   const dest = request.destination;
   if (dest === 'audio' || dest === 'video') return;

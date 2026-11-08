@@ -1,6 +1,6 @@
 // Worker entry: Cloudflare Access check (index.ts), then the single studio Container instance.
 // The container's own data dir is mirrored to R2 by its sync agent through host r2.vbm (r2-store.ts).
-import { Container, getContainer } from '@cloudflare/containers';
+import { Container, getContainer, switchPort } from '@cloudflare/containers';
 // Required by @cloudflare/containers for outbound interception (outboundByHost below).
 export { ContainerProxy } from '@cloudflare/containers';
 import { handle, type Env as EdgeEnv } from './index';
@@ -35,7 +35,8 @@ export function containerEnv(env: Env): Record<string, string> {
   const vars: Record<string, string> = {
     NODE_ENV: 'production',
     HOST: '0.0.0.0',
-    PORT: '3002',
+    PORT: String(STUDIO_PORT),
+    VOCAL_FIX_PORT: String(VOCAL_FIX_PORT),
     VBM_DATA_DIR: '/data',
     FFMPEG_PATH: '/usr/bin/ffmpeg',
     VBM_FFMPEG: '/usr/bin/ffmpeg',
@@ -51,8 +52,17 @@ export function containerEnv(env: Env): Record<string, string> {
   return vars;
 }
 
+/** Studio on 3002, Vocal Fix on 3001; any other port in the target URL means the studio. */
+export const STUDIO_PORT = 3002;
+export const VOCAL_FIX_PORT = 3001;
+export function containerPort(url: string): number {
+  return Number(new URL(url).port) === VOCAL_FIX_PORT ? VOCAL_FIX_PORT : STUDIO_PORT;
+}
+
 export class StudioContainer extends Container<Env> {
-  defaultPort = 3002;
+  defaultPort = STUDIO_PORT;
+  // Wait for both servers before the instance takes traffic.
+  requiredPorts = [STUDIO_PORT, VOCAL_FIX_PORT];
   sleepAfter = '15m';
   enableInternet = true;
 
@@ -72,7 +82,9 @@ export default {
       fetch(input: Request | string | URL, init?: RequestInit): Promise<Response> {
         const forwarded = new Request(input, init);
         forwarded.headers.set(PROTO_HEADER, new URL(forwarded.url).protocol.replace(':', ''));
-        return getContainer(env.CONTAINER, 'owner').fetch(forwarded);
+        // Always set the port here; switchPort overrides any client-sent target-port header.
+        const port = containerPort(forwarded.url);
+        return getContainer(env.CONTAINER, 'owner').fetch(switchPort(forwarded, port));
       }
     };
     return handle(request, { ...env, STUDIO: studio });

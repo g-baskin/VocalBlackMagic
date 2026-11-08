@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { apiPath } from '../../lib/base';
   import { resolve } from '$app/paths';
   import type { VoiceModel } from '@vbm/contracts';
   import ArcanePanel from '@vbm/ui/ArcanePanel.svelte';
@@ -27,7 +28,7 @@
 
   async function load() {
     try {
-      const res = await fetch('/api/voices');
+      const res = await fetch(apiPath('/api/voices'));
       if (!res.ok)
         throw new Error((await res.json().catch(() => null))?.detail ?? `HTTP ${res.status}`);
       voices = (await res.json()) as VoiceModel[];
@@ -51,7 +52,9 @@
     notice = '';
     error = '';
     try {
-      const res = await fetch(`/api/voices/${encodeURIComponent(v.id)}`, { method: 'DELETE' });
+      const res = await fetch(apiPath(`/api/voices/${encodeURIComponent(v.id)}`), {
+        method: 'DELETE'
+      });
       if (!res.ok)
         throw new Error((await res.json().catch(() => null))?.detail ?? `HTTP ${res.status}`);
       voices = (voices ?? []).filter((x) => x.id !== v.id);

@@ -136,7 +136,7 @@
     deleting = true;
     try {
       await api('/api/sessions/' + id, { method: 'DELETE' });
-      location.href = '/';
+      location.href = resolve('/');
     } catch (e) {
       error = e instanceof Error ? e.message : String(e);
       deleting = false;

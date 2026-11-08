@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { apiPath } from '../../../../lib/base';
   import { page } from '$app/state';
   import { resolve } from '$app/paths';
   import ArcanePanel from '@vbm/ui/ArcanePanel.svelte';
@@ -49,7 +50,7 @@
 
   $effect(() => {
     if (!id) return;
-    fetch(`/api/sessions/${encodeURIComponent(id)}`)
+    fetch(apiPath(`/api/sessions/${encodeURIComponent(id)}`))
       .then(async (res) => {
         if (!res.ok)
           throw new Error((await res.json().catch(() => null))?.detail ?? `HTTP ${res.status}`);
@@ -66,7 +67,7 @@
     if (!file) return;
     const controller = new AbortController();
     decodeAudioFromUrl(
-      `/api/sessions/${encodeURIComponent(id)}/audio/derived/${encodeURIComponent(file)}`,
+      apiPath(`/api/sessions/${encodeURIComponent(id)}/audio/derived/${encodeURIComponent(file)}`),
       controller.signal
     )
       .then((b) => (goldBuffer = b))
@@ -90,7 +91,7 @@
     const timer = setTimeout(async () => {
       try {
         const res = await fetch(
-          `/api/sessions/${encodeURIComponent(id)}/jobs/${encodeURIComponent(j.id)}`
+          apiPath(`/api/sessions/${encodeURIComponent(id)}/jobs/${encodeURIComponent(j.id)}`)
         );
         if (res.ok) {
           pollFailures = 0;
@@ -112,7 +113,7 @@
     submitting = true;
     error = '';
     try {
-      const res = await fetch(`/api/sessions/${encodeURIComponent(id)}/forge`, {
+      const res = await fetch(apiPath(`/api/sessions/${encodeURIComponent(id)}/forge`), {
         method: 'POST',
         headers: { 'content-type': 'application/json' },
         body: JSON.stringify({ attested_name: name, own_voice: true, statement: STATEMENT })

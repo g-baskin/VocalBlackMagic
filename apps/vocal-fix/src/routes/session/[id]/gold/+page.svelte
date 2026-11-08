@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { apiPath } from '../../../../lib/base';
   import { page } from '$app/state';
   import { resolve } from '$app/paths';
   import ArcanePanel from '@vbm/ui/ArcanePanel.svelte';
@@ -43,7 +44,7 @@
 
   const id = $derived(page.params.id ?? '');
   const audioUrl = (area: string, file: string) =>
-    `/api/sessions/${encodeURIComponent(id)}/audio/${area}/${encodeURIComponent(file)}`;
+    apiPath(`/api/sessions/${encodeURIComponent(id)}/audio/${area}/${encodeURIComponent(file)}`);
 
   let manifest = $state<Manifest | null>(null);
   let loadError = $state('');
@@ -70,7 +71,7 @@
   async function load() {
     loadError = '';
     try {
-      const res = await fetch(`/api/sessions/${encodeURIComponent(id)}`);
+      const res = await fetch(apiPath(`/api/sessions/${encodeURIComponent(id)}`));
       if (!res.ok)
         throw new Error((await res.json().catch(() => null))?.detail ?? `HTTP ${res.status}`);
       const m = (await res.json()) as Manifest;
@@ -162,7 +163,7 @@
     const included = gold.phrases.filter((p) => chosen[p.id]).map((p) => p.id);
     const excluded = gold.phrases.filter((p) => !chosen[p.id]).map((p) => p.id);
     try {
-      const res = await fetch(`/api/sessions/${encodeURIComponent(id)}/gold`, {
+      const res = await fetch(apiPath(`/api/sessions/${encodeURIComponent(id)}/gold`), {
         method: 'POST',
         headers: { 'content-type': 'application/json' },
         body: JSON.stringify({ included, excluded })

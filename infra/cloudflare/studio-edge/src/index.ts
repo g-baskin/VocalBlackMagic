@@ -17,10 +17,14 @@ export interface Env {
   ORIGIN_URL: string;
   /** Shared secret the studio checks in owner mode (wrangler secret put EDGE_SECRET). */
   EDGE_SECRET: string;
+  /** Path prefix served by Vocal Fix (built with the same base), e.g. /vocal-fix. Optional. */
+  VOCAL_FIX_BASE?: string;
+  /** Vocal Fix origin inside the container, e.g. http://localhost:3001. Optional. */
+  VOCAL_FIX_ORIGIN_URL?: string;
 }
 
 /** Headers only this Worker may set; anything a client sends under these names is dropped. */
-export const EDGE_HEADERS = ['x-vbm-edge-auth', 'x-vbm-owner-email'];
+export const EDGE_HEADERS = ['x-vbm-edge-auth', 'x-vbm-owner-email', 'cf-container-target-port'];
 const MIN_SECRET_LENGTH = 32;
 
 const securityHeaders: Record<string, string> = {
@@ -31,7 +35,36 @@ const securityHeaders: Record<string, string> = {
   'permissions-policy': 'camera=(), geolocation=(), microphone=(self)'
 };
 
-function config(env: Env): (AccessConfig & { origin: URL; secret: string }) | null {
+type Config = AccessConfig & {
+  origin: URL;
+  secret: string;
+  vocalFix: { base: string; origin: URL } | null;
+};
+
+function httpOrigin(raw: string | undefined): URL | null {
+  try {
+    const url = new URL(raw ?? '');
+    return url.protocol === 'http:' || url.protocol === 'https:' ? url : null;
+  } catch {
+    return null;
+  }
+}
+
+/** Vocal Fix routing is on only when both values are valid; a bad value fails closed (503). */
+function vocalFixConfig(env: Env): Config['vocalFix'] | undefined {
+  const base = (env.VOCAL_FIX_BASE ?? '').trim();
+  if (!base && !env.VOCAL_FIX_ORIGIN_URL) return null;
+  const origin = httpOrigin(env.VOCAL_FIX_ORIGIN_URL);
+  if (!origin || !/^\/[A-Za-z0-9_~-][A-Za-z0-9._~-]*$/.test(base)) return undefined;
+  return { base, origin };
+}
+
+/** True when the pathname belongs to the app served under `base` (exact or below it). */
+export function underBase(pathname: string, base: string): boolean {
+  return pathname === base || pathname.startsWith(base + '/');
+}
+
+function config(env: Env): Config | null {
   const allowedEmails = (env.OWNER_EMAILS ?? '')
     .split(',')
     .map((e) => e.trim().toLowerCase())
@@ -39,19 +72,17 @@ function config(env: Env): (AccessConfig & { origin: URL; secret: string }) | nu
   const secret = env.EDGE_SECRET ?? '';
   if (!env.ACCESS_TEAM_DOMAIN || !env.ACCESS_AUD || allowedEmails.length === 0) return null;
   if (secret.length < MIN_SECRET_LENGTH || !env.STUDIO) return null;
-  let origin: URL;
-  try {
-    origin = new URL(env.ORIGIN_URL);
-  } catch {
-    return null;
-  }
-  if (origin.protocol !== 'http:' && origin.protocol !== 'https:') return null;
+  const origin = httpOrigin(env.ORIGIN_URL);
+  if (!origin) return null;
+  const vocalFix = vocalFixConfig(env);
+  if (vocalFix === undefined) return null;
   return {
     teamDomain: env.ACCESS_TEAM_DOMAIN,
     audience: env.ACCESS_AUD,
     allowedEmails,
     origin,
-    secret
+    secret,
+    vocalFix
   };
 }
 
@@ -92,18 +123,21 @@ export async function handle(
     return plain(403, 'Sign in with your Cloudflare Access account to use VBM Studio.');
 
   const url = new URL(request.url);
-  const target = new URL(url.pathname + url.search, cfg.origin);
+  // /vocal-fix/... goes to Vocal Fix (built with that base path); everything else to the studio.
+  const vf = cfg.vocalFix && underBase(url.pathname, cfg.vocalFix.base) ? cfg.vocalFix : null;
+  const upstreamOrigin = vf ? vf.origin : cfg.origin;
+  const target = new URL(url.pathname + url.search, upstreamOrigin);
   const headers = new Headers(request.headers);
   for (const name of EDGE_HEADERS) headers.delete(name);
   headers.delete('cf-access-jwt-assertion');
-  headers.set('host', cfg.origin.host);
+  headers.set('host', upstreamOrigin.host);
   headers.set('x-forwarded-host', url.host);
   headers.set('x-forwarded-proto', url.protocol.replace(':', ''));
   headers.set('x-vbm-edge-auth', cfg.secret);
   headers.set('x-vbm-owner-email', identity.email);
   // SvelteKit's CSRF check compares Origin with the server's own origin; rewrite same-site origins.
   const origin = request.headers.get('origin');
-  if (origin && origin === url.origin) headers.set('origin', cfg.origin.origin);
+  if (origin && origin === url.origin) headers.set('origin', upstreamOrigin.origin);
 
   const hasBody = request.method !== 'GET' && request.method !== 'HEAD';
   let upstream: Response;
@@ -124,11 +158,13 @@ export async function handle(
   const location = upstream.headers.get('location');
   if (location) {
     // Keep redirects on the public address instead of leaking the internal origin.
-    const resolved = new URL(location, cfg.origin);
-    if (resolved.origin === cfg.origin.origin) {
+    // Relative locations (SvelteKit sends ./x with relative paths) resolve against the request.
+    const resolved = new URL(location, target);
+    if (resolved.origin === upstreamOrigin.origin) {
       response = new Response(upstream.body, upstream);
       response.headers.set('location', resolved.pathname + resolved.search + resolved.hash);
     }
   }
-  return withSecurity(response, url.pathname.startsWith('/api/'));
+  const apiPrefix = (vf ? vf.base : '') + '/api/';
+  return withSecurity(response, url.pathname.startsWith(apiPrefix));
 }

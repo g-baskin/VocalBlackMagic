@@ -12,3 +12,9 @@ test('worker entrypoint exports ContainerProxy, the container class and a defaul
   expect(source).toMatch(/^export default \{/m);
   if (source.includes('outboundByHost')) expect(source).toContain('ContainerProxy');
 });
+
+test('worker entrypoint pins the container port per app', () => {
+  const source = readFileSync(join(import.meta.dir, 'worker.ts'), 'utf8');
+  expect(source).toContain('switchPort(forwarded, port)');
+  expect(source).toMatch(/requiredPorts = \[STUDIO_PORT, VOCAL_FIX_PORT\]/);
+});

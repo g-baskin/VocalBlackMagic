@@ -13,7 +13,10 @@
     "ACCESS_AUD": "7e7d18140e88e5ac6c842d6a7a88679122e167226e90d87244eb3b6293d46f97", // gitleaks:allow (public: it is in every Access login redirect)
     "OWNER_EMAILS": "gregory.baskin@gmail.com",
     // The studio as seen inside the container.
-    "ORIGIN_URL": "http://localhost:3002"
+    "ORIGIN_URL": "http://localhost:3002",
+    // Vocal Fix runs in the same container on 3001, built with base path /vocal-fix.
+    "VOCAL_FIX_BASE": "/vocal-fix",
+    "VOCAL_FIX_ORIGIN_URL": "http://localhost:3001"
   },
   // Secrets: EDGE_SECRET (required) and optional provider keys (REPLICATE_API_TOKEN, FAL_KEY, ...).
   "containers": [
