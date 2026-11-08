@@ -142,7 +142,9 @@ export function stylePrompt(
   return [
     request.prompt.trim(),
     tags.length ? 'Style: ' + tags.join(', ') + '.' : '',
-    'Sound character: ' + soundCharacterNames[request.sound_character] + '.'
+    request.sound_character === 'custom'
+      ? ''
+      : 'Sound character: ' + soundCharacterNames[request.sound_character] + '.'
   ]
     .filter(Boolean)
     .join(' ');
