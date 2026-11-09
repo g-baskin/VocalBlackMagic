@@ -21,6 +21,8 @@ describe('kits', () => {
     expect(padNoteName(k.pads[0].note)).toBe('C1');
     expect(padNoteName(k.pads[35].note)).toBe('B3');
     expect(padNoteName(61)).toBe('C#3');
+    // New pads play the moment they are pressed.
+    expect(k.pads.every((p) => p.launch.lands_on === 'natural')).toBe(true);
   });
 
   test('unknown schema versions are refused, not guessed', () => {

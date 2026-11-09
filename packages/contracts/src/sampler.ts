@@ -307,7 +307,8 @@ export function newKit(id: string, name: string, now: string): Kit {
     pads: Array.from({ length: padCount }, (_, i) => ({
       note: firstPadNote + i,
       layers: [null, null, null],
-      launch: { lands_on: '1 bar', mode: 'one-shot', sync: true, reverse: false }
+      // Natural plays on press; choosing a grid turns on hit-aligned launch.
+      launch: { lands_on: 'natural', mode: 'one-shot', sync: true, reverse: false }
     })),
     macros: Array.from({ length: macroCount }, () => 0),
     whole: {
