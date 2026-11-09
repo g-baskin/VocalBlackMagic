@@ -115,6 +115,30 @@ flowchart LR
 
 Every derived song is a new library entry with `parent_id`, so the original is never overwritten. Derived songs inherit the parent's cover unless it is re-conjured.
 
+## TTB Studio: the Beats workspace
+
+```mermaid
+flowchart LR
+  input["Computer keys and MIDI keyboard"] --> live["Live notes on the selected channel"]
+  live -- "Record" --> project
+  rack["Channel rack steps"] --> project["Beat project: channels, patterns, playlist, mixer"]
+  roll["Piano roll"] --> project
+  plist["Playlist clips"] --> project
+  project --> sched["Scheduler: notes in a tick window, swing, mute and solo"]
+  sched --> clock["Transport: 25 ms timer, 120 ms lookahead on the audio clock"]
+  clock --> voices["Voices: 3-osc synth, drum synth, sampler"]
+  live --> voices
+  sounds["Pads sound library"] --> voices
+  voices --> mix["Mixer: volume, pan and meter per channel, master, ceiling"]
+  mix --> speakers["Speakers"]
+  sched --> offline["Offline render with the same voices and mixer"]
+  offline --> wav["WAV export"]
+  project <--> midi["MIDI file import and export"]
+  project <--> store["Beat store: data/studio/beats/id.json"]
+```
+
+Steps and piano-roll notes are the same data: a step is a note on the channel's root key, one 16th long. Playback and export share the voice and mixer code, so an export sounds like what was played.
+
 ## Vocal Fix: repairing a take
 
 ```mermaid
@@ -186,6 +210,7 @@ flowchart TD
   vfDir --> vfFiles["originals/, derived/, manifest.json with sha256 and provenance"]
   data --> jobsDir["vocal-fix/jobs/id.json"]
   data --> studioJobs["studio/jobs/id.json and studio/seances/"]
+  data --> beatsDir["studio/beats/id.json"]
   data --> voicesDir["shared/voices/"]
   voicesDir --> voiceFiles["voice-id.json and voice-id.model.zip"]
 ```

@@ -180,3 +180,146 @@ describe('transport', () => {
     expect(clicks.length).toBeGreaterThanOrEqual(2);
   });
 });
+
+import { Midi } from '@tonejs/midi';
+import { drumForNote, exportMidi, importMidi } from './midi-file';
+import { Recorder } from './record';
+
+describe('MIDI files', () => {
+  const base = { id: '22222222-2222-4333-8444-555555555555', name: 'Back', now: 'x' };
+  const byName = (p: BeatProject) =>
+    Object.fromEntries(
+      p.channels.map((c) => [
+        c.name,
+        p.patterns
+          .flatMap((pat) => pat.notes[c.id] ?? [])
+          .sort((a, b) => a.start - b.start || a.key - b.key)
+      ])
+    );
+
+  test('a pattern exported to .mid imports back to the same notes', async () => {
+    const p = project();
+    p.patterns[0].notes.lead = [{ key: 67, start: 30, length: 50, velocity: 77 }];
+    const bytes = await exportMidi(p, 'pattern', 'p1');
+    const midi = new Midi(bytes);
+    expect(midi.tracks.filter((t) => t.channel === 9).length).toBe(4);
+    expect(midi.tracks.find((t) => t.name === 'Kick')!.notes[0].midi).toBe(36);
+    const back = await importMidi(bytes.buffer, base);
+    expect(back.project.bpm).toBe(124);
+    expect(back.dropped).toBe(0);
+    expect(back.project.patterns).toHaveLength(1);
+    expect(back.project.patterns[0].steps).toBe(16);
+    const want = byName(p);
+    const got = byName(back.project);
+    for (const name of ['Kick', 'Clap', 'Hat', 'Snare', 'Bass', 'Lead'])
+      expect(got[name]).toEqual(want[name]);
+    expect(back.project.channels.map((c) => c.name)).toEqual([
+      'Kick',
+      'Snare',
+      'Clap',
+      'Hat',
+      'Bass',
+      'Lead'
+    ]);
+    expect(back.project.channels.find((c) => c.name === 'Kick')!.instrument).toMatchObject({
+      kind: 'drum',
+      drum: 'kick'
+    });
+  });
+
+  test('a long song splits into 16-bar patterns on the playlist', async () => {
+    const midi = new Midi();
+    midi.header.setTempo(90);
+    const t = midi.addTrack();
+    t.name = 'Keys';
+    for (let bar = 0; bar < 20; bar++)
+      t.addNote({
+        midi: 60,
+        ticks: bar * 4 * midi.header.ppq,
+        durationTicks: midi.header.ppq,
+        velocity: 0.8
+      });
+    const drums = midi.addTrack();
+    drums.channel = 9;
+    drums.addNote({ midi: 49, ticks: 0, durationTicks: 10, velocity: 1 });
+    const out = await importMidi(new Uint8Array(midi.toArray()).buffer, base);
+    expect(out.project.bpm).toBe(90);
+    expect(out.project.patterns.map((p) => [p.name, p.steps])).toEqual([
+      ['Bars 1–16', 256],
+      ['Bars 17–20', 64]
+    ]);
+    expect(out.project.playlist.clips.map((c) => c.start_beat)).toEqual([0, 64]);
+    expect(out.project.channels.map((c) => c.name)).toEqual(['Open hat', 'Keys']);
+    expect(out.notes).toBe(21);
+  });
+
+  test('a stray note far past the playlist is dropped without empty passes', async () => {
+    const midi = new Midi();
+    const t = midi.addTrack();
+    t.addNote({ midi: 60, ticks: 0, durationTicks: 100, velocity: 0.8 });
+    t.addNote({ midi: 62, ticks: 2 ** 30, durationTicks: 100, velocity: 0.8 });
+    const started = performance.now();
+    const out = await importMidi(new Uint8Array(midi.toArray()).buffer, base);
+    expect(performance.now() - started).toBeLessThan(1000);
+    expect(out.project.patterns).toHaveLength(1);
+    expect(out.dropped).toBe(1);
+  });
+
+  test('bad and empty files are refused with a plain message', async () => {
+    await expect(importMidi(new Uint8Array([1, 2, 3]).buffer, base)).rejects.toThrow(/not a MIDI/);
+    const empty = new Midi();
+    empty.addTrack();
+    await expect(importMidi(new Uint8Array(empty.toArray()).buffer, base)).rejects.toThrow(
+      /no notes/
+    );
+    await expect(
+      exportMidi(
+        { ...project(), patterns: [{ id: 'p1', name: 'E', steps: 16, notes: {} }] },
+        'pattern',
+        'p1'
+      )
+    ).rejects.toThrow(/Nothing/);
+  });
+
+  test('GM drums map to drum synths', () => {
+    expect([35, 36, 38, 39, 42, 46, 45, 49, 56, 76].map(drumForNote)).toEqual([
+      'kick',
+      'kick',
+      'snare',
+      'clap',
+      'hat',
+      'openhat',
+      'tom',
+      'openhat',
+      'perc',
+      'perc'
+    ]);
+  });
+});
+
+describe('recording', () => {
+  test('notes land where they were played, quantised when asked', () => {
+    const r = new Recorder(384, 24);
+    r.noteOn('a', 60, 100, 50);
+    expect(r.noteOff('a', 95)).toEqual({ key: 60, start: 48, length: 48, velocity: 100 });
+    r.noteOn('b', 62, 90, 5);
+    expect(r.noteOff('b', 8)).toEqual({ key: 62, start: 0, length: 24, velocity: 90 });
+    expect(r.noteOff('unknown', 10)).toBeNull();
+  });
+
+  test('a note held over the loop point wraps, and stop closes held notes', () => {
+    const r = new Recorder(384, 1);
+    r.noteOn('a', 60, 100, 370);
+    expect(r.noteOff('a', 20)).toEqual({ key: 60, start: 370, length: 34, velocity: 100 });
+    r.noteOn('b', 64, 80, 380);
+    r.noteOn('c', 67, 80, 100);
+    expect(r.flush(200)).toEqual([
+      { id: 'b', note: { key: 64, start: 380, length: 204, velocity: 80 } },
+      { id: 'c', note: { key: 67, start: 100, length: 100, velocity: 80 } }
+    ]);
+    // A start quantised up to the loop end wraps to 0.
+    const q = new Recorder(384, 96);
+    q.noteOn('d', 60, 100, 370);
+    expect(q.noteOff('d', 380)?.start).toBe(0);
+  });
+});

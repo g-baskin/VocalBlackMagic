@@ -27,7 +27,7 @@
 - [ ] HeartMuLa provider adapter and verified external V2 integration (if API and commercial terms permit). Partial: HeartMuLa runs through Replicate or the self-hosted engine in the studio router; external V2 is not integrated.
 - [ ] Four-generation comparison, blind listening panel and structured preference capture. Partial: the Séance compares 2 to 4 models blind for one listener and keeps a ranking leaderboard; no multi-listener panel.
 - [ ] Prompt optimization from preference feedback; seed and style replication only when provider supports.
-- [ ] Stems, section regenerate, extend, remix, waveform timeline, pattern editor, MIDI export with actual conversion. Partial: stems (Demucs), repaint, extend, cover/restyle and reimagine exist in development; timeline, pattern editor and MIDI do not.
+- [ ] Stems, section regenerate, extend, remix, waveform timeline, pattern editor, MIDI export with actual conversion. Partial: stems (Demucs), repaint, extend, cover/restyle and reimagine exist in development; the Beats page (development only) adds a pattern editor (channel rack, piano roll, playlist, mixer) with `.mid` import and export of its own patterns. A waveform timeline for generated songs and audio-to-MIDI conversion do not exist.
 - **Gate:** reproducible preference benchmark on 20+ varied prompts and multiple listeners.
 
 ## Phase 4 — Production readiness

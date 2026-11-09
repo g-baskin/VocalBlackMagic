@@ -8,6 +8,9 @@
     swing = $bindable(),
     masterDb = $bindable(),
     metronome = $bindable(),
+    mode = $bindable(),
+    recording = $bindable(),
+    recQuantise = $bindable(),
     playing,
     position,
     projects,
@@ -30,13 +33,17 @@
     ondelete,
     onexport,
     onmidi,
-    extra
+    onexportmidi,
+    onimportmidi
   }: {
     name: string;
     bpm: number;
     swing: number;
     masterDb: number;
     metronome: boolean;
+    mode: 'pattern' | 'song';
+    recording: boolean;
+    recQuantise: number;
     playing: boolean;
     position: string;
     projects: BeatProjectSummary[];
@@ -59,8 +66,11 @@
     ondelete: (id: string) => void;
     onexport: () => void;
     onmidi: () => void;
-    extra?: import('svelte').Snippet;
+    onexportmidi: () => void;
+    onimportmidi: (file: File) => void;
   } = $props();
+
+  let fileInput: HTMLInputElement;
 
   let bpmDrag: { y: number; bpm: number } | null = null;
   function bpmDown(e: PointerEvent) {
@@ -118,7 +128,36 @@
         <svg viewBox="0 0 20 20" aria-hidden="true"><path d="M6 4l10 6-10 6z" /></svg>
       {/if}
     </button>
-    {@render extra?.()}
+    <button
+      class="rec"
+      class:on={recording}
+      aria-pressed={recording}
+      aria-label="Record"
+      title={mode === 'song'
+        ? 'Recording works in Pattern mode'
+        : 'Record keys and MIDI into the current pattern while it plays'}
+      onclick={() => (recording = !recording)}
+      ><svg viewBox="0 0 20 20" aria-hidden="true"><circle cx="10" cy="10" r="5" /></svg></button
+    >
+    <label class="sr" for="beats-rec-q">Record quantise</label>
+    <select id="beats-rec-q" bind:value={recQuantise} title="Record quantise">
+      <option value={1}>Rec: as played</option>
+      <option value={6}>Rec: 1/4 step</option>
+      <option value={12}>Rec: 1/2 step</option>
+      <option value={24}>Rec: step</option>
+    </select>
+    <div class="seg" role="group" aria-label="Play mode">
+      <button
+        class:on={mode === 'pattern'}
+        aria-pressed={mode === 'pattern'}
+        onclick={() => (mode = 'pattern')}>Pat</button
+      >
+      <button
+        class:on={mode === 'song'}
+        aria-pressed={mode === 'song'}
+        onclick={() => (mode = 'song')}>Song</button
+      >
+    </div>
   </div>
 
   <output class="lcd" aria-label="Position, bar:beat:step">{position}</output>
@@ -225,6 +264,27 @@
         onclick={() => ondelete(projectId)}>✕</button
       >
     {/if}
+    <button
+      class="tool"
+      onclick={() => fileInput.click()}
+      disabled={busy}
+      title="Open a .mid file as a new project">Import .mid</button
+    >
+    <input
+      bind:this={fileInput}
+      class="sr"
+      type="file"
+      accept=".mid,.midi,audio/midi,audio/x-midi"
+      tabindex="-1"
+      aria-hidden="true"
+      onchange={(e) => {
+        const el = e.currentTarget as HTMLInputElement;
+        const file = el.files?.[0];
+        el.value = '';
+        if (file) onimportmidi(file);
+      }}
+    />
+    <button class="tool" onclick={onexportmidi} disabled={busy}>Export .mid</button>
     <button class="tool export" onclick={onexport} disabled={busy}>Export WAV</button>
   </div>
 </header>
@@ -296,6 +356,47 @@
   .big.live {
     color: var(--vbm-warning);
     border-color: var(--vbm-warning);
+  }
+  .rec {
+    display: grid;
+    place-items: center;
+    width: 2.3rem;
+    height: 2.3rem;
+    border: 1px solid var(--vbm-border-strong);
+    border-radius: 8px;
+    background: var(--vbm-surface-2);
+    color: #7a3a40;
+    cursor: pointer;
+  }
+  .rec svg {
+    width: 16px;
+    height: 16px;
+    fill: currentColor;
+  }
+  .rec.on {
+    color: #ff3b4e;
+    border-color: #ff3b4e;
+    box-shadow: 0 0 10px rgb(255 59 78 / 45%);
+  }
+  .seg {
+    display: flex;
+    border: 1px solid var(--vbm-border-strong);
+    border-radius: 7px;
+    overflow: hidden;
+  }
+  .seg button {
+    min-height: 2.1rem;
+    padding: 0 0.6rem;
+    border: 0;
+    background: var(--vbm-surface-2);
+    color: var(--vbm-muted);
+    font: inherit;
+    font-size: 0.78rem;
+    cursor: pointer;
+  }
+  .seg button.on {
+    background: var(--vbm-blue);
+    color: #fff;
   }
   .lcd {
     display: inline-flex;
