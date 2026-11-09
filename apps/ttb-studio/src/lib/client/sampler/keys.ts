@@ -28,6 +28,12 @@ export function padForKey(code: string, octave: number): number | null {
   return pad < 36 ? pad : null;
 }
 
+/** Semitones above the keyboard's C for a piano key (0 to 16), or null for other keys. */
+export function pianoOffset(code: string): number | null {
+  const offset = pianoCodes.indexOf(code);
+  return offset < 0 ? null : offset;
+}
+
 /** Z and X shift the octave down and up. */
 export function octaveShift(code: string): -1 | 1 | 0 {
   return code === 'KeyZ' ? -1 : code === 'KeyX' ? 1 : 0;
