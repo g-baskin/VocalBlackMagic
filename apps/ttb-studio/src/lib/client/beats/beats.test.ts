@@ -323,3 +323,40 @@ describe('recording', () => {
     expect(q.noteOff('d', 380)?.start).toBe(0);
   });
 });
+
+import { beatTitle, uploadBeat } from './send';
+
+describe('send to Create', () => {
+  test('titles name the project and, for a pattern, the pattern', () => {
+    expect(beatTitle('Night Drive', '')).toBe('Night Drive');
+    expect(beatTitle('  ', 'Pattern 2')).toBe('Untitled beat (Pattern 2)');
+    expect(beatTitle('x'.repeat(200), '').length).toBe(100);
+  });
+
+  test('uploads the WAV as a beat with the intent header, and reports refusals', async () => {
+    const realFetch = globalThis.fetch;
+    const seen: { url: string; init: RequestInit }[] = [];
+    try {
+      globalThis.fetch = (async (url: string, init: RequestInit) => {
+        seen.push({ url, init });
+        return Response.json({ song: { id: 's1', title: 'T' } }, { status: 201 });
+      }) as unknown as typeof fetch;
+      const song = await uploadBeat(new Blob(['RIFF'], { type: 'audio/wav' }), 'T');
+      expect(song.id).toBe('s1');
+      expect(seen[0].url).toBe('/api/studio/uploads');
+      expect((seen[0].init.headers as Record<string, string>)['x-vbm-intent']).toBe('upload');
+      const form = seen[0].init.body as FormData;
+      expect([form.get('type'), form.get('title'), form.get('rights')]).toEqual([
+        'beat',
+        'T',
+        'true'
+      ]);
+      expect((form.get('file') as File).name).toBe('beat.wav');
+      globalThis.fetch = (async () =>
+        Response.json({ detail: 'Too big.' }, { status: 413 })) as unknown as typeof fetch;
+      await expect(uploadBeat(new Blob([]), 'T')).rejects.toThrow('Too big.');
+    } finally {
+      globalThis.fetch = realFetch;
+    }
+  });
+});

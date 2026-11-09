@@ -1,5 +1,7 @@
 <script lang="ts">
   import { onDestroy, onMount, untrack } from 'svelte';
+  import { goto } from '$app/navigation';
+  import { resolve } from '$app/paths';
   import {
     barTicks,
     beatLimits,
@@ -25,6 +27,12 @@
   import { Recorder } from '../../lib/client/beats/record';
   import type { PlayMode } from '../../lib/client/beats/schedule';
   import { renderBeat, saveFile } from '../../lib/client/beats/render';
+  import {
+    beatTitle,
+    createPrefillKey,
+    uploadBeat,
+    type CreatePrefill
+  } from '../../lib/client/beats/send';
   import { Transport } from '../../lib/client/beats/transport';
   import ChannelRack from '../../lib/client/beats/ui/ChannelRack.svelte';
   import ChannelSettings from '../../lib/client/beats/ui/ChannelSettings.svelte';
@@ -590,6 +598,47 @@
     }
   }
 
+  async function sendToCreate() {
+    const what = mode === 'song' ? '' : pattern.name;
+    const title = beatTitle(project.name, what);
+    if (
+      !confirm(
+        'Add "' +
+          title +
+          '" to your Library and open Create with it as the music reference?\n\n' +
+          'By continuing you confirm: I made this or have the rights to use it ' +
+          "(sampler sounds sliced from library songs keep those songs' licences)."
+      )
+    )
+      return;
+    busy = true;
+    try {
+      if (dirty) {
+        // Leaving the page would lose unsaved edits, so save first.
+        await save();
+        if (dirty) return;
+      }
+      const e = ensureEngine();
+      await loadSounds();
+      status = 'Rendering ' + (what || 'the song') + '…';
+      const wav = await renderBeat(current(), mode, patternId, e.buffers);
+      status = 'Adding it to your Library…';
+      const song = await uploadBeat(wav, title);
+      const prefill: CreatePrefill = {
+        title: project.name.slice(0, 80),
+        prompt: project.bpm + ' BPM',
+        reference: song.id
+      };
+      sessionStorage.setItem(createPrefillKey, JSON.stringify(prefill));
+      stop();
+      await goto(resolve('/'));
+    } catch (e) {
+      fail(e, 'Could not send the beat to Create.');
+    } finally {
+      busy = false;
+    }
+  }
+
   async function exportMidiFile() {
     busy = true;
     try {
@@ -722,6 +771,7 @@
     onmidi={toggleMidi}
     onexportmidi={exportMidiFile}
     onimportmidi={importMidiFile}
+    onsend={sendToCreate}
   />
 
   {#if error}<p class="msg error" role="alert">

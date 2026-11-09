@@ -34,7 +34,8 @@
     onexport,
     onmidi,
     onexportmidi,
-    onimportmidi
+    onimportmidi,
+    onsend
   }: {
     name: string;
     bpm: number;
@@ -68,6 +69,7 @@
     onmidi: () => void;
     onexportmidi: () => void;
     onimportmidi: (file: File) => void;
+    onsend: () => void;
   } = $props();
 
   let fileInput: HTMLInputElement;
@@ -286,6 +288,13 @@
     />
     <button class="tool" onclick={onexportmidi} disabled={busy}>Export .mid</button>
     <button class="tool export" onclick={onexport} disabled={busy}>Export WAV</button>
+    <button
+      class="tool send"
+      onclick={onsend}
+      disabled={busy}
+      title="Render this beat, add it to your Library and open Create with it as the music reference"
+      >Send to Create</button
+    >
   </div>
 </header>
 
@@ -450,6 +459,11 @@
     border: 0;
     background: var(--vbm-gradient);
     color: var(--vbm-on-accent);
+    font-weight: 600;
+  }
+  .tool.send {
+    border-color: var(--vbm-blue);
+    color: var(--vbm-blue-text);
     font-weight: 600;
   }
   .project {

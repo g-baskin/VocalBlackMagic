@@ -79,6 +79,9 @@
   let busy = $state(false);
   let writtenLyrics = $state<string | null>(null);
   let lyricsNote = $state(false);
+  // A beat sent from the Beats page: preselected as the music reference.
+  let beatRef = $state<string | null>(null);
+  const beatSong = $derived(beatRef ? librarySongs.find((s) => s.id === beatRef) : undefined);
   // What the form held before a pasted full prompt was split, so Undo can put it back.
   let beforeSplit = $state<{
     mode: 'simple' | 'custom';
@@ -350,7 +353,11 @@
 
   onMount(async () => {
     api<{ voices: { id: string; performer: string }[] }>('/api/studio/voices')
-      .then((r) => (voices = r.voices))
+      .then((r) => {
+        voices = r.voices;
+        // The reference only applies when your voice sings, so offer the first one.
+        if (beatRef && !sungBy && voices[0]) sungBy = voices[0].id;
+      })
       .catch(() => undefined);
     api<{ songs: SongMeta[] }>('/api/studio/songs')
       .then((r) => (librarySongs = r.songs))
@@ -359,11 +366,22 @@
     if (prefill) {
       sessionStorage.removeItem('vbm-studio-prefill');
       try {
-        const data = JSON.parse(prefill) as { title?: string; lyrics?: string; prompt?: string };
+        const data = JSON.parse(prefill) as {
+          title?: string;
+          lyrics?: string;
+          prompt?: string;
+          reference?: string;
+        };
         mode = 'custom';
         title = data.title ?? '';
         lyrics = data.lyrics ?? '';
         if (data.prompt) stylePrompt = data.prompt.slice(0, MAX_STYLE_CHARS);
+        if (typeof data.reference === 'string' && data.reference) {
+          beatRef = data.reference;
+          referenceSong = data.reference;
+          instrumental = false;
+          if (!sungBy && voices[0]) sungBy = voices[0].id;
+        }
       } catch {
         // ignore a malformed hand-off
       }
@@ -531,6 +549,23 @@
     <div class="loaded-note" role="status">
       <span>Lyrics loaded from your upload</span>
       <button type="button" aria-label="Dismiss" onclick={() => (lyricsNote = false)}>×</button>
+    </div>
+  {/if}
+
+  {#if beatRef}
+    <div class="loaded-note" role="status">
+      <span>
+        {#if voices.length}
+          Your beat “{beatSong?.title ?? 'from Beats'}” is in your Library and set as the
+          <strong>Music reference</strong>. Choose who sings under <strong>Sung by</strong>, write
+          lyrics, then Summon. It guides the music; the model makes new audio, not your exact beat.
+        {:else}
+          Your beat “{beatSong?.title ?? 'from Beats'}” is in your Library. Using it as a music
+          reference needs your own voice: train one in Vocal Fix. Without one, Create writes new
+          music from your description.
+        {/if}
+      </span>
+      <button type="button" aria-label="Dismiss" onclick={() => (beatRef = null)}>×</button>
     </div>
   {/if}
 
