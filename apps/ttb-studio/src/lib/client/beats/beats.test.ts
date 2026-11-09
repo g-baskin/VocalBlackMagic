@@ -1,5 +1,5 @@
 import { describe, expect, test } from 'bun:test';
-import { newBeatProject, newPattern, type BeatProject } from '@vbm/contracts';
+import { newBeatProject, newPattern, validateBeatProject, type BeatProject } from '@vbm/contracts';
 import { audibleChannels, loopTicks, swingOffset, windowEvents } from './schedule';
 
 const project = (): BeatProject =>
@@ -358,5 +358,28 @@ describe('send to Create', () => {
     } finally {
       globalThis.fetch = realFetch;
     }
+  });
+});
+
+import { loopedForSend } from './send';
+
+describe('sending a pattern to Create', () => {
+  test('one pattern is looped to at least 30 seconds from bar 1', () => {
+    const p = project();
+    // 1 bar at 124 BPM is about 1.94 s, so 16 passes are needed.
+    const out = loopedForSend(p, 'p1');
+    expect(out.repeats).toBe(16);
+    expect(out.project.playlist.clips.map((c) => c.start_beat).slice(0, 3)).toEqual([0, 4, 8]);
+    expect(out.project.playlist.clips.every((c) => c.pattern_id === 'p1' && c.track === 0)).toBe(
+      true
+    );
+    expect(p.playlist.clips).toHaveLength(1);
+    expect(validateBeatProject(out.project)).toBeNull();
+    // A 16-bar pattern at 60 BPM already lasts 64 s: one pass.
+    const long = project();
+    long.bpm = 60;
+    long.patterns[0].steps = 256;
+    expect(loopedForSend(long, 'p1').repeats).toBe(1);
+    expect(() => loopedForSend(p, 'nope')).toThrow(/pattern/);
   });
 });

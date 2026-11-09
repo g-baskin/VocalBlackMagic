@@ -35,6 +35,9 @@
 
   const uid = $props.id();
   let changing = $state(false);
+  let seconds = $state(0);
+  // Strength is only honoured by the self-hosted engine; fal's remix has no such setting.
+  const strengthWorks = $derived(remix?.runner === 'engine');
 </script>
 
 <section class="beat" aria-labelledby="{uid}-title">
@@ -68,8 +71,20 @@
   {/if}
 
   {#if song?.audio}
-    <audio controls preload="metadata" src={audioUrl(songId)} aria-label="Play {song.title}"
+    <audio
+      controls
+      preload="metadata"
+      src={audioUrl(songId)}
+      aria-label="Play {song.title}"
+      bind:duration={seconds}
     ></audio>
+    {#if seconds > 0 && seconds < 10}
+      <p class="short" role="status">
+        This beat is only {Math.round(seconds)} seconds long, too short for song models to work with (the
+        likely reason a remix fails). In Beats, Send to Create now loops a pattern to at least 30 seconds,
+        or arrange a longer song in Song mode.
+      </p>
+    {/if}
   {/if}
 
   <fieldset class="uses">
@@ -96,13 +111,17 @@
       <span>
         <strong>Keep my beat's structure, add vocals</strong>
         <small>
-          ACE-Step remixes your actual audio with your style and lyrics. About $0.05. Unverified: it
-          may come back without vocals.
+          ACE-Step remixes your actual audio with your style and lyrics (lyrics needed, or it stays
+          instrumental). About $0.05. Not yet verified with a real run.
           {#if remix && !remix.available}<em>Unavailable: {remix.reason}</em>{/if}
         </small>
       </span>
     </label>
-    {#if use === 'remix'}
+    {#if use === 'remix' && !strengthWorks}
+      <p class="note">
+        {remix?.runner ?? 'This runner'} has no "how far from your beat" setting; the remix decides.
+      </p>
+    {:else if use === 'remix'}
       <label class="strength">
         <span>How far from your beat: {strength.toFixed(2)} (0 keeps it, 1 ignores it)</span>
         <input type="range" min="0" max="1" step="0.05" bind:value={strength} />
@@ -242,6 +261,20 @@
     display: block;
     font-style: normal;
     color: var(--vbm-warning);
+  }
+  .short {
+    margin: 0;
+    padding: 0.5rem 0.7rem;
+    border-radius: 8px;
+    background: rgb(255 192 77 / 12%);
+    color: var(--vbm-warning);
+    font-size: 0.8rem;
+  }
+  .note {
+    margin: 0;
+    padding: 0 0.3rem;
+    font-size: 0.78rem;
+    color: var(--vbm-muted);
   }
   .strength {
     display: grid;

@@ -30,6 +30,8 @@
   import {
     beatTitle,
     createPrefillKey,
+    loopedForSend,
+    minSendSeconds,
     uploadBeat,
     type CreatePrefill
   } from '../../lib/client/beats/send';
@@ -599,7 +601,7 @@
   }
 
   async function sendToCreate() {
-    const what = mode === 'song' ? '' : pattern.name;
+    const what = mode === 'song' ? '' : pattern.name + ', looped';
     const title = beatTitle(project.name, what);
     if (
       !confirm(
@@ -620,8 +622,20 @@
       }
       const e = ensureEngine();
       await loadSounds();
-      status = 'Rendering ' + (what || 'the song') + '…';
-      const wav = await renderBeat(current(), mode, patternId, e.buffers);
+      // One pattern is a bar or two: loop it so song models get enough music to work with.
+      const looped = mode === 'pattern' ? loopedForSend(current(), patternId) : null;
+      status = looped
+        ? 'Rendering ' +
+          pattern.name +
+          ' ×' +
+          looped.repeats +
+          ' (at least ' +
+          minSendSeconds +
+          ' s)…'
+        : 'Rendering the song…';
+      const wav = looped
+        ? await renderBeat(looped.project, 'song', patternId, e.buffers)
+        : await renderBeat(current(), mode, patternId, e.buffers);
       status = 'Adding it to your Library…';
       const song = await uploadBeat(wav, title);
       const prefill: CreatePrefill = {

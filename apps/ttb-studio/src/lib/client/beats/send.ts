@@ -1,4 +1,4 @@
-import type { SongMeta } from '@vbm/contracts';
+import { beatLimits, type BeatProject, type SongMeta } from '@vbm/contracts';
 
 /** The hand-off key the Create page reads once on load (shared with the lyrics page). */
 export const createPrefillKey = 'vbm-studio-prefill';
@@ -36,4 +36,33 @@ export async function uploadBeat(wav: Blob, title: string): Promise<SongMeta> {
       reply.detail || 'Adding the beat to the library failed (' + response.status + ').'
     );
   return reply.song;
+}
+
+/** Seconds a beat sent to Create should last at least; one bar is too short for song models. */
+export const minSendSeconds = 30;
+
+/**
+ * A copy of the project whose playlist repeats one pattern from bar 1 until it lasts at least
+ * `minSeconds`, so a single pattern can be rendered in Song mode as a usable beat.
+ */
+export function loopedForSend(
+  project: BeatProject,
+  patternId: string,
+  minSeconds = minSendSeconds
+): { project: BeatProject; repeats: number } {
+  const pattern = project.patterns.find((p) => p.id === patternId);
+  if (!pattern) throw new Error('Pick a pattern first.');
+  const beats = pattern.steps / 4;
+  const passSeconds = (beats * 60) / project.bpm;
+  const fit = Math.min(
+    beatLimits.clips,
+    Math.floor(beatLimits.maxStartBeat / beats) + 1,
+    Math.max(1, Math.ceil(minSeconds / passSeconds))
+  );
+  const clips = Array.from({ length: fit }, (_, i) => ({
+    pattern_id: pattern.id,
+    track: 0,
+    start_beat: i * beats
+  }));
+  return { project: { ...project, playlist: { clips } }, repeats: fit };
 }

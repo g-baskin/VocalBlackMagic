@@ -531,12 +531,16 @@
       error = 'Describe the style for the remix.';
       return;
     }
+    if (remix && !lyrics.trim()) {
+      error = 'Add lyrics: without them the remix comes back instrumental.';
+      return;
+    }
     const body = remix
       ? {
           action: 'cover',
           prompt: style,
           strength: remixStrength,
-          ...(lyrics.trim() ? { lyrics: lyrics.slice(0, 6000) } : {}),
+          lyrics: lyrics.slice(0, 6000),
           ...(title.trim() ? { title: title.slice(0, 120) } : {})
         }
       : { lyrics, title: title.trim() ? title.slice(0, 120) : null };
@@ -740,7 +744,7 @@
               label={beatDirect && beatUse === 'reference'
                 ? 'Lyrics (needed for your beat; about the first 380 characters are sung)'
                 : beatDirect
-                  ? 'Lyrics (optional for the remix)'
+                  ? 'Lyrics (needed: without them the remix stays instrumental)'
                   : 'Lyrics (leave empty and we write them)'}
               bind:value={lyrics}
               rows={10}
