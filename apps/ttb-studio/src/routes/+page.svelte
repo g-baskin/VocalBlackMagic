@@ -19,6 +19,7 @@
     type SongMeta,
     type SoundCharacter,
     type StudioEngine,
+    type StudioEditInfo,
     type StudioEngineInfo,
     type StudioJob,
     type StudioModel,
@@ -27,6 +28,7 @@
   } from '@vbm/contracts';
   import { ApiError, api, sleep } from '../lib/client/api';
   import SongCard from '../lib/client/SongCard.svelte';
+  import BeatAttachment, { type BeatUse } from '../lib/client/BeatAttachment.svelte';
   import ModelPicker, { type PickerItem } from '../lib/client/ModelPicker.svelte';
   import StyleTagPicker from '../lib/client/StyleTagPicker.svelte';
   import { parseTags } from '../lib/client/style-tags';
@@ -79,9 +81,21 @@
   let busy = $state(false);
   let writtenLyrics = $state<string | null>(null);
   let lyricsNote = $state(false);
-  // A beat sent from the Beats page: preselected as the music reference.
+  // An attached beat (sent from Beats or picked from the Library) and how this song uses it.
   let beatRef = $state<string | null>(null);
-  const beatSong = $derived(beatRef ? librarySongs.find((s) => s.id === beatRef) : undefined);
+  let beatUse = $state<BeatUse>('reference');
+  let remixStrength = $state(0.5);
+  let remixInfo = $state<StudioEditInfo | null>(null);
+  const beatSong = $derived(beatRef ? (librarySongs.find((s) => s.id === beatRef) ?? null) : null);
+  const beatActive = $derived(!!beatRef && mode === 'custom' && beatUse !== 'none');
+  // With your voice chosen, "in my beat's style" is the voice summon; otherwise the beat drives a
+  // fixed model directly and the model list does not apply.
+  const beatDirect = $derived(beatActive && !(beatUse === 'reference' && !!sungBy));
+  const beatModel = $derived(
+    beatUse === 'remix'
+      ? 'ACE-Step remix of your beat' + (remixInfo?.runner ? ' (' + remixInfo.runner + ')' : '')
+      : 'MiniMax Music-01 with your beat as the reference song'
+  );
   // What the form held before a pasted full prompt was split, so Undo can put it back.
   let beforeSplit = $state<{
     mode: 'simple' | 'custom';
@@ -312,13 +326,19 @@
     else description = prompt;
     tagText = fixedTags;
   }
-  const voiceSummon = $derived(mode === 'custom' && !!sungBy && !instrumental);
+  const voiceSummon = $derived(
+    mode === 'custom' && !!sungBy && !instrumental && !(beatActive && beatUse === 'remix')
+  );
   const estimate = $derived(
-    voiceSummon
-      ? (0.035 + (coverArt ? 0.003 : 0)) * Number(takes)
-      : spec
-        ? (spec.est_cost_usd + (coverArt ? 0.003 : 0)) * Number(takes)
-        : 0
+    beatDirect
+      ? beatUse === 'remix'
+        ? 0.05
+        : 0.035
+      : voiceSummon
+        ? (0.035 + (coverArt ? 0.003 : 0)) * Number(takes)
+        : spec
+          ? (spec.est_cost_usd + (coverArt ? 0.003 : 0)) * Number(takes)
+          : 0
   );
   const sungByOptions = $derived([
     { value: '', label: "The engine's own voice" },
@@ -340,6 +360,32 @@
   $effect(() => {
     if (sungBy && !referenceSong && referenceOptions[0]) referenceSong = referenceOptions[0].value;
   });
+  $effect(() => {
+    // The attached beat is the music reference whenever it is in use.
+    if (beatRef && beatUse === 'reference') referenceSong = beatRef;
+  });
+  $effect(() => {
+    // Ask whether the remix can run on this beat (needs a runner with audio editing).
+    const id = beatRef;
+    remixInfo = null;
+    if (!id) return;
+    api<{ edits: StudioEditInfo[] }>('/api/studio/songs/' + encodeURIComponent(id) + '/edit')
+      .then((r) => {
+        if (beatRef !== id) return;
+        remixInfo = r.edits.find((e) => e.action === 'cover') ?? null;
+        if (beatUse === 'remix' && remixInfo && !remixInfo.available) beatUse = 'reference';
+      })
+      .catch(() => undefined);
+  });
+  const shownItems = $derived<PickerItem[]>(
+    beatDirect
+      ? pickerItems.map((i) => ({
+          ...i,
+          disabled: true,
+          reason: "Doesn't use your beat. Choose “Don't use it” on the attached beat to pick this."
+        }))
+      : pickerItems
+  );
   const running = $derived(job?.status === 'running' || job?.status === 'queued');
 
   // Pick a usable engine whenever the instrumental switch changes what is allowed.
@@ -378,6 +424,7 @@
         if (data.prompt) stylePrompt = data.prompt.slice(0, MAX_STYLE_CHARS);
         if (typeof data.reference === 'string' && data.reference) {
           beatRef = data.reference;
+          beatUse = 'reference';
           referenceSong = data.reference;
           instrumental = false;
           if (!sungBy && voices[0]) sungBy = voices[0].id;
@@ -471,8 +518,51 @@
       songs.push((await api<{ song: SongMeta }>('/api/studio/songs/' + songId)).song);
   }
 
+  /** Starts a song straight from the attached beat: Reimagine or the ACE-Step remix. */
+  async function createFromBeat() {
+    if (!beatRef) return;
+    const remix = beatUse === 'remix';
+    const style = [stylePrompt.trim(), tags.join(', ')].filter(Boolean).join(', ').slice(0, 2000);
+    if (!remix && lyrics.trim().length < 10) {
+      error = 'Write some lyrics first: this song is sung (up to about 380 characters are used).';
+      return;
+    }
+    if (remix && !style) {
+      error = 'Describe the style for the remix.';
+      return;
+    }
+    const body = remix
+      ? {
+          action: 'cover',
+          prompt: style,
+          strength: remixStrength,
+          ...(lyrics.trim() ? { lyrics: lyrics.slice(0, 6000) } : {}),
+          ...(title.trim() ? { title: title.slice(0, 120) } : {})
+        }
+      : { lyrics, title: title.trim() ? title.slice(0, 120) : null };
+    busy = true;
+    error = null;
+    songs = [];
+    writtenLyrics = null;
+    job = null;
+    try {
+      const reply = await api<{ job: StudioJob }>(
+        '/api/studio/songs/' + encodeURIComponent(beatRef) + (remix ? '/edit' : '/reimagine'),
+        { method: 'POST', body: JSON.stringify(body) }
+      );
+      job = reply.job;
+      busy = false;
+      await poll(reply.job.id);
+    } catch (e) {
+      error = e instanceof Error ? e.message : 'Could not start the song.';
+    } finally {
+      busy = false;
+    }
+  }
+
   async function summon() {
     if (artistFix.names.length) return;
+    if (beatDirect) return createFromBeat();
     const request = buildRequest();
     const invalid = validateCreateSongRequest(request);
     if (invalid) {
@@ -552,23 +642,6 @@
     </div>
   {/if}
 
-  {#if beatRef}
-    <div class="loaded-note" role="status">
-      <span>
-        {#if voices.length}
-          Your beat “{beatSong?.title ?? 'from Beats'}” is in your Library and set as the
-          <strong>Music reference</strong>. Choose who sings under <strong>Sung by</strong>, write
-          lyrics, then Summon. It guides the music; the model makes new audio, not your exact beat.
-        {:else}
-          Your beat “{beatSong?.title ?? 'from Beats'}” is in your Library. Using it as a music
-          reference needs your own voice: train one in Vocal Fix. Without one, Create writes new
-          music from your description.
-        {/if}
-      </span>
-      <button type="button" aria-label="Dismiss" onclick={() => (beatRef = null)}>×</button>
-    </div>
-  {/if}
-
   {#if capsError}
     <OracleStatus tone="danger">{capsError}</OracleStatus>
   {:else if caps && !caps.allowed}
@@ -593,6 +666,49 @@
           onclick={() => (mode = 'custom')}>Custom</button
         >
       </div>
+      {#if beatRef}
+        {#if mode === 'custom'}
+          <BeatAttachment
+            songId={beatRef}
+            song={beatSong}
+            choices={referenceOptions}
+            bind:use={beatUse}
+            bind:strength={remixStrength}
+            remix={remixInfo}
+            voiceName={sungBy ? (voices.find((v) => v.id === sungBy)?.performer ?? null) : null}
+            onchange={(id) => (beatRef = id)}
+            onremove={() => {
+              beatRef = null;
+              if (referenceSong && !sungBy) referenceSong = '';
+            }}
+          />
+        {:else}
+          <p class="aside beat-simple">
+            Your attached beat “{beatSong?.title ?? '…'}” is used in Custom mode.
+            <button type="button" class="inline" onclick={() => (mode = 'custom')}
+              >Switch to Custom</button
+            >
+          </p>
+        {/if}
+      {:else if mode === 'custom' && referenceOptions.length}
+        <label class="attach">
+          <span>♫ Make it from a beat in your Library (optional)</span>
+          <select
+            value=""
+            onchange={(e) => {
+              const el = e.currentTarget as HTMLSelectElement;
+              if (el.value) {
+                beatRef = el.value;
+                beatUse = 'reference';
+              }
+              el.value = '';
+            }}
+          >
+            <option value="">Choose a song or beat…</option>
+            {#each referenceOptions as o (o.value)}<option value={o.value}>{o.label}</option>{/each}
+          </select>
+        </label>
+      {/if}
       <div class="fields">
         {#if mode === 'simple'}
           <div class="prompt">
@@ -621,7 +737,11 @@
           {@render splitOffer()}
           {#if !instrumental}
             <ArcaneTextarea
-              label="Lyrics (leave empty and we write them)"
+              label={beatDirect && beatUse === 'reference'
+                ? 'Lyrics (needed for your beat; about the first 380 characters are sung)'
+                : beatDirect
+                  ? 'Lyrics (optional for the remix)'
+                  : 'Lyrics (leave empty and we write them)'}
               bind:value={lyrics}
               rows={10}
               maxlength={MAX_LYRICS_CHARS}
@@ -665,12 +785,12 @@
           onclick={summon}
           busy={busy || running}
           disabled={!caps?.allowed ||
-            !spec ||
-            spec.status !== 'ready' ||
-            !!tooLong ||
-            artistFix.names.length > 0}
+            artistFix.names.length > 0 ||
+            (beatDirect
+              ? beatUse === 'remix' && !!remixInfo && !remixInfo.available
+              : !spec || spec.status !== 'ready' || !!tooLong)}
         >
-          ♪ Create
+          {beatActive ? '♪ Create from my beat' : '♪ Create'}
         </RuneButton>
         {#if running}<RuneButton variant="ghost" onclick={cancel}>Cancel</RuneButton>{/if}
         <p class="price">Estimated cost <strong>${estimate.toFixed(3)}</strong></p>
@@ -681,7 +801,11 @@
       <div class="fields">
         {#if mode === 'custom' && !instrumental}
           <ArcaneSelect label="Sung by" bind:value={sungBy} options={sungByOptions} />
-          {#if sungBy}
+          {#if beatActive && beatUse === 'remix' && sungBy}
+            <p class="aside">The remix keeps the beat's own sound; Sung by is not used.</p>
+          {:else if sungBy && beatActive}
+            <p class="aside">Music reference: your attached beat.</p>
+          {:else if sungBy}
             {#if referenceOptions.length}
               <ArcaneSelect
                 label="Music reference"
@@ -703,7 +827,10 @@
         {#if voiceSummon}
           <p class="aside">Model: MiniMax Music-01 with your voice's Gold Vocal as reference.</p>
         {:else if caps}
-          <ModelPicker items={pickerItems} bind:value={engine} />
+          {#if beatDirect}
+            <p class="aside beat-model">Model: {beatModel}. Other models don't use your beat.</p>
+          {/if}
+          <ModelPicker items={shownItems} bind:value={engine} />
         {:else if capsError}
           <div class="caps-retry">
             <p>Models couldn't load.</p>
@@ -717,7 +844,11 @@
             size={40}
           />
         {/if}
-        {#if spec?.duration}
+        {#if beatDirect}
+          <p class="aside">
+            Length, sound character, cover art and takes don't apply to a song made from your beat.
+          </p>
+        {:else if spec?.duration}
           <ArcaneInput
             label={'Length in seconds (' + spec.duration.min + '–' + spec.duration.max + ')'}
             type="number"
@@ -726,13 +857,15 @@
         {:else if spec}
           <p class="aside">This model chooses the song length itself.</p>
         {/if}
-        <ArcaneSelect label="Sound character" bind:value={character} options={characterOptions} />
-        <RuneToggle
-          label="Generate cover art"
-          bind:checked={coverArt}
-          hint="One cover per take with FLUX Schnell, about $0.003 each."
-        />
-        <ArcaneSelect label="Takes" bind:value={takes} options={takeOptions} />
+        {#if !beatDirect}
+          <ArcaneSelect label="Sound character" bind:value={character} options={characterOptions} />
+          <RuneToggle
+            label="Generate cover art"
+            bind:checked={coverArt}
+            hint="One cover per take with FLUX Schnell, about $0.003 each."
+          />
+          <ArcaneSelect label="Takes" bind:value={takes} options={takeOptions} />
+        {/if}
       </div>
     </ArcanePanel>
   </div>
@@ -764,6 +897,33 @@
 </div>
 
 <style>
+  .attach {
+    display: grid;
+    gap: 0.3rem;
+    margin: 0 0 1rem;
+    font-size: 0.85rem;
+    color: var(--vbm-muted);
+  }
+  .attach select {
+    min-height: var(--vbm-tap);
+    padding: 0 0.6rem;
+    border: 1px dashed var(--vbm-border-strong);
+    border-radius: 10px;
+    background: var(--vbm-surface-2);
+    color: var(--vbm-text);
+    font: inherit;
+  }
+  .beat-simple .inline {
+    border: 0;
+    background: none;
+    color: var(--vbm-blue-text);
+    font: inherit;
+    text-decoration: underline;
+    cursor: pointer;
+  }
+  .beat-model {
+    color: var(--vbm-blue-text);
+  }
   .loaded-note {
     display: flex;
     align-items: center;
