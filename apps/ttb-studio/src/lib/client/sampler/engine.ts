@@ -292,6 +292,12 @@ export function startPad(
   return voices;
 }
 
+/** Fades a voice out from a known context time (offline export, where currentTime is 0). */
+export function stopVoiceAt(voice: Pick<Voice, 'source' | 'amp'>, at: number, fade = 0.01): void {
+  voice.amp.gain.setTargetAtTime(0, at, fade / 3);
+  voice.source.stop(at + fade * 2);
+}
+
 export function releaseVoice(ctx: BaseAudioContext, voice: Voice, fast = false): void {
   const now = ctx.currentTime;
   const time = fast ? 0.005 : voice.release;

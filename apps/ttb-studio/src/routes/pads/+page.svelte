@@ -15,7 +15,14 @@
   import { launchRate, PadEngine } from '../../lib/client/sampler/engine';
   import { History } from '../../lib/client/sampler/history';
   import { inspire } from '../../lib/client/sampler/inspire';
-  import { isTypingTarget, maxOctave, octaveShift, padForKey } from '../../lib/client/sampler/keys';
+  import {
+    HeldKeys,
+    isTypingTarget,
+    maxOctave,
+    octaveShift,
+    padForKey,
+    PressTracker
+  } from '../../lib/client/sampler/keys';
   import { connectMidi, macroForCc, type MidiConnection } from '../../lib/client/sampler/midi';
   import { download, renderKitReel, renderPad } from '../../lib/client/sampler/render';
   import HitWave from '../../lib/client/sampler/ui/HitWave.svelte';
@@ -50,6 +57,8 @@
   let midiNote = $state<string | null>(null);
   let historyVersion = $state(0);
   const history = new History<Kit>();
+  const presses = new PressTracker();
+  const heldKeys = new HeldKeys();
   let engine: PadEngine | null = null;
 
   const byId = $derived(new Map(sounds.map((s) => [s.id, s])));
@@ -144,11 +153,14 @@
   async function press(index: number, velocity: number) {
     selectedPad = index;
     active.add(index);
+    const token = presses.begin(index);
     const e = ensureEngine();
     await e.resume();
     const ids = kit.pads[index].layers.filter(Boolean) as string[];
     const missing = ids.filter((id) => !e.sounds.has(id));
     if (missing.length) await Promise.all(missing.map(loadSound));
+    // A gate or loop pad let go while loading must not start after the release.
+    if (kit.pads[index].launch.mode !== 'one-shot' && !presses.isHeld(index, token)) return;
     const started = e.trigger(index, velocity);
     if (started) watch();
     if (started && index === selectedPad) {
@@ -182,6 +194,7 @@
   };
 
   function release(index: number) {
+    presses.end(index);
     engine?.release(index);
     setTimeout(() => active.delete(index), 90);
   }
@@ -270,7 +283,7 @@
   }
 
   async function openKit(id: string) {
-    if (dirty && stored && !confirm('Discard unsaved changes to ' + kit.name + '?')) return;
+    if (dirty && !confirm('Discard unsaved changes to ' + kit.name + '?')) return;
     busy = true;
     try {
       const out = await api<{ kit: Kit }>('/api/studio/kits/' + encodeURIComponent(id));
@@ -400,10 +413,13 @@
     const index = padForKey(e.code, octave);
     if (index === null) return;
     e.preventDefault();
-    if (!e.repeat) void press(index, 100);
+    if (!e.repeat) {
+      heldKeys.down(e.code, index);
+      void press(index, 100);
+    }
   }
   function keyup(e: KeyboardEvent) {
-    const index = padForKey(e.code, octave);
+    const index = heldKeys.up(e.code);
     if (index !== null) release(index);
   }
 
@@ -430,7 +446,7 @@
   });
 
   function beforeUnload(e: BeforeUnloadEvent) {
-    if (dirty && stored) e.preventDefault();
+    if (dirty) e.preventDefault();
   }
 </script>
 

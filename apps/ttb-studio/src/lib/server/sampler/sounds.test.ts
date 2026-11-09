@@ -5,7 +5,7 @@ import path from 'node:path';
 import type { SoundSource } from '@vbm/contracts';
 import { ProviderError } from '../music/errors';
 import { LibraryError } from '../studio/library';
-import { analyse, autoTags, decodeArgs, hitPoint, playableArgs } from './analyse';
+import { analyse, autoTags, centred, decodeArgs, hitPoint, playableArgs } from './analyse';
 import { render, riser } from './fixtures.test-util';
 import { cleanTags, SoundLibrary } from './sounds';
 
@@ -52,6 +52,22 @@ describe('analysis (pure)', () => {
     expect(autoTags(n.features)).toEqual(
       expect.arrayContaining(['bright', 'airy', 'noisy', 'soft'])
     );
+  });
+
+  test('very short sounds still get real spectral features (no false dark/tonal)', () => {
+    let seed = 7;
+    const burst = new Float32Array(Math.round(22050 * 0.03)).map(() => {
+      seed = (seed * 16807) % 2147483647;
+      return 0.8 * (seed / 2147483647 - 0.5);
+    });
+    const a = analyse(burst);
+    expect(a.features.centroid_hz).toBeGreaterThan(3000);
+    expect(a.features.flatness).toBeGreaterThan(0.3);
+    expect(autoTags(a.features)).not.toContain('dark');
+    expect(autoTags(a.features)).not.toContain('tonal');
+    expect(centred(new Float32Array([1, 2]), 6)).toEqual(new Float32Array([0, 0, 1, 2, 0, 0]));
+    const long = new Float32Array(10);
+    expect(centred(long, 4)).toBe(long);
   });
 
   test('ffmpeg commands are argument arrays with a strict full decode', () => {
@@ -133,6 +149,21 @@ describe('SoundLibrary (real ffmpeg)', () => {
     ).rejects.toBeInstanceOf(ProviderError);
     expect(await lib.list()).toEqual([]);
     expect(await readdir(lib.soundsDir)).toEqual([]);
+  });
+
+  test('two edits to one sound at the same time both succeed', async () => {
+    const lib = new SoundLibrary(root);
+    const s = await lib.add({
+      bytes: await render(path.join(root, 'c.wav'), 'sine=f=300:d=0.3'),
+      name: 'Clap',
+      category: 'drum',
+      source: upload
+    });
+    const results = await Promise.allSettled(
+      Array.from({ length: 8 }, (_, i) => lib.update(s.id, { name: 'Clap ' + i }))
+    );
+    expect(results.every((r) => r.status === 'fulfilled')).toBe(true);
+    expect((await readdir(lib.soundDir(s.id))).filter((f) => f.endsWith('.tmp'))).toEqual([]);
   });
 
   test('tags are cleaned and bounded', () => {

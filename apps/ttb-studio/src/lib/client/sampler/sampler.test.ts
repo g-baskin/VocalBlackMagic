@@ -278,3 +278,40 @@ describe('what is playing', () => {
     expect(playingPads(voices, 10)).toEqual([{ pad: 7, progress: null }]);
   });
 });
+
+describe('review fixes', () => {
+  test('a key releases the pad it started, even after an octave change', async () => {
+    const { HeldKeys } = await import('./keys');
+    const keys = new HeldKeys();
+    keys.down('KeyA', 0);
+    // Octave moves up while A is held; key-up must still release pad 0, not pad 12.
+    expect(keys.up('KeyA')).toBe(0);
+    expect(keys.up('KeyA')).toBeNull();
+  });
+
+  test('a pad let go while loading is no longer held; a new press supersedes an old one', async () => {
+    const { PressTracker } = await import('./keys');
+    const presses = new PressTracker();
+    const first = presses.begin(3);
+    presses.end(3);
+    expect(presses.isHeld(3, first)).toBe(false);
+    const second = presses.begin(3);
+    const third = presses.begin(3);
+    expect(presses.isHeld(3, second)).toBe(false);
+    expect(presses.isHeld(3, third)).toBe(true);
+  });
+
+  test('exports fade and stop a voice at a fixed time', async () => {
+    const { stopVoiceAt } = await import('./engine');
+    const calls: unknown[] = [];
+    const voice = {
+      amp: { gain: { setTargetAtTime: (...a: unknown[]) => calls.push(['target', ...a]) } },
+      source: { stop: (t: number) => calls.push(['stop', t]) }
+    } as unknown as Parameters<typeof stopVoiceAt>[0];
+    stopVoiceAt(voice, 5, 0.03);
+    expect(calls).toEqual([
+      ['target', 0, 5, 0.01],
+      ['stop', 5.06]
+    ]);
+  });
+});

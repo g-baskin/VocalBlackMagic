@@ -121,7 +121,8 @@ export class SoundLibrary {
 
   async save(meta: SoundMeta): Promise<void> {
     const dir = this.soundDir(meta.id);
-    const tmp = path.join(dir, 'meta.json.tmp');
+    // Unique per write so two concurrent edits cannot consume each other's temp file.
+    const tmp = path.join(dir, 'meta.json.' + crypto.randomUUID() + '.tmp');
     await writeFile(tmp, JSON.stringify(meta, null, 2));
     await rename(tmp, path.join(dir, 'meta.json'));
   }

@@ -41,6 +41,37 @@ export function isTypingTarget(target: EventTarget | null): boolean {
   return !!el.closest('input, textarea, select, dialog, [contenteditable="true"]');
 }
 
+/** Remembers which pad each held key started, so a later octave change releases the right one. */
+export class HeldKeys {
+  private pads = new Map<string, number>();
+  down(code: string, pad: number): void {
+    this.pads.set(code, pad);
+  }
+  /** The pad this key started, or null when the key was not playing one. */
+  up(code: string): number | null {
+    const pad = this.pads.get(code);
+    this.pads.delete(code);
+    return pad ?? null;
+  }
+}
+
+/** Tracks presses so a pad released while its sound is still loading does not start late. */
+export class PressTracker {
+  private seq = 0;
+  private held = new Map<number, number>();
+  begin(pad: number): number {
+    this.seq += 1;
+    this.held.set(pad, this.seq);
+    return this.seq;
+  }
+  end(pad: number): void {
+    this.held.delete(pad);
+  }
+  isHeld(pad: number, token: number): boolean {
+    return this.held.get(pad) === token;
+  }
+}
+
 export function keyLabel(pad: number, octave: number): string | null {
   const offset = pad - octave * 12;
   const code = pianoCodes[offset];

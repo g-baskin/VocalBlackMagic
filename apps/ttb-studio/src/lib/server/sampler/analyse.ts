@@ -126,9 +126,17 @@ export function hitPoint(samples: Float32Array, rate = analysisRate): number {
   return round(bestAt / rate, 4);
 }
 
+/** Short sounds are zero-padded (centred) to one analysis frame so they still get spectra. */
+export function centred(samples: Float32Array, length: number): Float32Array {
+  if (samples.length >= length) return samples;
+  const out = new Float32Array(length);
+  out.set(samples, Math.floor((length - samples.length) / 2));
+  return out;
+}
+
 /** Mean spectral flatness (geometric / arithmetic mean of power) over frames that carry energy. */
 export function flatness(samples: Float32Array, rate = analysisRate): number {
-  const { frames } = computeSpectrogram(samples, rate, { fftSize: 1024, hop: 2048 });
+  const { frames } = computeSpectrogram(centred(samples, 1024), rate, { fftSize: 1024, hop: 2048 });
   let total = 0;
   let counted = 0;
   for (const frame of frames) {
@@ -164,7 +172,7 @@ export function analyse(samples: Float32Array, rate = analysisRate) {
     peak_db: round(db(peak)),
     rms_db: round(db(rms)),
     crest_db: round(db(peak) - db(rms)),
-    centroid_hz: Math.round(spectralCentroid(samples, rate)),
+    centroid_hz: Math.round(spectralCentroid(centred(samples, 2048), rate)),
     flatness: flatness(samples, rate),
     thumb: heights.map((h) => round(h / top, 3))
   };

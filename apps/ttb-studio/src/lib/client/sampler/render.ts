@@ -1,6 +1,6 @@
 import type { Kit } from '@vbm/contracts';
 import { encodeWav } from '../jobs';
-import { KitBus, startPad, tailSeconds, type LoadedSound } from './engine';
+import { KitBus, startPad, stopVoiceAt, tailSeconds, type LoadedSound } from './engine';
 
 const sampleRate = 44100;
 const maxSeconds = 600;
@@ -49,8 +49,16 @@ async function renderPlan(
   const length = Math.ceil(Math.min(maxSeconds, seconds + tail) * sampleRate);
   const ctx = new OfflineAudioContext(2, length, sampleRate);
   const bus = new KitBus(ctx, kit);
-  for (const step of plan)
-    startPad(ctx, bus, kit, step.pad, sounds, 127, { now: step.at, origin: 0, natural: true });
+  for (const step of plan) {
+    const voices = startPad(ctx, bus, kit, step.pad, sounds, 127, {
+      now: step.at,
+      origin: 0,
+      natural: true
+    });
+    // Loops would otherwise repeat under every later pad; each pad gets only its own slot.
+    const slotEnd = step.at + padSeconds(kit, step.pad, sounds);
+    for (const voice of voices) if (voice.ends === Infinity) stopVoiceAt(voice, slotEnd);
+  }
   return encodeWav(await ctx.startRendering());
 }
 
