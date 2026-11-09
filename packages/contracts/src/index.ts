@@ -93,3 +93,4 @@ export * from './voice';
 export * from './studio';
 export * from './engine';
 export * from './sampler';
+export * from './beats';

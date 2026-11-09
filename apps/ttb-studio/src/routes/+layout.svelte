@@ -27,6 +27,11 @@
       href: resolve('/pads'),
       label: 'Pads',
       icon: 'M4 4h6v6H4zM14 4h6v6h-6zM4 14h6v6H4zM14 14h6v6h-6z'
+    },
+    {
+      href: resolve('/beats'),
+      label: 'Beats',
+      icon: 'M3 6h4v4H3zM10 6h4v4h-4zM17 6h4v4h-4zM3 14h4v4H3zM17 14h4v4h-4z'
     }
   ];
   const more: Tab[] = [
@@ -133,7 +138,7 @@
       inset: auto 0 0 0;
       z-index: 40;
       display: grid;
-      grid-template-columns: repeat(6, 1fr);
+      grid-template-columns: repeat(7, 1fr);
       padding: 0.25rem calc(0.25rem + var(--vbm-safe-right)) calc(0.25rem + var(--vbm-safe-bottom))
         calc(0.25rem + var(--vbm-safe-left));
       background: rgb(26 26 32 / 92%);

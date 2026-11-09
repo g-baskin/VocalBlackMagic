@@ -57,7 +57,7 @@ describe('every /api/studio route is behind guard()', () => {
   // Regression guard: a route that forgets guard() would spend money with no dev gate or Host check.
   test('the route table is the expected one', async () => {
     const all = await handlers();
-    expect(all.length).toBeGreaterThanOrEqual(34);
+    expect(all.length).toBeGreaterThanOrEqual(39);
     for (const name of [
       'sounds/+server.ts GET',
       'sounds/[id]/+server.ts DELETE',
@@ -67,7 +67,12 @@ describe('every /api/studio route is behind guard()', () => {
       'sounds/upload/+server.ts POST',
       'kits/+server.ts POST',
       'kits/[id]/+server.ts PUT',
-      'kits/[id]/+server.ts DELETE'
+      'kits/[id]/+server.ts DELETE',
+      'beats/+server.ts GET',
+      'beats/+server.ts POST',
+      'beats/[id]/+server.ts GET',
+      'beats/[id]/+server.ts PUT',
+      'beats/[id]/+server.ts DELETE'
     ])
       expect(all.map((h) => h.name)).toContain(name);
     for (const name of UNGUARDED) expect(all.map((h) => h.name)).toContain(name);

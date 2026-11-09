@@ -315,3 +315,11 @@ describe('review fixes', () => {
     ]);
   });
 });
+
+test('pianoOffset maps the two piano rows from C', async () => {
+  const { pianoOffset } = await import('./keys');
+  expect(pianoOffset('KeyA')).toBe(0);
+  expect(pianoOffset('KeyW')).toBe(1);
+  expect(pianoOffset('Semicolon')).toBe(16);
+  expect(pianoOffset('KeyQ')).toBeNull();
+});
