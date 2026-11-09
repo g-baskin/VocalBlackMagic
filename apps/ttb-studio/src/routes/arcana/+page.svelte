@@ -3,7 +3,7 @@
   import design from '../../../../../docs/DESIGN.md?raw';
 </script>
 
-<svelte:head><title>The Arcana · The Studio · Vocal Black Magic</title></svelte:head>
+<svelte:head><title>How it works · VBM Studio</title></svelte:head>
 
 <div class="page">
   <DesignCodex markdown={design} />

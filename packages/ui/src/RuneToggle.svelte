@@ -22,7 +22,7 @@
   />
   <label for={toggleId}>
     <span class="track" aria-hidden="true">
-      <span class="gem">◆</span>
+      <span class="gem"></span>
     </span>
     <span class="text">
       <span class="name">{label}</span>
@@ -45,6 +45,7 @@
     display: flex;
     align-items: center;
     gap: 0.85rem;
+    min-height: var(--vbm-tap);
     cursor: pointer;
   }
   .disabled label {
@@ -54,54 +55,44 @@
   .track {
     position: relative;
     flex: none;
-    width: 3.4rem;
-    height: 1.6rem;
-    background: var(--vbm-void);
-    box-shadow: inset 0 0 0 1px var(--vbm-line-bright);
-    clip-path: polygon(8px 0, calc(100% - 8px) 0, 100% 50%, calc(100% - 8px) 100%, 8px 100%, 0 50%);
-    transition: background 0.25s;
+    width: 3rem;
+    height: 1.75rem;
+    background: var(--vbm-surface-3);
+    border-radius: var(--vbm-radius-pill);
+    box-shadow: inset 0 0 0 1px var(--vbm-border-strong);
+    transition: background 0.2s;
   }
   .gem {
     position: absolute;
-    top: 50%;
-    left: 0.55rem;
-    transform: translateY(-50%);
-    color: var(--vbm-faint);
-    font-size: 0.95rem;
-    line-height: 1;
-    transition:
-      left 0.25s,
-      color 0.25s,
-      text-shadow 0.25s;
+    top: 0.2rem;
+    left: 0.2rem;
+    width: 1.35rem;
+    height: 1.35rem;
+    border-radius: 50%;
+    background: #fff;
+    box-shadow: var(--vbm-shadow-sm);
+    transition: transform 0.2s;
   }
   input:checked + label .track {
-    background: linear-gradient(90deg, rgb(91 43 196 / 60%), rgb(63 240 210 / 30%));
+    background: var(--vbm-gradient);
+    box-shadow: none;
   }
   input:checked + label .gem {
-    left: calc(100% - 1.45rem);
-    color: var(--vbm-teal);
-    text-shadow: var(--vbm-glow-teal);
+    transform: translateX(1.25rem);
   }
   input:focus-visible + label .track {
-    box-shadow:
-      inset 0 0 0 2px var(--vbm-teal),
-      inset 0 0 0 3px var(--vbm-void);
-  }
-  input:focus-visible + label .name {
-    text-decoration: underline;
-    text-underline-offset: 4px;
+    outline: 2px solid var(--vbm-blue);
+    outline-offset: 2px;
   }
   .text {
     display: grid;
   }
   .name {
-    font-family: var(--vbm-font-display);
-    letter-spacing: 0.1em;
-    font-size: 0.92rem;
+    font-weight: 600;
+    font-size: 0.95rem;
   }
   .hint {
     color: var(--vbm-muted);
-    font-style: italic;
-    font-size: 0.92rem;
+    font-size: 0.875rem;
   }
 </style>

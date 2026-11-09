@@ -250,7 +250,7 @@
     cursor: pointer;
     color: var(--vbm-void);
     background: linear-gradient(135deg, var(--vbm-violet), var(--vbm-teal));
-    clip-path: polygon(50% 0, 100% 50%, 50% 100%, 0 50%);
+    border-radius: 50%;
   }
   .play:disabled {
     opacity: 0.4;
@@ -279,10 +279,10 @@
     cursor: pointer;
     font-family: var(--vbm-font-display);
     font-size: 0.8rem;
-    letter-spacing: 0.12em;
+    letter-spacing: 0.04em;
     color: var(--vbm-muted);
     background: var(--vbm-obsidian-3);
-    clip-path: polygon(10px 0, 100% 0, calc(100% - 10px) 100%, 0 100%);
+    border-radius: var(--vbm-radius-sm);
   }
   .switch button[aria-pressed='true'] {
     color: var(--vbm-void);
@@ -316,7 +316,7 @@
     color: var(--vbm-text);
   }
   dt {
-    letter-spacing: 0.12em;
+    letter-spacing: 0.04em;
     text-transform: uppercase;
     font-size: 0.65rem;
   }

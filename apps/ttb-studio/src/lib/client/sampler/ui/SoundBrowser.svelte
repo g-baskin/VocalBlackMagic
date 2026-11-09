@@ -473,8 +473,8 @@
     cursor: default;
   }
   .primary {
-    background: linear-gradient(90deg, #ffb15a, #ff4f6a) !important;
-    color: #1a0f14 !important;
+    background: var(--vbm-gradient) !important;
+    color: var(--vbm-on-accent) !important;
     border: 0 !important;
   }
   .assign {

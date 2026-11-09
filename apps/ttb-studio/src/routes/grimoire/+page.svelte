@@ -39,7 +39,7 @@
   let abUrls: { a: string; b: string } | null = $state(null);
   let stageIndex = $state(1);
 
-  const stageNames = ['Intake', 'Separate', 'Purify', 'Conjure', 'Seal'];
+  const stageNames = ['Upload', 'Separate', 'Clean up', 'Generate', 'Save'];
   const stages = $derived(
     stageNames.map((label, i) => ({
       id: label.toLowerCase(),
@@ -161,20 +161,20 @@
   });
 </script>
 
-<svelte:head><title>The Grimoire · Vocal Black Magic</title></svelte:head>
+<svelte:head><title>Analyzer · VBM Studio</title></svelte:head>
 
 <div class="grimoire">
   <div class="intro">
     <p class="eyebrow">Design system</p>
-    <h1>The Grimoire</h1>
-    <p>Every rune of Vocal Black Magic, bound in one tome. Graphs render only real audio.</p>
+    <h1>Analyzer</h1>
+    <p>Every VBM Studio audio tool on one page. Graphs render only real audio.</p>
   </div>
 
   <div class="grid">
-    <ArcanePanel title="Source sound" eyebrow="i · offering" glow="ember">
+    <ArcanePanel title="Source sound" eyebrow="1 · input" glow="ember">
       <div class="stack">
         <RuneDropzone
-          label="Offer a local audio file"
+          label="Choose a local audio file"
           accept="audio/*,.wav,.mp3,.flac,.ogg,.m4a"
           bind:files
           hint="Decoded in your browser; never uploaded."
@@ -189,7 +189,7 @@
       </div>
     </ArcanePanel>
 
-    <ArcanePanel title="Incantation" eyebrow="ii · inputs">
+    <ArcanePanel title="Controls" eyebrow="2 · inputs">
       {#snippet actions()}
         <RuneButton variant="ghost" onclick={() => (name = '')}>Clear</RuneButton>
       {/snippet}
@@ -197,14 +197,14 @@
         <ArcaneInput
           label="Song name"
           bind:value={name}
-          placeholder="Nameless hymn"
+          placeholder="Untitled song"
           maxlength={60}
         />
         <ArcaneTextarea
           label="Lyrics"
           bind:value={lyrics}
           rows={4}
-          placeholder="Speak the words…"
+          placeholder="Write some words…"
           maxlength={500}
         />
         <ArcaneSelect
@@ -222,20 +222,20 @@
           hint="Opt-in finishing on a derived copy."
         />
         <div class="row">
-          <RuneButton {busy} onclick={fakeBusy}>Summon</RuneButton>
-          <RuneButton variant="ghost" href="#graphs">Ghost link</RuneButton>
-          <RuneButton variant="danger">Banish</RuneButton>
-          <RuneButton disabled>Sealed</RuneButton>
+          <RuneButton {busy} onclick={fakeBusy}>Create</RuneButton>
+          <RuneButton variant="ghost" href="#graphs">Secondary link</RuneButton>
+          <RuneButton variant="danger">Delete</RuneButton>
+          <RuneButton disabled>Disabled</RuneButton>
         </div>
       </div>
     </ArcanePanel>
   </div>
 
-  <ArcanePanel title="Ritual" eyebrow="iii · progress" glow="teal">
+  <ArcanePanel title="Progress" eyebrow="3 · progress" glow="teal">
     <RitualProgress
       {stages}
       detail={stageIndex >= stageNames.length
-        ? 'The ritual is complete.'
+        ? 'All steps are complete.'
         : `Stage ${stageIndex + 1}: ${stageNames[stageIndex]}…`}
     />
     <div class="row spaced">
@@ -252,7 +252,7 @@
   </ArcanePanel>
 
   <section id="graphs" class="stack">
-    <ArcanePanel title="Waveform" eyebrow="iv · voice graphs" glow="violet">
+    <ArcanePanel title="Waveform" eyebrow="4 · voice graphs" glow="violet">
       <Waveform
         {buffer}
         {currentTime}
@@ -267,26 +267,26 @@
       </p>
     </ArcanePanel>
     <div class="grid">
-      <ArcanePanel title="Spectrogram" eyebrow="v · STFT" glow="ember">
+      <ArcanePanel title="Spectrogram" eyebrow="5 · STFT" glow="ember">
         <Spectrogram {buffer} />
       </ArcanePanel>
-      <ArcanePanel title="Pitch trace" eyebrow="vi · YIN" glow="teal">
+      <ArcanePanel title="Pitch trace" eyebrow="6 · YIN" glow="teal">
         <PitchTrace {buffer} />
       </ArcanePanel>
     </div>
-    <ArcanePanel title="Grimoire player" eyebrow="vii · playback">
+    <ArcanePanel title="Player" eyebrow="7 · playback">
       {#if playerSrc}
         <GrimoirePlayer
           src={playerSrc}
-          title="Offering"
+          title="Your audio"
           subtitle="Local, never uploaded"
-          downloadName="offering"
+          downloadName="audio"
         />
       {:else}
-        <p class="note">Choose a file or synthesize the chirp to bind it to the player.</p>
+        <p class="note">Choose a file or synthesize the chirp to load it into the player.</p>
       {/if}
     </ArcanePanel>
-    <ArcanePanel title="Summoning circle (standalone)" eyebrow="viii · live spectrum">
+    <ArcanePanel title="Live spectrum" eyebrow="8 · live spectrum">
       <div class="row">
         <SummoningCircle audio={fileAudio ?? null} />
         {#if playerSrc}
@@ -294,7 +294,7 @@
         {/if}
       </div>
     </ArcanePanel>
-    <ArcanePanel title="A | B compare" eyebrow="ix · before / after" glow="teal">
+    <ArcanePanel title="A | B compare" eyebrow="9 · before / after" glow="teal">
       {#if abUrls}
         <ABCompare
           title="Chirp: quieted vs original"
@@ -306,10 +306,10 @@
       {/if}
     </ArcanePanel>
     <div class="grid">
-      <ArcanePanel title="Voice sigil" eyebrow="x · voice print" glow="violet">
+      <ArcanePanel title="Voice fingerprint" eyebrow="10 · voice print" glow="violet">
         <div class="center"><VoiceSigil {buffer} /></div>
       </ArcanePanel>
-      <ArcanePanel title="Scrying mirror" eyebrow="xi · record" glow="ember">
+      <ArcanePanel title="Recorder" eyebrow="11 · record" glow="ember">
         <RuneRecorder bind:files={takes} maxSeconds={60} />
         {#if takes.length}
           <p class="note vbm-mono">{takes.length} take{takes.length === 1 ? '' : 's'} kept</p>
@@ -332,7 +332,7 @@
   }
   .eyebrow {
     font-family: var(--vbm-font-mono);
-    letter-spacing: 0.3em;
+    letter-spacing: 0.04em;
     text-transform: uppercase;
     font-size: 0.72rem;
     color: var(--vbm-ember);

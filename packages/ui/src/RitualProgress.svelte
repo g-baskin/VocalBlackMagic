@@ -7,7 +7,6 @@
     detail?: string;
   } = $props();
 
-  const RUNES = ['ᚠ', 'ᚢ', 'ᚦ', 'ᚨ', 'ᚱ', 'ᚲ', 'ᚷ', 'ᚹ', 'ᚺ', 'ᚾ', 'ᛁ', 'ᛃ'];
   const STATE_TEXT = {
     pending: 'waiting',
     active: 'in progress',
@@ -17,12 +16,14 @@
   const doneCount = $derived(stages.filter((s) => s.state === 'done').length);
 </script>
 
-<div class="ritual">
+<div class="steps">
   <ol aria-label="Progress: {doneCount} of {stages.length} stages complete">
     {#each stages as stage, i (stage.id)}
       <li class={stage.state} aria-current={stage.state === 'active' ? 'step' : undefined}>
         <span class="node" aria-hidden="true">
-          <span class="rune">{stage.state === 'failed' ? '✕' : RUNES[i % RUNES.length]}</span>
+          <span class="rune"
+            >{stage.state === 'failed' ? '✕' : stage.state === 'done' ? '✓' : i + 1}</span
+          >
         </span>
         <span class="label">{stage.label}</span>
         <span class="vbm-sr-only">({STATE_TEXT[stage.state]})</span>
@@ -61,11 +62,10 @@
     background: var(--vbm-line-bright);
   }
   li.done:not(:last-child)::after {
-    background: linear-gradient(90deg, var(--vbm-teal), var(--vbm-violet));
-    box-shadow: var(--vbm-glow-teal);
+    background: var(--vbm-gradient);
   }
   .done {
-    --c: var(--vbm-teal);
+    --c: var(--vbm-accent);
   }
   .active {
     --c: var(--vbm-ember);
@@ -78,7 +78,7 @@
     height: 2.8rem;
     display: grid;
     place-items: center;
-    clip-path: polygon(50% 0, 100% 50%, 50% 100%, 0 50%);
+    border-radius: 50%;
     background: var(--c);
     padding: 1px;
   }
@@ -87,26 +87,25 @@
     height: 100%;
     display: grid;
     place-items: center;
-    clip-path: inherit;
+    border-radius: inherit;
     background: var(--vbm-void);
     color: var(--c);
-    font-size: 1.1rem;
+    font-size: 0.95rem;
+    font-weight: 700;
   }
   .done .rune {
-    background: color-mix(in srgb, var(--vbm-teal) 20%, var(--vbm-void));
-    text-shadow: var(--vbm-glow-teal);
+    background: var(--vbm-gradient);
+    color: #1a0b12;
   }
   .active .node {
     animation: throb 1.6s ease-in-out infinite;
   }
   .active .rune {
-    text-shadow: var(--vbm-glow-ember);
+    background: color-mix(in srgb, var(--vbm-accent) 18%, var(--vbm-bg));
   }
   .label {
-    font-family: var(--vbm-font-mono);
-    font-size: 0.68rem;
-    letter-spacing: 0.15em;
-    text-transform: uppercase;
+    font-size: 0.8rem;
+    font-weight: 500;
     color: var(--vbm-muted);
   }
   .active .label,
@@ -119,12 +118,11 @@
   .detail {
     margin: 0.75rem 0 0;
     text-align: center;
-    font-style: italic;
     color: var(--vbm-muted);
   }
   @keyframes throb {
     50% {
-      filter: drop-shadow(0 0 10px var(--vbm-ember)) brightness(1.3);
+      box-shadow: 0 0 0 6px rgb(255 79 139 / 18%);
     }
   }
   @media (prefers-reduced-motion: reduce) {

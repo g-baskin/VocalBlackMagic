@@ -10,6 +10,7 @@
     onseek,
     height = 120,
     color = 'violet',
+    unplayedOpacity = 0.38,
     compareBuffer = null,
     regions = [],
     label = 'Waveform'
@@ -20,6 +21,7 @@
     onseek?: (seconds: number) => void;
     height?: number;
     color?: GlowName;
+    unplayedOpacity?: number;
     compareBuffer?: AudioBuffer | null;
     regions?: { start: number; end: number; label?: string }[];
     label?: string;
@@ -68,11 +70,12 @@
     const ghostData = ghost;
     const p = progress;
     const c = GLOW[color];
+    const opacity = Math.min(1, Math.max(0, unplayedOpacity));
     const regs = regions;
     const t = total;
     return observeCanvas(canvas, (ctx, w, h) => {
       ctx.clearRect(0, 0, w, h);
-      ctx.strokeStyle = 'rgba(167,116,255,0.12)';
+      ctx.strokeStyle = 'rgba(255,79,139,0.12)';
       ctx.beginPath();
       ctx.moveTo(0, h / 2);
       ctx.lineTo(w, h / 2);
@@ -100,7 +103,7 @@
       ctx.save();
       ctx.shadowColor = c.main;
       ctx.shadowBlur = 8;
-      ctx.fillStyle = `rgba(${c.rgb},0.38)`;
+      ctx.fillStyle = `rgba(${c.rgb},${opacity})`;
       drawPeaks(ctx, data, w, h, cols, buffer?.duration ?? 0);
       ctx.beginPath();
       ctx.rect(0, 0, w * p, h);
@@ -171,9 +174,9 @@
     position: relative;
     width: 100%;
     background:
-      linear-gradient(90deg, rgb(167 116 255 / 5%) 1px, transparent 1px) 0 0 / 40px 100%,
+      linear-gradient(90deg, rgb(255 79 139 / 5%) 1px, transparent 1px) 0 0 / 40px 100%,
       var(--vbm-void);
-    clip-path: polygon(8px 0, 100% 0, 100% calc(100% - 8px), calc(100% - 8px) 100%, 0 100%, 0 8px);
+    border-radius: var(--vbm-radius-sm);
   }
   canvas {
     display: block;

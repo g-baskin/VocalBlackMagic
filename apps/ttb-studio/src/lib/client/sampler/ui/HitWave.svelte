@@ -37,7 +37,12 @@
       ctx.fillStyle = 'rgb(169 159 194 / 70%)';
       ctx.font = '13px system-ui, sans-serif';
       ctx.textAlign = 'center';
-      ctx.fillText('Choose a sound in the browser and send it to this pad.', w / 2, mid);
+      const long = 'Choose a sound in the browser and send it to this pad.';
+      ctx.fillText(
+        ctx.measureText(long).width < w - 24 ? long : 'Send a sound to this pad.',
+        w / 2,
+        mid
+      );
       return;
     }
     const duration = buffer.duration;

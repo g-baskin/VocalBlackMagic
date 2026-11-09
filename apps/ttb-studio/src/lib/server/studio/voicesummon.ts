@@ -37,8 +37,11 @@ export async function instrumentalSources(
     : (await library.list()).find(
         (s) => s.parent_id === song.id && s.kind === 'stems' && s.stems?.length
       );
-  if (withStems) {
-    const names: StemName[] = ['drums', 'bass', 'other'];
+  // Uploaded stems may lack some buses; use the non-vocal ones present (generated stems have all three).
+  const names: StemName[] = (['drums', 'bass', 'other'] as const).filter((name) =>
+    withStems?.stems?.some((stem) => stem.name === name)
+  );
+  if (withStems && names.length) {
     const files: string[] = [];
     for (const name of names) files.push((await library.audioFile(withStems.id, name)).file);
     return { files, from: 'stems of ' + withStems.id };
@@ -62,7 +65,10 @@ export function music01Lyrics(lyrics: string): string {
 export async function findVoice(root: string, id: string): Promise<VoiceModel> {
   const voice = (await usableVoices(root)).find((v) => v.id === id);
   if (!voice)
-    throw new ProviderError(422, 'Choose a ready voice with own-voice consent from Voice Forge.');
+    throw new ProviderError(
+      422,
+      'Choose a ready voice with own-voice consent from Voice training.'
+    );
   return voice;
 }
 
@@ -76,7 +82,7 @@ export async function submitVoiceSummon(
   plan: SongPlan
 ): Promise<{ tasks: JobTask[]; plan: SongPlan }> {
   const sung = music01Lyrics(lyrics);
-  if (sung.length < 10) throw new ProviderError(422, 'A voice summon needs some lyrics.');
+  if (sung.length < 10) throw new ProviderError(422, 'Singing in your voice needs some lyrics.');
   const gold = await goldVocalFile(ctx.library.root, voice);
   const instrumental = await instrumentalSources(ctx.library, request.reference_song_id ?? '');
   const voiceRef = await mp3DataUri((out) => makeReference(gold, out));

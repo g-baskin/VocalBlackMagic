@@ -1,3 +1,5 @@
+import { apiPath } from './base';
+
 /** Browser helpers for the Vocal Fix API. Every mutating call is non-simple (JSON or custom header). */
 export interface Finding {
   severity: 'info' | 'warning' | 'problem';
@@ -70,7 +72,7 @@ export async function api<T>(
     headers.set('content-type', 'application/json');
     body = JSON.stringify(init.json);
   } else if (init.method && init.method !== 'GET') headers.set('x-vbm-intent', 'vocal-fix');
-  const res = await fetch(path, { ...init, headers, body });
+  const res = await fetch(apiPath(path), { ...init, headers, body });
   if (res.status === 204) return undefined as T;
   const data: unknown = await res
     .json()
@@ -81,7 +83,7 @@ export async function api<T>(
 }
 
 export const audioUrl = (sid: string, area: 'originals' | 'derived', file: string) =>
-  '/api/sessions/' + sid + '/audio/' + area + '/' + file;
+  apiPath('/api/sessions/' + sid + '/audio/' + area + '/' + file);
 
 export const meterTone = (v: number): 'good' | 'warn' | 'bad' =>
   v >= 0.75 ? 'good' : v >= 0.45 ? 'warn' : 'bad';

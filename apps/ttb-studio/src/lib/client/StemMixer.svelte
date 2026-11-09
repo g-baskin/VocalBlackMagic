@@ -162,7 +162,7 @@
 {#if error}
   <p class="err">{error}</p>
 {:else if !tracks.length}
-  <SigilLoader label="Gathering the stems…" />
+  <SigilLoader label="Loading stems…" />
 {:else}
   <div class="transport">
     <RuneButton onclick={() => (playing ? pause() : play())}
@@ -238,7 +238,7 @@
   }
   .controls strong {
     font-family: var(--vbm-font-display);
-    letter-spacing: 0.12em;
+    letter-spacing: 0.04em;
     text-transform: uppercase;
     min-width: 5rem;
   }

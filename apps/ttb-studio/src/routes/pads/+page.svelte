@@ -690,17 +690,17 @@
 
 <style>
   .pads {
-    --pads-font: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
-    --pads-text: #ecebf5;
-    --pads-muted: #9b98b3;
-    --pads-line: rgb(255 255 255 / 9%);
+    --pads-font: var(--vbm-font-sans);
+    --pads-text: var(--vbm-text);
+    --pads-muted: var(--vbm-muted);
+    --pads-line: var(--vbm-border);
     --pads-field: rgb(255 255 255 / 3%);
-    --pads-focus: #5fd4e6;
+    --pads-focus: var(--vbm-blue);
     --pads-panel: linear-gradient(
       135deg,
-      rgb(26 24 48 / 92%),
-      rgb(20 18 34 / 92%) 55%,
-      rgb(40 20 24 / 90%)
+      rgb(34 30 50 / 92%),
+      var(--vbm-surface) 55%,
+      rgb(42 26 30 / 92%)
     );
     font-family: var(--pads-font);
     color: var(--pads-text);
@@ -709,8 +709,8 @@
     padding: 1rem;
     border-radius: 18px;
     background:
-      radial-gradient(ellipse at 15% 0%, rgb(80 60 200 / 18%), transparent 55%),
-      radial-gradient(ellipse at 100% 100%, rgb(255 90 60 / 10%), transparent 55%), #0b0a14;
+      radial-gradient(ellipse at 15% 0%, rgb(120 80 220 / 14%), transparent 55%),
+      radial-gradient(ellipse at 100% 100%, rgb(255 110 70 / 9%), transparent 55%), var(--vbm-bg);
     border: 1px solid var(--pads-line);
   }
   .pads :global(h1),
@@ -832,8 +832,9 @@
     padding: 0 1.6rem;
     border: 0;
     border-radius: 10px;
-    background: linear-gradient(90deg, #ffb15a, #ff6a5a 55%, #ff4f8a);
-    color: #1a0f14;
+    background: var(--vbm-gradient);
+    color: var(--vbm-on-accent);
+    box-shadow: var(--vbm-shadow-accent);
     font: inherit;
     font-weight: 600;
     font-size: 0.85rem;
@@ -888,6 +889,7 @@
   .wave {
     grid-area: wave;
     display: grid;
+    grid-template-columns: minmax(0, 1fr);
     gap: 0.5rem;
   }
   .pads-panel {
@@ -915,6 +917,7 @@
     font-weight: 400;
   }
   .grids {
+    max-width: 100%;
     display: flex;
     gap: 0.15rem;
     padding: 0.2rem;
@@ -1073,14 +1076,9 @@
     width: min(620px, calc(100vw - 2rem));
     border: 1px solid rgb(255 255 255 / 9%);
     border-radius: 16px;
-    background: #12121f;
-    color: #ecebf5;
-    font-family:
-      system-ui,
-      -apple-system,
-      'Segoe UI',
-      Roboto,
-      sans-serif;
+    background: var(--vbm-surface);
+    color: var(--vbm-text);
+    font-family: var(--vbm-font-sans);
     padding: 1.2rem 1.5rem;
   }
   .guide::backdrop {

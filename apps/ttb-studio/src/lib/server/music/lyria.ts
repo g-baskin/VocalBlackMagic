@@ -2,6 +2,7 @@ import type { GenerationRequest, InlineAudio } from '@vbm/contracts';
 import { inspectBase64Audio } from './audio';
 import { ProviderError } from './errors';
 import { styleDescription, sungLyrics } from './prompt';
+import { separateLyriaDirections } from './lyria-directions';
 
 const interactionsUrl = 'https://generativelanguage.googleapis.com/v1beta/interactions';
 export const lyriaModel = 'lyria-3.5';
@@ -13,11 +14,24 @@ export interface LyriaDeps {
 }
 
 export function buildLyriaPrompt(request: GenerationRequest): string {
-  const parts = [styleDescription(request)];
+  const parts = [
+    'Musical style and production instructions (not sung words):\n' + styleDescription(request)
+  ];
   const lyrics = sungLyrics(request);
   if (request.mode === 'instrumental') parts.push('Instrumental only, no vocals.');
-  else if (lyrics) parts.push('Use these lyrics:\n' + lyrics);
-  else parts.push('Write original lyrics and sing them with clear, intelligible words.');
+  else if (lyrics) {
+    const prepared = separateLyriaDirections(lyrics);
+    if (prepared.directions.length)
+      parts.push(
+        'Arrangement and performance instructions (not lyrics):\n' + prepared.directions.join('\n')
+      );
+    parts.push(
+      'Do not sing or speak the style, production instructions, arrangement notes or section labels. ' +
+        'Sing only the words in the lyrics block. Parenthesized words are sung backing vocals.'
+    );
+    if (prepared.hasWords) parts.push('Use these lyrics:\n' + prepared.lyrics);
+    else parts.push('No sung words were supplied. Do not invent lyrics.');
+  } else parts.push('Write original lyrics and sing them with clear, intelligible words.');
   parts.push('Target length: about ' + request.duration_seconds + ' seconds.');
   return parts.join('\n\n');
 }

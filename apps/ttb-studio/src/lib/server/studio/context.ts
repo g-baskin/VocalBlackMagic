@@ -10,7 +10,12 @@ import {
   VBM_ENGINE_URL
 } from '$app/env/private';
 import { errorResponse, isInternalError } from '../music/errors';
-import { configuredKey, generationDisabledResponse, isJsonRequest } from '../music/gate';
+import {
+  configuredKey,
+  generationDisabledResponse,
+  isJsonRequest,
+  isOwnerEdgeRequest
+} from '../music/gate';
 import type { CreateDeps } from './create';
 import type { EngineDeps } from './runners/engine';
 import { LibraryError, SongLibrary } from './library';
@@ -47,27 +52,14 @@ function engineDeps(fetcher: typeof fetch): EngineDeps | null {
 
 export const noStore = { 'cache-control': 'no-store' };
 
-export const intentHeader = 'x-vbm-intent';
-
-/**
- * Dev gate plus, for writes, a JSON content type so cross-site forms cannot trigger paid work.
- * 'intent' is for raw-body uploads: they must carry the x-vbm-intent header instead, which a
- * cross-site form cannot set without a CORS preflight.
- */
-export function guard(request: Request, needsJson: boolean | 'intent'): Response | null {
-  const disabled = generationDisabledResponse();
+/** Dev gate plus, for writes, a JSON content type so cross-site forms cannot trigger paid work. */
+export function guard(request: Request, needsJson: boolean): Response | null {
+  const disabled = generationDisabledResponse(request);
   if (disabled) return disabled;
   // DNS-rebinding guard: the dev server is only reachable as localhost / 127.0.0.1.
-  if (!isLocalHost(request.headers.get('host')))
+  // An owner-mode request carries the edge secret, which a rebinding page cannot supply.
+  if (!isLocalHost(request.headers.get('host')) && !isOwnerEdgeRequest(request))
     return Response.json({ detail: 'The studio only answers on localhost.' }, { status: 403 });
-  if (needsJson === 'intent') {
-    if (!request.headers.get(intentHeader)?.trim())
-      return Response.json(
-        { detail: 'Send the upload with the ' + intentHeader + ' header.' },
-        { status: 415 }
-      );
-    return null;
-  }
   if (needsJson && !isJsonRequest(request))
     return Response.json({ detail: 'Send the request as application/json.' }, { status: 415 });
   return null;

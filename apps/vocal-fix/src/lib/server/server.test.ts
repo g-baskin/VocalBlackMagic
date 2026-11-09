@@ -639,3 +639,74 @@ describe('job runner: failure reporting', () => {
     }
   });
 });
+
+describe('owner mode behind the edge Worker', () => {
+  const SECRET = 'v'.repeat(48);
+  const keys = ['NODE_ENV', 'VBM_OWNER_MODE', 'VBM_EDGE_SECRET'] as const;
+  const saved = Object.fromEntries(keys.map((k) => [k, process.env[k]]));
+  const restore = () => {
+    for (const k of keys) {
+      if (saved[k] === undefined) delete process.env[k];
+      else process.env[k] = saved[k];
+    }
+  };
+  const prod = (owner: boolean, secret = SECRET) => {
+    process.env.NODE_ENV = 'production';
+    if (owner) process.env.VBM_OWNER_MODE = '1';
+    else delete process.env.VBM_OWNER_MODE;
+    process.env.VBM_EDGE_SECRET = secret;
+  };
+  const call = async (path: string, headers: Record<string, string>) => {
+    const { handle } = await import('../../hooks.server');
+    return handle({
+      event: {
+        url: new URL('http://localhost:3001' + path),
+        request: new Request('http://localhost:3001' + path, { headers })
+      },
+      resolve: async () => new Response('ok')
+    } as unknown as Parameters<typeof handle>[0]);
+  };
+
+  test('production without owner mode stays closed', async () => {
+    const { processingAllowed, isOwnerEdgeRequest } = await import('./gate');
+    prod(false);
+    expect(processingAllowed()).toBe(false);
+    expect(
+      isOwnerEdgeRequest(new Request('http://x', { headers: { 'x-vbm-edge-auth': SECRET } }))
+    ).toBe(false);
+    restore();
+  });
+
+  test('owner mode needs a long secret, and every API call must carry it', async () => {
+    const { processingAllowed } = await import('./gate');
+    prod(true, 'short');
+    expect(processingAllowed()).toBe(false);
+    prod(true);
+    expect(processingAllowed()).toBe(true);
+    expect((await call('/api/capabilities', { host: 'localhost:3001' })).status).toBe(403);
+    expect(
+      (await call('/api/capabilities', { host: 'localhost:3001', 'x-vbm-edge-auth': 'wrong' }))
+        .status
+    ).toBe(403);
+    const ok = await call('/api/capabilities', {
+      host: 'vbm-studio.example.workers.dev',
+      'x-vbm-edge-auth': SECRET
+    });
+    expect(ok.status).toBe(200);
+    expect((await call('/', { host: 'localhost:3001' })).status).toBe(200);
+    restore();
+  });
+
+  test('base path helpers', async () => {
+    const { normaliseBase, stripBase } = await import('../base');
+    expect(normaliseBase(undefined)).toBe('');
+    expect(normaliseBase('/vocal-fix/')).toBe('/vocal-fix');
+    expect(() => normaliseBase('vocal-fix')).toThrow();
+    expect(() => normaliseBase('/a/../b')).toThrow();
+    expect(normaliseBase('/apps/vocal-fix')).toBe('/apps/vocal-fix');
+    expect(stripBase('/vocal-fix/api/voices', '/vocal-fix')).toBe('/api/voices');
+    expect(stripBase('/vocal-fix', '/vocal-fix')).toBe('/');
+    expect(stripBase('/vocal-fixer/api', '/vocal-fix')).toBe('/vocal-fixer/api');
+    expect(stripBase('/api/x', '')).toBe('/api/x');
+  });
+});

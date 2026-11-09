@@ -35,7 +35,7 @@
   {:else}
     <Spectrogram {buffer} height={140} />
   {/if}
-  <a class="detail" href={resolve('/library/[id]', { id: song.id })}>Open in the grimoire →</a>
+  <a class="detail" href={resolve('/library/[id]', { id: song.id })}>Open song →</a>
 </div>
 
 <style>
@@ -51,7 +51,7 @@
     justify-self: end;
     color: var(--vbm-teal);
     font-family: var(--vbm-font-display);
-    letter-spacing: 0.12em;
+    letter-spacing: 0.04em;
     font-size: 0.8rem;
   }
 </style>

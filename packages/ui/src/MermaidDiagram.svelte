@@ -40,47 +40,47 @@
         flowchart: { curve: 'basis', htmlLabels: false, padding: 14 },
         sequence: { mirrorActors: false, showSequenceNumbers: true },
         themeVariables: {
-          background: '#05040a',
+          background: '#121216',
           fontSize: '17px',
-          primaryColor: '#151026',
-          primaryTextColor: '#ece6f7',
-          primaryBorderColor: '#a774ff',
-          secondaryColor: '#1d1430',
-          secondaryTextColor: '#ece6f7',
+          primaryColor: '#232329',
+          primaryTextColor: '#f4f4f6',
+          primaryBorderColor: '#ff4f8b',
+          secondaryColor: '#2c2c34',
+          secondaryTextColor: '#f4f4f6',
           secondaryBorderColor: '#ff8a3d',
-          tertiaryColor: '#0d0b16',
-          tertiaryTextColor: '#ece6f7',
-          tertiaryBorderColor: '#3ff0d2',
-          lineColor: '#3ff0d2',
-          textColor: '#ece6f7',
-          mainBkg: '#151026',
-          nodeBorder: '#a774ff',
-          clusterBkg: '#0d0b16',
-          clusterBorder: '#4a3d6e',
-          titleColor: '#f0c96a',
-          edgeLabelBackground: '#0d0b16',
-          actorBkg: '#151026',
-          actorBorder: '#a774ff',
-          actorTextColor: '#ece6f7',
-          actorLineColor: '#4a3d6e',
-          signalColor: '#3ff0d2',
-          signalTextColor: '#ece6f7',
-          labelBoxBkgColor: '#1d1430',
+          tertiaryColor: '#1a1a20',
+          tertiaryTextColor: '#f4f4f6',
+          tertiaryBorderColor: '#4f8bff',
+          lineColor: '#4f8bff',
+          textColor: '#f4f4f6',
+          mainBkg: '#232329',
+          nodeBorder: '#ff4f8b',
+          clusterBkg: '#1a1a20',
+          clusterBorder: '#45454f',
+          titleColor: '#ffc04d',
+          edgeLabelBackground: '#1a1a20',
+          actorBkg: '#232329',
+          actorBorder: '#ff4f8b',
+          actorTextColor: '#f4f4f6',
+          actorLineColor: '#45454f',
+          signalColor: '#4f8bff',
+          signalTextColor: '#f4f4f6',
+          labelBoxBkgColor: '#2c2c34',
           labelBoxBorderColor: '#ff8a3d',
-          labelTextColor: '#ece6f7',
-          loopTextColor: '#f0c96a',
-          noteBkgColor: '#1d1430',
+          labelTextColor: '#f4f4f6',
+          loopTextColor: '#ffc04d',
+          noteBkgColor: '#2c2c34',
           noteBorderColor: '#ff8a3d',
-          noteTextColor: '#ece6f7',
-          activationBkgColor: '#2a1d47',
-          activationBorderColor: '#a774ff',
-          sequenceNumberColor: '#05040a',
-          stateBkg: '#151026',
-          stateLabelColor: '#ece6f7',
-          compositeBackground: '#0d0b16',
-          altBackground: '#120d20',
-          specialStateColor: '#f0c96a',
-          innerEndBackground: '#f0c96a'
+          noteTextColor: '#f4f4f6',
+          activationBkgColor: '#34343e',
+          activationBorderColor: '#ff4f8b',
+          sequenceNumberColor: '#121216',
+          stateBkg: '#232329',
+          stateLabelColor: '#f4f4f6',
+          compositeBackground: '#1a1a20',
+          altBackground: '#1e1e24',
+          specialStateColor: '#ffc04d',
+          innerEndBackground: '#ffc04d'
         }
       });
       return mermaid;
@@ -146,8 +146,9 @@
     min-height: 8rem;
     border: 1px solid var(--vbm-line);
     background:
-      radial-gradient(ellipse at 50% 0%, rgb(167 116 255 / 10%), transparent 70%), rgb(5 4 10 / 70%);
-    clip-path: var(--vbm-clip);
+      radial-gradient(ellipse at 50% 0%, rgb(255 79 139 / 10%), transparent 70%),
+      rgb(18 18 22 / 70%);
+    border-radius: var(--vbm-radius-sm);
   }
   .scroller {
     overflow-x: auto;
@@ -159,18 +160,12 @@
     max-width: 100%;
     min-width: 34rem;
     height: auto;
-    filter: drop-shadow(0 0 6px rgb(167 116 255 / 25%));
   }
   .drawing :global(.flowchart-link),
   .drawing :global(.transition),
   .drawing :global([class^='messageLine']) {
     stroke-dasharray: 7 5;
     animation: vbm-mermaid-flow 1.4s linear infinite;
-  }
-  .drawing :global(.node rect),
-  .drawing :global(.node polygon),
-  .drawing :global(.actor) {
-    filter: drop-shadow(0 0 4px rgb(167 116 255 / 45%));
   }
   .drawing :global(.cluster rect) {
     stroke-dasharray: 3 4;
@@ -190,7 +185,7 @@
     color: var(--vbm-faint);
     font-family: var(--vbm-font-mono);
     font-size: 0.75rem;
-    letter-spacing: 0.25em;
+    letter-spacing: 0.04em;
     text-transform: uppercase;
   }
   .broken {

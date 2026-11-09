@@ -1,9 +1,13 @@
 <script lang="ts">
-  import { computeSpectrogram, mixToMono } from './audio';
-  import { arcaneColor, observeCanvas } from './canvas';
+  import { computeSpectrogram, mixToMono, formatTime } from './audio';
+  import { arcaneColor, signalColor, observeCanvas } from './canvas';
   import EmptyState from './EmptyState.svelte';
 
-  let { buffer, height = 200 }: { buffer: AudioBuffer | null; height?: number } = $props();
+  let {
+    buffer,
+    height = 200,
+    variant = 'classic'
+  }: { buffer: AudioBuffer | null; height?: number; variant?: 'classic' | 'signal' } = $props();
 
   const MIN_HZ = 40;
   const ROWS = 160;
@@ -37,7 +41,9 @@
         const f = frames[x];
         let m = FLOOR_DB;
         for (let b = b0; b < b1 && b < f.length; b++) if (f[b] > m) m = f[b];
-        const [r, g, bl] = arcaneColor((m - FLOOR_DB) / range);
+        const [r, g, bl] = (variant === 'signal' ? signalColor : arcaneColor)(
+          (m - FLOOR_DB) / range
+        );
         const i = (row * frames.length + x) * 4;
         img.data[i] = r;
         img.data[i + 1] = g;
@@ -54,10 +60,47 @@
   $effect(() => {
     if (!canvas) return;
     const data = image;
+    const signal = variant === 'signal';
+    const duration = buffer?.duration ?? 0;
     return observeCanvas(canvas, (ctx, w, h) => {
       ctx.clearRect(0, 0, w, h);
       if (!data) return;
       ctx.imageSmoothingEnabled = true;
+      if (signal) {
+        const left = 44,
+          top = 10,
+          plotWidth = Math.max(1, w - left - 12),
+          plotHeight = Math.max(1, h - 38);
+        ctx.fillStyle = '#10161e';
+        ctx.fillRect(0, 0, w, h);
+        ctx.drawImage(data.off, left, top, plotWidth, plotHeight);
+        ctx.font = '11px ui-monospace, monospace';
+        ctx.textBaseline = 'middle';
+        for (const hz of TICKS) {
+          if (hz > data.maxHz) continue;
+          const y = top + plotHeight * (1 - Math.log(hz / MIN_HZ) / Math.log(data.maxHz / MIN_HZ));
+          ctx.strokeStyle = 'rgba(169,200,215,0.17)';
+          ctx.beginPath();
+          ctx.moveTo(left, y);
+          ctx.lineTo(left + plotWidth, y);
+          ctx.stroke();
+          ctx.fillStyle = '#bbc8d6';
+          ctx.textAlign = 'right';
+          ctx.fillText(hz >= 1000 ? `${hz / 1000}k` : `${hz}`, left - 8, Math.max(16, y));
+        }
+        for (let i = 0; i <= 4; i++) {
+          const x = left + (plotWidth * i) / 4;
+          ctx.strokeStyle = 'rgba(169,200,215,0.14)';
+          ctx.beginPath();
+          ctx.moveTo(x, top);
+          ctx.lineTo(x, top + plotHeight);
+          ctx.stroke();
+          ctx.fillStyle = '#bbc8d6';
+          ctx.textAlign = i === 0 ? 'left' : i === 4 ? 'right' : 'center';
+          ctx.fillText(formatTime((duration * i) / 4), x, h - 11);
+        }
+        return;
+      }
       ctx.drawImage(data.off, 0, 0, w, h);
       ctx.font = '10px "JetBrains Mono", monospace';
       ctx.textBaseline = 'middle';
@@ -66,9 +109,9 @@
         const y = h - (Math.log(hz / MIN_HZ) / Math.log(data.maxHz / MIN_HZ)) * h;
         ctx.fillStyle = 'rgba(236,230,247,0.18)';
         ctx.fillRect(0, y, w, 1);
-        ctx.fillStyle = 'rgba(5,4,10,0.7)';
+        ctx.fillStyle = 'rgba(18,18,22,0.7)';
         ctx.fillRect(2, y - 7, 34, 14);
-        ctx.fillStyle = '#ece6f7';
+        ctx.fillStyle = '#f4f4f6';
         ctx.fillText(hz >= 1000 ? `${hz / 1000}k` : `${hz}`, 5, y);
       }
     });
@@ -77,6 +120,7 @@
 
 <div
   class="spec"
+  class:signal={variant === 'signal'}
   role="img"
   aria-label={buffer
     ? 'Spectrogram: time left to right, log frequency bottom to top, brightness is energy'
@@ -92,14 +136,12 @@
     position: relative;
     width: 100%;
     background: var(--vbm-void);
-    clip-path: polygon(
-      0 0,
-      calc(100% - 10px) 0,
-      100% 10px,
-      100% 100%,
-      10px 100%,
-      0 calc(100% - 10px)
-    );
+    border-radius: var(--vbm-radius-sm);
+  }
+  .spec.signal {
+    background: #10161e;
+    border-radius: 10px;
+    overflow: hidden;
   }
   canvas {
     display: block;

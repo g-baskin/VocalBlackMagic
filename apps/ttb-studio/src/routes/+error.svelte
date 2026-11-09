@@ -5,18 +5,18 @@
   import RuneButton from '@vbm/ui/RuneButton.svelte';
 
   const status = $derived(page.status);
-  const heading = $derived(status === 404 ? 'Nothing was summoned here' : 'The circle is broken');
+  const heading = $derived(status === 404 ? 'Page not found' : 'Something went wrong');
 </script>
 
-<svelte:head><title>{status} · The Studio · Vocal Black Magic</title></svelte:head>
+<svelte:head><title>{status} · VBM Studio</title></svelte:head>
 
 <section class="broken" aria-labelledby="err-title">
-  <div class="sigil"><Sigil size={140} dim /></div>
+  <div class="sigil"><Sigil size={72} dim /></div>
   <p class="code vbm-mono">Error {status}</p>
   <h1 id="err-title">{heading}</h1>
   <p class="msg">{page.error?.message ?? 'Something went wrong.'}</p>
   <div class="row">
-    <RuneButton href={resolve('/')}>Return to The Studio</RuneButton>
+    <RuneButton href={resolve('/')}>Back to Create</RuneButton>
     <RuneButton variant="ghost" onclick={() => history.back()}>Go back</RuneButton>
   </div>
 </section>
@@ -32,24 +32,12 @@
     margin: 0 auto;
   }
   .sigil {
-    transform: rotate(12deg);
-    clip-path: polygon(
-      0 0,
-      100% 0,
-      100% 46%,
-      58% 52%,
-      100% 58%,
-      100% 100%,
-      0 100%,
-      0 54%,
-      44% 49%,
-      0 44%
-    );
+    border-radius: var(--vbm-radius-sm);
   }
   .code {
     margin: 0;
     font-size: 0.75rem;
-    letter-spacing: 0.35em;
+    letter-spacing: 0.04em;
     text-transform: uppercase;
     color: var(--vbm-blood);
   }

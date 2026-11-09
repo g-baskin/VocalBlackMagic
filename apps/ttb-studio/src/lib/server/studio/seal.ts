@@ -1,7 +1,7 @@
 import type { SongMeta } from '@vbm/contracts';
 import { loadSeance, type StoredSeance } from './seance';
 
-export const sealedLabel = 'Séance take (sealed)';
+export const sealedLabel = 'Compare take (hidden)';
 /** Params that name the model, its runner or its price. */
 const revealingParams = ['runner', 'model_version', 'model', 'engine', 'est_cost_usd'];
 

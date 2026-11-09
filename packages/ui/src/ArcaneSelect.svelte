@@ -24,7 +24,7 @@
         <option value={option.value} disabled={option.disabled}>{option.label}</option>
       {/each}
     </select>
-    <span class="glyph" aria-hidden="true">▽</span>
+    <span class="glyph" aria-hidden="true">▾</span>
   </div>
   {#if hint}<p class="hint" id="{selectId}-hint">{hint}</p>{/if}
 </div>
@@ -35,41 +35,31 @@
     gap: 0.35rem;
   }
   label {
-    font-family: var(--vbm-font-mono);
-    font-size: 0.72rem;
-    letter-spacing: 0.22em;
-    text-transform: uppercase;
+    font-size: 0.875rem;
+    font-weight: 600;
     color: var(--vbm-muted);
   }
   .frame {
     position: relative;
-    padding: 1px;
-    background: linear-gradient(90deg, var(--vbm-line-bright), var(--vbm-line));
-    clip-path: polygon(
-      10px 0,
-      100% 0,
-      100% calc(100% - 10px),
-      calc(100% - 10px) 100%,
-      0 100%,
-      0 10px
-    );
+    background: var(--vbm-surface-2);
+    border: 1px solid var(--vbm-border-strong);
+    border-radius: var(--vbm-radius-sm);
   }
   .frame:focus-within {
-    background: linear-gradient(90deg, var(--vbm-teal), var(--vbm-violet));
-    padding: 2px;
+    border-color: var(--vbm-accent);
+    box-shadow: 0 0 0 3px rgb(255 79 139 / 22%);
   }
   select {
     width: 100%;
     appearance: none;
     border: 0;
     padding: 0.7rem 2.4rem 0.7rem 0.9rem;
-    background: var(--vbm-void);
+    background: transparent;
     color: var(--vbm-text);
-    font-family: var(--vbm-font-display);
-    font-size: 0.9rem;
-    letter-spacing: 0.08em;
+    min-height: var(--vbm-tap);
+    font-size: 1rem;
     cursor: pointer;
-    clip-path: inherit;
+    border-radius: inherit;
   }
   select:focus {
     outline: none;
@@ -83,13 +73,12 @@
     right: 0.9rem;
     top: 50%;
     transform: translateY(-50%);
-    color: var(--vbm-violet);
+    color: var(--vbm-muted);
     pointer-events: none;
     font-size: 0.8rem;
   }
   .hint {
     margin: 0;
-    font-style: italic;
     color: var(--vbm-muted);
     font-size: 0.95rem;
   }

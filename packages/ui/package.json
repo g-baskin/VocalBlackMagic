@@ -23,6 +23,7 @@
     "./Spectrogram.svelte": "./src/Spectrogram.svelte",
     "./PitchTrace.svelte": "./src/PitchTrace.svelte",
     "./SummoningCircle.svelte": "./src/SummoningCircle.svelte",
+    "./SignalScope.svelte": "./src/SignalScope.svelte",
     "./GrimoirePlayer.svelte": "./src/GrimoirePlayer.svelte",
     "./Sigil.svelte": "./src/Sigil.svelte",
     "./theme.css": "./src/theme.css",
@@ -40,8 +41,7 @@
     "svelte": "^5.57.1"
   },
   "dependencies": {
-    "@fontsource/cinzel": "^5.3.0",
-    "@fontsource/cormorant-garamond": "^5.3.0",
+    "@fontsource/inter": "^5.3.0",
     "@fontsource/jetbrains-mono": "^5.3.0",
     "mermaid": "^11"
   }

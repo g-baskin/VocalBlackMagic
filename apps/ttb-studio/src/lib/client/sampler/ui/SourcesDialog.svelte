@@ -329,17 +329,17 @@
 
 <style>
   .sources {
-    --pads-font: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
-    --pads-text: #ecebf5;
-    --pads-muted: #9b98b3;
-    --pads-line: rgb(255 255 255 / 12%);
+    --pads-font: var(--vbm-font-sans);
+    --pads-text: var(--vbm-text);
+    --pads-muted: var(--vbm-muted);
+    --pads-line: var(--vbm-border-strong);
     --pads-field: rgb(255 255 255 / 4%);
-    --pads-focus: #5fd4e6;
+    --pads-focus: var(--vbm-blue);
     width: min(560px, calc(100vw - 2rem));
     max-height: calc(100vh - 2rem);
     border: 1px solid var(--pads-line);
     border-radius: 16px;
-    background: #12121f;
+    background: var(--vbm-surface);
     color: var(--pads-text);
     padding: 1.2rem 1.4rem;
     font-family: var(--pads-font);
@@ -473,8 +473,8 @@
     padding: 0.65rem;
     font: inherit;
     font-weight: 600;
-    background: linear-gradient(90deg, #ffb15a, #ff4f6a);
-    color: #1a0f14;
+    background: var(--vbm-gradient);
+    color: var(--vbm-on-accent);
     cursor: pointer;
   }
   .go:disabled {

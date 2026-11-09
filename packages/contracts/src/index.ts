@@ -5,7 +5,7 @@ export const soundCharacterNames: Record<SoundCharacter, string> = {
   vintage: 'Vintage / Analog',
   live: 'Live / Organic',
   clean: 'Studio Clean',
-  custom: 'Custom'
+  custom: 'Custom (just my description)'
 };
 export const generationEngines = ['ace-step', 'lyria-3.5', 'heartmula', 'external-v2'] as const;
 export type GenerationEngine = (typeof generationEngines)[number];

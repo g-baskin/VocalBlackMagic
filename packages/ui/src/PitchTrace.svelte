@@ -1,9 +1,13 @@
 <script lang="ts">
-  import { detectPitch, hzToMidi, hzToNote, mixToMono } from './audio';
+  import { detectPitch, hzToMidi, hzToNote, mixToMono, formatTime } from './audio';
   import { observeCanvas } from './canvas';
   import EmptyState from './EmptyState.svelte';
 
-  let { buffer, height = 200 }: { buffer: AudioBuffer | null; height?: number } = $props();
+  let {
+    buffer,
+    height = 200,
+    variant = 'classic'
+  }: { buffer: AudioBuffer | null; height?: number; variant?: 'classic' | 'signal' } = $props();
 
   let canvas: HTMLCanvasElement | undefined = $state();
 
@@ -39,29 +43,44 @@
     if (!canvas) return;
     const data = track;
     const dur = buffer?.duration ?? 0;
+    const signal = variant === 'signal';
     return observeCanvas(canvas, (ctx, w, h) => {
       ctx.clearRect(0, 0, w, h);
       if (!data || dur <= 0) return;
-      const gutter = 38;
+      const gutter = signal ? 44 : 38;
+      const right = signal ? 12 : 0;
+      const top = signal ? 10 : 0;
+      const plotHeight = signal ? h - 38 : h;
+      const plotWidth = Math.max(1, w - gutter - right);
+      if (signal) {
+        ctx.fillStyle = '#10161e';
+        ctx.fillRect(0, 0, w, h);
+      }
       const span = data.maxMidi - data.minMidi;
-      const yOf = (midi: number) => h - ((midi - data.minMidi) / span) * h;
+      const yOf = (midi: number) => top + plotHeight - ((midi - data.minMidi) / span) * plotHeight;
       const labelEvery = span > 24 ? 12 : span > 12 ? 2 : 1;
-      ctx.font = '10px "JetBrains Mono", monospace';
+      ctx.font = signal ? '11px ui-monospace, monospace' : '10px "JetBrains Mono", monospace';
       ctx.textBaseline = 'middle';
       for (let m = Math.ceil(data.minMidi); m <= data.maxMidi; m++) {
         const y = yOf(m);
         const isC = m % 12 === 0;
-        ctx.fillStyle = isC ? 'rgba(167,116,255,0.22)' : 'rgba(167,116,255,0.07)';
-        ctx.fillRect(gutter, y, w - gutter, 1);
+        ctx.fillStyle = signal
+          ? isC
+            ? 'rgba(169,200,215,0.24)'
+            : 'rgba(169,200,215,0.08)'
+          : isC
+            ? 'rgba(255,79,139,0.22)'
+            : 'rgba(255,79,139,0.07)';
+        ctx.fillRect(gutter, y, plotWidth, 1);
         if (m % labelEvery === 0 || isC) {
-          ctx.fillStyle = isC ? '#ece6f7' : '#a99fc2';
+          ctx.fillStyle = signal ? '#bbc8d6' : isC ? '#f4f4f6' : '#a8a8b6';
           ctx.fillText(hzToNote(440 * 2 ** ((m - 69) / 12)), 4, y);
         }
       }
       ctx.save();
-      ctx.strokeStyle = '#3ff0d2';
-      ctx.shadowColor = '#3ff0d2';
-      ctx.shadowBlur = 8;
+      ctx.strokeStyle = signal ? '#75dfef' : '#4f8bff';
+      ctx.shadowColor = signal ? '#75dfef' : '#4f8bff';
+      ctx.shadowBlur = signal ? 0 : 8;
       ctx.lineWidth = 2;
       ctx.lineJoin = 'round';
       ctx.beginPath();
@@ -72,7 +91,7 @@
           pen = false; // unvoiced: leave a gap
           continue;
         }
-        const x = gutter + (data.times[i] / dur) * (w - gutter);
+        const x = gutter + (data.times[i] / dur) * plotWidth;
         const y = yOf(hzToMidi(v));
         if (pen) ctx.lineTo(x, y);
         else ctx.moveTo(x, y);
@@ -80,12 +99,26 @@
       }
       ctx.stroke();
       ctx.restore();
+      if (signal) {
+        for (let i = 0; i <= 4; i++) {
+          const x = gutter + (plotWidth * i) / 4;
+          ctx.strokeStyle = 'rgba(169,200,215,0.14)';
+          ctx.beginPath();
+          ctx.moveTo(x, top);
+          ctx.lineTo(x, top + plotHeight);
+          ctx.stroke();
+          ctx.fillStyle = '#bbc8d6';
+          ctx.textAlign = i === 0 ? 'left' : i === 4 ? 'right' : 'center';
+          ctx.fillText(formatTime((dur * i) / 4), x, h - 11);
+        }
+      }
     });
   });
 </script>
 
 <div
   class="pitch"
+  class:signal={variant === 'signal'}
   role="img"
   aria-label={!buffer
     ? 'Pitch trace: no audio'
@@ -107,7 +140,12 @@
     position: relative;
     width: 100%;
     background: var(--vbm-void);
-    clip-path: polygon(10px 0, 100% 0, 100% 100%, 0 100%, 0 10px);
+    border-radius: var(--vbm-radius-sm);
+  }
+  .pitch.signal {
+    background: #10161e;
+    border-radius: 10px;
+    overflow: hidden;
   }
   canvas {
     display: block;
