@@ -22,7 +22,12 @@
       icon: 'M12 16V4M7 9l5-5 5 5M4 16v3a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-3'
     },
     { href: resolve('/lyrics'), label: 'Lyrics', icon: 'M4 6h16M4 12h16M4 18h10' },
-    { href: resolve('/seance'), label: 'Compare', icon: 'M8 4v16M16 4v16M4 8h8M12 16h8' }
+    { href: resolve('/seance'), label: 'Compare', icon: 'M8 4v16M16 4v16M4 8h8M12 16h8' },
+    {
+      href: resolve('/pads'),
+      label: 'Pads',
+      icon: 'M4 4h6v6H4zM14 4h6v6h-6zM4 14h6v6H4zM14 14h6v6h-6z'
+    }
   ];
   const more: Tab[] = [
     { href: resolve('/arcana'), label: 'How it works', icon: '' },
@@ -128,7 +133,7 @@
       inset: auto 0 0 0;
       z-index: 40;
       display: grid;
-      grid-template-columns: repeat(5, 1fr);
+      grid-template-columns: repeat(6, 1fr);
       padding: 0.25rem calc(0.25rem + var(--vbm-safe-right)) calc(0.25rem + var(--vbm-safe-bottom))
         calc(0.25rem + var(--vbm-safe-left));
       background: rgb(26 26 32 / 92%);

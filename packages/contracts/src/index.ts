@@ -92,3 +92,4 @@ export function validateGenerationRequest(request: GenerationRequest): string | 
 export * from './voice';
 export * from './studio';
 export * from './engine';
+export * from './sampler';
