@@ -309,6 +309,27 @@ export function releaseVoice(ctx: BaseAudioContext, voice: Voice, fast = false):
   }
 }
 
+/**
+ * Pads sounding at a context time, with progress 0–1 through the longest layer (null for loops).
+ * A pad waiting for its grid start counts as playing at 0.
+ */
+export function playingPads(
+  voices: readonly Pick<Voice, 'pad' | 'startAt' | 'ends'>[],
+  now: number
+): { pad: number; progress: number | null }[] {
+  const byPad = new Map<number, number | null>();
+  for (const v of voices) {
+    if (v.ends <= now) continue;
+    const progress =
+      v.ends === Infinity
+        ? null
+        : Math.min(1, Math.max(0, (now - v.startAt) / Math.max(1e-6, v.ends - v.startAt)));
+    const prev = byPad.get(v.pad);
+    byPad.set(v.pad, prev === null || progress === null ? null : Math.min(prev ?? 1, progress));
+  }
+  return [...byPad].map(([pad, progress]) => ({ pad, progress })).sort((a, b) => a.pad - b.pad);
+}
+
 /** Live engine: one AudioContext, decoded-sound cache and a 32-voice pool with oldest stealing. */
 export class PadEngine {
   readonly ctx: AudioContext;
@@ -316,6 +337,7 @@ export class PadEngine {
   private voices: Voice[] = [];
   readonly sounds = new Map<string, LoadedSound>();
   private loading = new Map<string, Promise<LoadedSound | null>>();
+  private previewSource: AudioBufferSourceNode | null = null;
 
   constructor(private kit: Kit) {
     this.ctx = new AudioContext({ latencyHint: 'interactive' });
@@ -379,20 +401,49 @@ export class PadEngine {
     }
   }
 
+  /** What is sounding now, for the pad glow and the Playing list. */
+  playing(): { pad: number; progress: number | null }[] {
+    const now = this.ctx.currentTime;
+    this.voices = this.voices.filter((v) => v.ends > now);
+    return playingPads(this.voices, now);
+  }
+
+  /** Stops one pad at once, whatever its mode. */
+  stopPad(pad: number): void {
+    for (const voice of this.voices.filter((v) => v.pad === pad))
+      releaseVoice(this.ctx, voice, true);
+    this.voices = this.voices.filter((v) => v.pad !== pad);
+  }
+
   stopAll(): void {
     for (const voice of this.voices) releaseVoice(this.ctx, voice, true);
     this.voices = [];
+    try {
+      this.previewSource?.stop();
+    } catch {
+      // Already finished.
+    }
+    this.previewSource = null;
   }
 
   /** Auditions a single sound straight through the bus, outside any pad. */
   preview(id: string): void {
     const sound = this.sounds.get(id);
     if (!sound) return;
+    try {
+      this.previewSource?.stop();
+    } catch {
+      // Already finished.
+    }
     const source = this.ctx.createBufferSource();
     source.buffer = sound.forward;
     source.connect(this.bus.input);
-    source.onended = () => source.disconnect();
+    source.onended = () => {
+      source.disconnect();
+      if (this.previewSource === source) this.previewSource = null;
+    };
     source.start();
+    this.previewSource = source;
   }
 
   async close(): Promise<void> {

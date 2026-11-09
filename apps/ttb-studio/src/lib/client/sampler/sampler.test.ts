@@ -259,3 +259,22 @@ describe('pad rate', () => {
     expect(launchRate(k, 0, 3, true)).toEqual({ launch: 1, total: 2 });
   });
 });
+
+describe('what is playing', () => {
+  test('pads with live voices, their progress, loops as null, finished ones dropped', async () => {
+    const { playingPads } = await import('./engine');
+    const voices = [
+      { pad: 0, startAt: 0, ends: 4 },
+      { pad: 0, startAt: 0, ends: 2 },
+      { pad: 7, startAt: 1, ends: Infinity },
+      { pad: 3, startAt: 0, ends: 0.5 },
+      { pad: 9, startAt: 5, ends: 6 }
+    ];
+    expect(playingPads(voices, 1)).toEqual([
+      { pad: 0, progress: 0.25 },
+      { pad: 7, progress: null },
+      { pad: 9, progress: 0 }
+    ]);
+    expect(playingPads(voices, 10)).toEqual([{ pad: 7, progress: null }]);
+  });
+});

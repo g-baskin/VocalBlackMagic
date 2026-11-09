@@ -8,6 +8,7 @@
     sounds,
     selected,
     active,
+    playing,
     octave,
     onpress,
     onrelease,
@@ -18,6 +19,8 @@
     selected: number;
     /** Pads currently sounding. */
     active: ReadonlySet<number>;
+    /** Pads sounding now: progress 0–1, or null for loops. */
+    playing: ReadonlyMap<number, number | null>;
     octave: number;
     onpress: (pad: number, velocity: number) => void;
     onrelease: (pad: number) => void;
@@ -74,10 +77,13 @@
       class="pad"
       class:selected={pad === selected}
       class:active={active.has(pad)}
+      class:playing={playing.has(pad)}
       class:filled={!!name}
       class:drop={dropTarget === pad}
       aria-pressed={pad === selected}
-      aria-label={padNoteName(kit.pads[pad].note) + (name ? ', ' + name : ', empty')}
+      aria-label={padNoteName(kit.pads[pad].note) +
+        (name ? ', ' + name : ', empty') +
+        (playing.has(pad) ? ', playing' : '')}
       onpointerdown={(e) => down(e, pad)}
       onpointerup={() => up(pad)}
       onpointerleave={() => up(pad)}
@@ -96,6 +102,12 @@
       {#if name}
         <span class="dots" aria-hidden="true" style:width={layersUsed(pad) * 6 - 2 + 'px'}></span>
         <span class="name">{name}</span>
+      {/if}
+      {#if playing.has(pad)}
+        {@const p = playing.get(pad)}
+        <span class="progress" class:loop={p === null} aria-hidden="true"
+          ><i style:width={p === null ? '100%' : (p ?? 0) * 100 + '%'}></i></span
+        >
       {/if}
     </button>
   {/each}
@@ -148,6 +160,43 @@
   .pad.active {
     background: linear-gradient(180deg, rgb(143 107 255 / 45%), rgb(255 79 106 / 25%));
     transform: scale(0.98);
+  }
+  .pad.playing {
+    border-color: rgb(255 111 159 / 70%);
+    box-shadow:
+      0 0 0 1px rgb(255 79 139 / 35%),
+      0 0 16px rgb(255 79 139 / 30%);
+  }
+  .progress {
+    position: absolute;
+    left: 6px;
+    right: 6px;
+    bottom: 4px;
+    height: 3px;
+    border-radius: 2px;
+    background: rgb(255 255 255 / 10%);
+    overflow: hidden;
+  }
+  .progress i {
+    display: block;
+    height: 100%;
+    background: var(--vbm-gradient, linear-gradient(90deg, #ff4f8b, #ff8a3d));
+  }
+  .progress.loop i {
+    animation: pulse 1s ease-in-out infinite alternate;
+  }
+  @keyframes pulse {
+    from {
+      opacity: 0.4;
+    }
+    to {
+      opacity: 1;
+    }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .progress.loop i {
+      animation: none;
+    }
   }
   .pad.drop {
     outline: 2px dashed var(--pads-focus);

@@ -37,6 +37,8 @@
   let view = $state<'kits' | 'sounds'>('sounds');
   let octave = $state(0);
   const active = new SvelteSet<number>();
+  let playing = $state<Map<number, number | null>>(new Map());
+  let watching = 0;
   let loadedVersion = $state(0);
   let lastTrigger = $state<{ startAt: number; rate: number } | null>(null);
   let sourcesOpen = $state(false);
@@ -148,12 +150,37 @@
     const missing = ids.filter((id) => !e.sounds.has(id));
     if (missing.length) await Promise.all(missing.map(loadSound));
     const started = e.trigger(index, velocity);
+    if (started) watch();
     if (started && index === selectedPad) {
       const sound = firstSound;
       const hit = sound ? shownHit : 0;
       lastTrigger = { startAt: started.startAt, rate: launchRate(kit, index, hit).total };
     }
   }
+  // Follows what is sounding each frame while anything plays, then stops itself.
+  function watch() {
+    if (watching) return;
+    const tick = () => {
+      const now = engine?.playing() ?? [];
+      playing = new Map(now.map((p) => [p.pad, p.progress]));
+      watching = now.length ? requestAnimationFrame(tick) : 0;
+    };
+    watching = requestAnimationFrame(tick);
+  }
+  function stopAll() {
+    engine?.stopAll();
+    lastTrigger = null;
+    playing = new Map();
+  }
+  function stopPad(index: number) {
+    engine?.stopPad(index);
+    playing = new Map([...playing].filter(([p]) => p !== index));
+  }
+  const padLabel = (index: number) => {
+    const id = kit.pads[index].layers.find(Boolean);
+    return padNoteName(kit.pads[index].note) + (id ? ' ' + (byId.get(id)?.name ?? '') : '');
+  };
+
   function release(index: number) {
     engine?.release(index);
     setTimeout(() => active.delete(index), 90);
@@ -355,6 +382,10 @@
 
   function keydown(e: KeyboardEvent) {
     if (sourcesOpen || guide?.open || isTypingTarget(e.target)) return;
+    if (e.key === 'Escape') {
+      stopAll();
+      return;
+    }
     if ((e.metaKey || e.ctrlKey) && e.code === 'KeyZ' && !e.shiftKey) {
       e.preventDefault();
       undo();
@@ -394,6 +425,7 @@
   onDestroy(() => {
     if (typeof window === 'undefined') return;
     midi?.stop();
+    if (watching) cancelAnimationFrame(watching);
     void engine?.close();
   });
 
@@ -471,6 +503,16 @@
           /></svg
         >
       </button>
+      <button
+        class="tool text stop"
+        class:live={playing.size > 0}
+        disabled={!playing.size}
+        onclick={stopAll}
+        title="Stop everything (Esc)"
+        ><span aria-hidden="true">■</span> Stop{playing.size
+          ? ' (' + playing.size + ')'
+          : ''}</button
+      >
       <button class="tool text" onclick={() => guide.showModal()}>Guide</button>
       <button class="inspire" onclick={inspireClick}
         ><span aria-hidden="true">✦</span> Inspire</button
@@ -622,11 +664,30 @@
         <h2 id="pads-title" class="caps">Pads</h2>
         <span class="caps">C1 to B3 · keys octave {octave + 1}</span>
       </div>
+      <div class="now" aria-live="polite">
+        {#if playing.size}
+          <span class="caps live-label">Playing</span>
+          {#each [...playing.keys()] as p (p)}
+            <span class="chip"
+              ><button class="chip-name" onclick={() => (selectedPad = p)} title="Show this pad"
+                >{padLabel(p)}</button
+              ><button
+                class="chip-stop"
+                aria-label="Stop {padNoteName(kit.pads[p].note)}"
+                onclick={() => stopPad(p)}>✕</button
+              ></span
+            >
+          {/each}
+        {:else}
+          <span class="idle">Nothing playing. Press a filled pad or its key.</span>
+        {/if}
+      </div>
       <PadGrid
         {kit}
         sounds={byId}
         selected={selectedPad}
         {active}
+        {playing}
         {octave}
         onpress={press}
         onrelease={release}
@@ -675,6 +736,10 @@
     <li>
       <strong>Knobs:</strong> drag up or down (Shift for fine), use the arrow keys, or double-click to
       reset.
+    </li>
+    <li>
+      <strong>See and stop:</strong> pads glow with a progress bar while they sound, and the Playing list
+      under the Pads title names them. Stop (or Esc) silences everything; ✕ on a name stops one pad.
     </li>
     <li>
       <strong>Inspire</strong> lays your library across the pads by category and sets new macros. Undo
@@ -1061,7 +1126,61 @@
   .panel-head {
     display: flex;
     justify-content: space-between;
-    margin-bottom: 0.7rem;
+    margin-bottom: 0.5rem;
+  }
+  .now {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.35rem;
+    min-height: 1.9rem;
+    margin-bottom: 0.6rem;
+  }
+  .live-label {
+    color: var(--vbm-accent-text);
+  }
+  .idle {
+    font-size: 0.75rem;
+    color: var(--pads-muted);
+  }
+  .chip {
+    display: inline-flex;
+    align-items: center;
+    max-width: 14rem;
+    border: 1px solid rgb(255 111 159 / 45%);
+    background: rgb(255 79 139 / 10%);
+    border-radius: 999px;
+    font-size: 0.72rem;
+  }
+  .chip button {
+    border: 0;
+    background: none;
+    color: var(--pads-text);
+    font: inherit;
+    cursor: pointer;
+    padding: 0.2rem 0.5rem;
+  }
+  .chip-name {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    padding-right: 0.2rem !important;
+  }
+  .chip-stop {
+    color: var(--pads-muted) !important;
+    padding-left: 0.2rem !important;
+  }
+  .stop {
+    display: inline-flex;
+    gap: 0.4rem;
+    white-space: nowrap;
+  }
+  .stop span {
+    font-size: 0.65rem;
+  }
+  .stop.live {
+    border-color: rgb(255 111 159 / 60%);
+    color: var(--vbm-accent-text);
   }
   .caps {
     margin: 0;
