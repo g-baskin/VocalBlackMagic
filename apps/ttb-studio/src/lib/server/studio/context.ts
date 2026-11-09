@@ -47,13 +47,27 @@ function engineDeps(fetcher: typeof fetch): EngineDeps | null {
 
 export const noStore = { 'cache-control': 'no-store' };
 
-/** Dev gate plus, for writes, a JSON content type so cross-site forms cannot trigger paid work. */
-export function guard(request: Request, needsJson: boolean): Response | null {
+export const intentHeader = 'x-vbm-intent';
+
+/**
+ * Dev gate plus, for writes, a JSON content type so cross-site forms cannot trigger paid work.
+ * 'intent' is for raw-body uploads: they must carry the x-vbm-intent header instead, which a
+ * cross-site form cannot set without a CORS preflight.
+ */
+export function guard(request: Request, needsJson: boolean | 'intent'): Response | null {
   const disabled = generationDisabledResponse();
   if (disabled) return disabled;
   // DNS-rebinding guard: the dev server is only reachable as localhost / 127.0.0.1.
   if (!isLocalHost(request.headers.get('host')))
     return Response.json({ detail: 'The studio only answers on localhost.' }, { status: 403 });
+  if (needsJson === 'intent') {
+    if (!request.headers.get(intentHeader)?.trim())
+      return Response.json(
+        { detail: 'Send the upload with the ' + intentHeader + ' header.' },
+        { status: 415 }
+      );
+    return null;
+  }
   if (needsJson && !isJsonRequest(request))
     return Response.json({ detail: 'Send the request as application/json.' }, { status: 415 });
   return null;

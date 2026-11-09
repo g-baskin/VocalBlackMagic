@@ -2,6 +2,7 @@
 declare global {
   interface BunSubprocess {
     readonly stderr: ReadableStream<Uint8Array>;
+    readonly stdout: ReadableStream<Uint8Array>;
     readonly exited: Promise<number>;
     kill(): void;
   }

@@ -57,7 +57,19 @@ describe('every /api/studio route is behind guard()', () => {
   // Regression guard: a route that forgets guard() would spend money with no dev gate or Host check.
   test('the route table is the expected one', async () => {
     const all = await handlers();
-    expect(all.length).toBeGreaterThanOrEqual(22);
+    expect(all.length).toBeGreaterThanOrEqual(34);
+    for (const name of [
+      'sounds/+server.ts GET',
+      'sounds/[id]/+server.ts DELETE',
+      'sounds/[id]/+server.ts PATCH',
+      'sounds/[id]/audio/+server.ts GET',
+      'sounds/slice/+server.ts POST',
+      'sounds/upload/+server.ts POST',
+      'kits/+server.ts POST',
+      'kits/[id]/+server.ts PUT',
+      'kits/[id]/+server.ts DELETE'
+    ])
+      expect(all.map((h) => h.name)).toContain(name);
     for (const name of UNGUARDED) expect(all.map((h) => h.name)).toContain(name);
   });
 
@@ -108,5 +120,13 @@ describe('guard()', () => {
     expect(guard(req('localhost', 'text/plain'), true)?.status).toBe(415);
     expect(guard(req('localhost', 'application/json; charset=utf-8'), true)).toBeNull();
     expect(guard(req('localhost', 'text/plain'), false)).toBeNull();
+    // Raw uploads need the intent header a cross-site form cannot send.
+    expect(guard(req('localhost', 'audio/wav'), 'intent')?.status).toBe(415);
+    const upload = new Request('http://x/', {
+      method: 'POST',
+      headers: { host: 'localhost', 'content-type': 'audio/wav', 'x-vbm-intent': 'sound-upload' }
+    });
+    expect(guard(upload, 'intent')).toBeNull();
+    expect(guard(upload, true)?.status).toBe(415);
   });
 });

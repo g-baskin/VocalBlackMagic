@@ -27,6 +27,7 @@
     "./Sigil.svelte": "./src/Sigil.svelte",
     "./theme.css": "./src/theme.css",
     "./audio": "./src/audio.ts",
+    "./canvas": "./src/canvas.ts",
     "./RuneDropzone.svelte": "./src/RuneDropzone.svelte",
     "./ABCompare.svelte": "./src/ABCompare.svelte",
     "./RuneRecorder.svelte": "./src/RuneRecorder.svelte",
