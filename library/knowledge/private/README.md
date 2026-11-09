@@ -36,6 +36,14 @@ This area explains the system and business to the team. It also holds the eviden
 | [`auth/session-and-tenancy-model.md`](auth/session-and-tenancy-model.md) | Auth, database and billing contract packages |
 | [`security/trust-boundaries.md`](security/trust-boundaries.md) | Network and trust boundaries, dev gates |
 
+## Strategy and research
+
+Research notes explain options; they do not approve work. See [`strategy/`](strategy/README.md).
+
+| Document | Covers |
+| --- | --- |
+| [`strategy/hum-to-beat-research.md`](strategy/hum-to-beat-research.md) | Hum, chant or beatbox into a beat: market tools, open-source parts and licenses, suggested "Hum It" feature |
+
 ## Add domains as needed
 
 Use domains such as `auth/`, `data/`, `security/`, `operations/`, `strategy/`, `personas/`, or `reporting/` when the sources support them. Add a README that explains the domain. Do not seed unrelated domains or assume a technology stack.
