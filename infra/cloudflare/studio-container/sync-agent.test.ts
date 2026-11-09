@@ -10,6 +10,7 @@ import {
   isSkipped,
   isValidKey,
   newState,
+  plan,
   restore,
   runCycle,
   seedState,
@@ -139,7 +140,7 @@ describe('restore', () => {
 });
 
 describe('run cycle', () => {
-  test('uploads new and changed stable files, propagates deletions, ignores temp files', async () => {
+  test('uploads stable changes but preserves remotely stored files removed locally', async () => {
     const r2 = fakeR2();
     const cfg = cfgFor(r2.fetchFn);
     const state = newState();
@@ -167,8 +168,28 @@ describe('run cycle', () => {
     await rm(path.join(dir, 'studio/songs/1/meta.json'));
     await runCycle(cfg, state);
     r = await runCycle(cfg, state);
-    expect(r2.store.has('studio/songs/1/meta.json')).toBe(false);
+    expect(r2.store.has('studio/songs/1/meta.json')).toBe(true);
+    expect(r.deleted).toBe(0);
+    expect(r2.calls.some((c) => c.startsWith('DELETE'))).toBe(false);
     expect(r2.store.has('studio/lyrics/l.json')).toBe(true);
+  });
+
+  test('partial local scan must not infer remote deletion, including previously synced songs', async () => {
+    const r2 = fakeR2();
+    const song = 'studio/songs/1/audio.flac';
+    r2.store.set(song, enc('ORIGINAL'));
+    await put('studio/jobs/j.json', 'job');
+    const cfg = cfgFor(r2.fetchFn);
+    const state = newState();
+    await seedState(cfg, state);
+    const local = new Map([['studio/jobs/j.json', { size: 3, mtimeMs: 1 }]]);
+    expect(plan(state, local).deletes).toEqual([]);
+    state.index.set(song, { size: 8, mtimeMs: 1 });
+    expect(plan(state, local, { requireStable: false }).deletes).toEqual([]);
+    await runCycle(cfg, state);
+    await runCycle(cfg, state);
+    expect(new TextDecoder().decode(r2.store.get(song))).toBe('ORIGINAL');
+    expect(r2.calls.some((c) => c.startsWith('DELETE'))).toBe(false);
   });
 
   test('does not upload a still-growing file', async () => {
@@ -222,7 +243,7 @@ describe('run cycle', () => {
 });
 
 describe('flush (SIGTERM path)', () => {
-  test('uploads files seen for the first time and applies deletes within budget', async () => {
+  test('uploads new files during shutdown without deleting remote-only objects', async () => {
     const r2 = fakeR2();
     r2.store.set('gone.json', enc('g'));
     const cfg = cfgFor(r2.fetchFn);
@@ -231,8 +252,9 @@ describe('flush (SIGTERM path)', () => {
     await put('studio/songs/3/audio.flac', 'fresh');
     const r = await flush(cfg, state, { budgetMs: 5000, settleMs: 20 });
     expect(r.uploaded).toBe(1);
-    expect(r.deleted).toBe(1);
+    expect(r.deleted).toBe(0);
     expect(r2.store.has('studio/songs/3/audio.flac')).toBe(true);
-    expect(r2.store.has('gone.json')).toBe(false);
+    expect(r2.store.has('gone.json')).toBe(true);
+    expect(r2.calls.some((c) => c.startsWith('DELETE'))).toBe(false);
   });
 });

@@ -11,7 +11,6 @@ export interface R2Like {
   }>;
   get(key: string): Promise<{ body: ReadableStream; size: number; etag: string } | null>;
   put(key: string, value: ReadableStream | ArrayBuffer | string | null): Promise<unknown>;
-  delete(key: string): Promise<void>;
 }
 
 export const DATA_PREFIX = 'data/';
@@ -100,8 +99,8 @@ export async function handleR2(request: Request, bucket: R2Like): Promise<Respon
       await bucket.put(full, await uploadBody(request));
       return empty(204);
     case 'DELETE':
-      await bucket.delete(full);
-      return empty(204);
+      // Storage boundary also protects against still-running older sync agents.
+      return json(403, { detail: 'Cloud deletions are disabled by the storage safeguard.' });
     default:
       return empty(405);
   }

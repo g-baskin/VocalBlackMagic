@@ -13,6 +13,7 @@ import {
 } from './jobs';
 import { inheritCover } from './cover';
 import { makeReference, masterFile } from './master';
+import { masteringPresets, type MasteringPreset } from '../../mastering';
 import { uploadFile, type ReplicateDeps } from './replicate';
 import { isUsableVoice } from './voices';
 
@@ -170,22 +171,33 @@ export async function startVoice(
 }
 
 /** Studio Master: a new mastered WAV made locally; the parent song is never modified. */
-export async function masterSong(ctx: JobContext, parentId: string): Promise<SongMeta> {
+export async function masterSong(
+  ctx: JobContext,
+  parentId: string,
+  preset: MasteringPreset = 'balanced'
+): Promise<SongMeta> {
+  const selection = masteringPresets.find((item) => item.id === preset);
+  if (!selection) throw new ProviderError(400, 'Unknown mastering preset.');
   const parent = await ctx.library.get(parentId);
   const source = await ctx.library.audioFile(parent.id, 'main');
   const { id, dir } = await ctx.library.reserve();
   try {
     const output = path.join(dir, 'audio.wav');
-    const master = await masterFile(source.file, output);
+    const master = await masterFile(source.file, output, preset);
     const cover = await inheritCover(ctx.library, parent.id, dir);
     const meta: SongMeta = {
       id,
-      title: parent.title + ' — Studio Master',
+      title: parent.title + ' - ' + selection.name + ' Master',
       prompt: parent.prompt,
       style_tags: parent.style_tags,
       lyrics: parent.lyrics,
       engine: 'ffmpeg studio master',
-      params: { target_lufs: -14, true_peak_db: -1 },
+      params: {
+        target_lufs: -14,
+        true_peak_db: -1,
+        mastering_preset: preset,
+        mastering_version: 1
+      },
       created_at: ctx.now().toISOString(),
       parent_id: parent.id,
       kind: 'master',

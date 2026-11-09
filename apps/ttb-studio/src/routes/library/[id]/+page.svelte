@@ -8,6 +8,8 @@
   import OracleStatus from '@vbm/ui/OracleStatus.svelte';
   import RitualProgress from '@vbm/ui/RitualProgress.svelte';
   import AnalysisDeck from '../../../lib/client/AnalysisDeck.svelte';
+  import MasteringDesk from '../../../lib/client/MasteringDesk.svelte';
+  import type { MasteringPreset } from '../../../lib/mastering';
   import ArcaneSelect from '@vbm/ui/ArcaneSelect.svelte';
   import ArcaneTextarea from '@vbm/ui/ArcaneTextarea.svelte';
   import RegionSelect from '@vbm/ui/RegionSelect.svelte';
@@ -34,6 +36,8 @@
   let reimagineLyrics = $state('');
   let ritual = $state<{ name: string; job: StudioJob | null; error: string | null } | null>(null);
   let mastering = $state(false);
+  let masteringPreset = $state<MasteringPreset>('balanced');
+  let masterError = $state<string | null>(null);
   let edits = $state<StudioEditInfo[] | null>(null);
   let editsError = $state<string | null>(null);
   let extendBefore = $state('0');
@@ -77,6 +81,9 @@
     song = null;
     buffer = null;
     ritual = null;
+    masterError = null;
+    masteringPreset = 'balanced';
+    children = [];
     edits = null;
     editsError = null;
     regionStart = 0;
@@ -130,19 +137,19 @@
   }
 
   async function master() {
-    if (!song) return;
+    if (!song?.audio || busy) return;
+    const sourceId = song.id;
     mastering = true;
-    ritual = { name: 'Studio Master', job: null, error: null };
+    masterError = null;
     try {
-      await api('/api/studio/songs/' + song.id + '/master', { method: 'POST', body: '{}' });
-      await load(song.id);
-      ritual = null;
+      const reply = await api<{ song: SongMeta }>('/api/studio/songs/' + sourceId + '/master', {
+        method: 'POST',
+        body: JSON.stringify({ preset: masteringPreset })
+      });
+      if (alive && id === sourceId) children = [reply.song, ...children];
     } catch (e) {
-      ritual = {
-        name: 'Studio Master',
-        job: null,
-        error: e instanceof Error ? e.message : 'Mastering failed.'
-      };
+      if (alive && id === sourceId)
+        masterError = e instanceof Error ? e.message : 'Mastering failed. Try again.';
     } finally {
       mastering = false;
     }
@@ -200,7 +207,11 @@
     void startRitual('Restyle', 'edit', { action: 'cover', prompt: restyleStyle, strength });
   }
 
-  const masterChild = $derived(children.find((c) => c.kind === 'master'));
+  const masterChild = $derived(
+    children.find(
+      (c) => c.kind === 'master' && (c.params.mastering_preset ?? 'balanced') === masteringPreset
+    )
+  );
   const ext = (s: SongMeta) => s.audio?.file.split('.').pop() ?? 'mp3';
 </script>
 
@@ -251,14 +262,21 @@
                 ></strong
               >
             </div>
-            <p>
-              Original preserved{song.master.input_lufs != null
-                ? ' at ' + song.master.input_lufs.toFixed(1) + ' LUFS'
-                : ''}.
-            </p>
+            <p>Original preserved. Compare both versions to choose your preferred sound.</p>
           </div>
         {/if}
       </section>
+    {/if}
+
+    {#if song.audio}
+      <MasteringDesk
+        bind:selected={masteringPreset}
+        disabled={busy}
+        rendering={mastering}
+        error={masterError}
+        masterHref={masterChild ? resolve('/library/[id]', { id: masterChild.id }) : null}
+        onrender={master}
+      />
     {/if}
 
     {#if song.stems?.length}
@@ -390,16 +408,6 @@
             <RuneButton disabled={busy} onclick={() => startRitual('Split stems', 'stems')}
               >Split</RuneButton
             >
-          </section>
-          <section>
-            <h3>Studio Master</h3>
-            <p>Local, free: gentle EQ, compression, −14 LUFS, −1 dBTP. A/B it against this song.</p>
-            {#if masterChild}
-              <RuneButton variant="ghost" href={resolve('/library/[id]', { id: masterChild.id })}
-                >Open master (A/B)</RuneButton
-              >
-            {/if}
-            <RuneButton disabled={busy} busy={mastering} onclick={master}>Master</RuneButton>
           </section>
           <section>
             <h3>Cover art</h3>

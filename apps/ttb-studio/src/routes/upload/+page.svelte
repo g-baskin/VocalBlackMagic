@@ -29,7 +29,7 @@
       hint: 'We keep the sound',
       accept: '.mp4,.mov,.m4v,.webm,.mkv,video/*'
     },
-    { id: 'midi', label: 'MIDI', hint: 'Turned into a beat', accept: '.mid,.midi' },
+    { id: 'midi', label: 'MIDI', hint: 'Notes with a synth preview', accept: '.mid,.midi' },
     {
       id: 'lyrics',
       label: 'Lyrics',
@@ -245,7 +245,7 @@
       form.set('rights', 'true');
       if (choice === 'recording') form.append('file', take!);
       else if (choice === 'midi') {
-        status = 'Turning your MIDI into audio…';
+        status = 'Rendering a MIDI preview, not generating a song…';
         const rendered = await renderMidi(await files[0].arrayBuffer());
         form.append('file', new File([rendered.wav], 'midi-preview.wav', { type: 'audio/wav' }));
         form.append('midi', files[0]);
@@ -277,6 +277,7 @@
 
 <div class="upload">
   <h1>Upload</h1>
+  <RuneButton variant="ghost" href={resolve('/riffs')}>Create a riff instead</RuneButton>
   <p class="lead">
     Bring your own songs, beats, vocals, stems, video sound, MIDI or lyrics, then keep creating with
     them.
@@ -285,6 +286,12 @@
   {#if song}
     <ArcanePanel title="Uploaded" eyebrow={song.upload?.type ?? 'upload'} glow="teal">
       <p class="done">“{song.title}” is in your library.</p>
+      {#if song.upload?.type === 'midi'}
+        <p class="tiny">
+          This is a synthesized preview of the MIDI notes, not an AI-produced song. The original
+          MIDI is preserved. Riff-to-song generation is not ready yet.
+        </p>
+      {/if}
       <audio controls preload="metadata" src={audioUrl(song.id)}></audio>
       <p class="tiny">
         From the song page you can extend it, remix or restyle it, split stems and master it.

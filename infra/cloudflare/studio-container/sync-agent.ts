@@ -155,14 +155,6 @@ async function uploadFile(cfg: SyncConfig, rel: string): Promise<void> {
   });
 }
 
-async function deleteKey(cfg: SyncConfig, key: string): Promise<void> {
-  await withRetry(cfg, 'delete ' + key, async () => {
-    const res = await cfg.fetch(cfg.baseUrl + '/o/' + encodeKey(key), { method: 'DELETE' });
-    if (res.status === 404) return;
-    await expectOk(res, 'delete ' + key);
-  });
-}
-
 // ---------------------------------------------------------------------------
 // Scan
 
@@ -311,12 +303,8 @@ export function plan(
     if (!requireStable || same(state.seen.get(rel), s)) uploads.push(rel);
     else pending.push(rel);
   }
-  // Never wipe R2 because the local dir looks empty.
-  if (local.size > 0) {
-    for (const key of state.remote) {
-      if (!local.has(key) && !isSkipped(key) && isValidKey(key)) deletes.push(key);
-    }
-  }
+  // Incident safeguard: absence is never deletion intent. A partial scan or stale
+  // container must not erase the durable copy. Explicit cloud deletion is paused.
   uploads.sort();
   pending.sort();
   deletes.sort();
@@ -331,7 +319,7 @@ export interface CycleResult {
   scanFailed: boolean;
 }
 
-/** One sync round: scan, plan, upload stable changes, delete removed keys. Never throws. */
+/** One sync round: scan and upload stable changes. Never deletes remote objects. Never throws. */
 export async function runCycle(
   cfg: SyncConfig,
   state: SyncState,
@@ -382,26 +370,13 @@ export async function runCycle(
       cfg.log('upload failed ' + rel + ': ' + (error as Error).message);
     }
   }
-  for (const key of p.deletes) {
-    if (late()) break;
-    try {
-      await deleteKey(cfg, key);
-      state.remote.delete(key);
-      state.index.delete(key);
-      state.seen.delete(key);
-      result.deleted++;
-    } catch (error) {
-      result.failed++;
-      cfg.log('delete failed ' + key + ': ' + (error as Error).message);
-    }
-  }
   for (const rel of [...state.seen.keys()]) if (!local.has(rel)) state.seen.delete(rel);
   return result;
 }
 
 /**
  * Final flush on shutdown: scan twice (settle interval apart) so files that stopped changing
- * count as stable, then upload them and apply deletes, bounded by `budgetMs`.
+ * count as stable, then upload them without deleting remote objects, bounded by `budgetMs`.
  */
 export async function flush(
   cfg: SyncConfig,
@@ -428,7 +403,7 @@ export async function flush(
 async function runForever(cfg: SyncConfig): Promise<void> {
   const state = newState();
   await withRetry(cfg, 'initial listing', () => seedState(cfg, state)).catch((error) => {
-    cfg.log('initial listing failed, deletions disabled until a listing succeeds: ' + error);
+    cfg.log('initial listing failed (cloud deletions remain disabled): ' + error);
   });
   let chain: Promise<unknown> = Promise.resolve();
   let debounce: ReturnType<typeof setTimeout> | undefined;

@@ -93,6 +93,32 @@ describe('every /api/studio route is behind guard()', () => {
   });
 });
 
+test('owner-mode deletion is paused before accessing the library', async () => {
+  const ownerMode = process.env.VBM_OWNER_MODE;
+  const edgeSecret = process.env.VBM_EDGE_SECRET;
+  try {
+    process.env.NODE_ENV = 'production';
+    process.env.VBM_OWNER_MODE = '1';
+    process.env.VBM_EDGE_SECRET = 'test-only-owner-secret-for-deletion-guard';
+    const all = await handlers();
+    const handler = all.find((h) => h.name === 'songs/[id]/+server.ts DELETE');
+    expect(handler).toBeDefined();
+    const request = new Request('https://studio.test/api/studio/songs/invalid-test-id', {
+      method: 'DELETE',
+      headers: { 'x-vbm-edge-auth': process.env.VBM_EDGE_SECRET }
+    });
+    const response = await handler!.run({ request, params: { id: 'invalid-test-id' }, fetch });
+    expect(response.status).toBe(503);
+    expect(response.headers.get('cache-control')).toBe('no-store');
+    expect((await response.json()).detail).toContain('temporarily disabled');
+  } finally {
+    if (ownerMode === undefined) delete process.env.VBM_OWNER_MODE;
+    else process.env.VBM_OWNER_MODE = ownerMode;
+    if (edgeSecret === undefined) delete process.env.VBM_EDGE_SECRET;
+    else process.env.VBM_EDGE_SECRET = edgeSecret;
+  }
+});
+
 describe('guard()', () => {
   test('dev gate, loopback hosts and JSON-only writes', async () => {
     const { guard } = await import('./context');

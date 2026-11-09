@@ -23,14 +23,15 @@ function fakeBucket() {
     async get(key) {
       const hit = store.get(key);
       if (!hit) return null;
-      return { body: new Blob([hit.data]).stream(), size: hit.data.length, etag: 'e-' + key };
+      return {
+        body: new Blob([new Uint8Array(hit.data)]).stream(),
+        size: hit.data.length,
+        etag: 'e-' + key
+      };
     },
     async put(key, value) {
       const data = new Uint8Array(await new Response(value).arrayBuffer());
       store.set(key, { data, uploaded: new Date(0) });
-    },
-    async delete(key) {
-      store.delete(key);
     }
   };
   return { bucket, store };
@@ -40,7 +41,7 @@ const req = (method: string, path: string, body?: string) =>
   new Request('http://r2.vbm' + path, { method, body });
 
 describe('r2 store', () => {
-  test('put, get, list and delete under the data/ prefix', async () => {
+  test('put, get and list under data/ but refuse deletion even from an old sync agent', async () => {
     const { bucket, store } = fakeBucket();
     expect(
       (await handleR2(req('PUT', '/o/studio/songs/a%20b/meta.json', '{"x":1}'), bucket)).status
@@ -64,11 +65,23 @@ describe('r2 store', () => {
     });
 
     expect((await handleR2(req('DELETE', '/o/studio/songs/a%20b/meta.json'), bucket)).status).toBe(
-      204
+      403
     );
-    expect((await handleR2(req('GET', '/o/studio/songs/a%20b/meta.json'), bucket)).status).toBe(
-      404
-    );
+    const preserved = await handleR2(req('GET', '/o/studio/songs/a%20b/meta.json'), bucket);
+    expect(preserved.status).toBe(200);
+    expect(await preserved.text()).toBe('{"x":1}');
+    for (const key of [
+      'studio/jobs/j.json',
+      'shared/voices/v.json',
+      'vocal-fix/sessions/s/audio.wav'
+    ]) {
+      store.set('data/' + key, {
+        data: new TextEncoder().encode('preserve'),
+        uploaded: new Date(0)
+      });
+      expect((await handleR2(req('DELETE', '/o/' + key), bucket)).status).toBe(403);
+      expect(store.has('data/' + key)).toBe(true);
+    }
   });
 
   test('list pages with a cursor', async () => {

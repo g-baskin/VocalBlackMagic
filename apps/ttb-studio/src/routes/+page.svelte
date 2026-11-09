@@ -522,6 +522,7 @@
 <div class="page create">
   <header class="hero">
     <h1>Make a song</h1>
+    <RuneButton variant="ghost" href={resolve('/riffs')}>Create a riff</RuneButton>
     <p>Describe it in a sentence, or switch to Custom and write your own lyrics.</p>
     <RuneButton variant="ghost" href={resolve('/upload')}>Upload audio or lyrics</RuneButton>
   </header>

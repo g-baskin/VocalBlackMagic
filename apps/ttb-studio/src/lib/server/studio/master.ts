@@ -1,4 +1,18 @@
 import { ProviderError } from '../music/errors';
+import { isMasteringPreset, type MasteringPreset } from '../../mastering';
+
+/** Only named, authored presets reach ffmpeg, never user-supplied filters. */
+export function masterPresetRequest(body: unknown): MasteringPreset {
+  if (!body || typeof body !== 'object' || Array.isArray(body))
+    throw new ProviderError(400, 'Send a mastering preset as a JSON object.');
+  const record = body as Record<string, unknown>;
+  if (Object.keys(record).some((key) => key !== 'preset'))
+    throw new ProviderError(400, 'Only the preset option is supported.');
+  const preset = record.preset === undefined ? 'balanced' : record.preset;
+  if (!isMasteringPreset(preset))
+    throw new ProviderError(400, 'Choose one of the available mastering presets.');
+  return preset;
+}
 
 /** Explicit env path first, then whatever is on PATH (Homebrew, apt), then the Intel Homebrew default. */
 export const ffmpegPath =
@@ -13,30 +27,79 @@ export interface Loudness {
 }
 
 // Gentle tone shaping and glue compression ahead of loudness normalisation.
-const toneChain = [
+const balancedChain = [
   'highpass=f=28',
   'equalizer=f=280:t=q:w=1.1:g=-1.5',
   'equalizer=f=3500:t=q:w=1.4:g=0.8',
   'highshelf=f=11000:g=1.2',
   'acompressor=threshold=-18dB:ratio=2:attack=25:release=250:makeup=1.5'
 ].join(',');
+const toneChains: Record<MasteringPreset, string> = {
+  balanced: balancedChain,
+  warm: [
+    'highpass=f=28',
+    'equalizer=f=220:t=q:w=0.8:g=1',
+    'highshelf=f=8000:g=-1.5',
+    'acompressor=threshold=-18dB:ratio=2:attack=30:release=280:makeup=1.5'
+  ].join(','),
+  punchy: [
+    'highpass=f=28',
+    'equalizer=f=90:t=q:w=0.9:g=1.2',
+    'equalizer=f=300:t=q:w=1.1:g=-1.5',
+    'acompressor=threshold=-20dB:ratio=2.5:attack=20:release=140:makeup=1.5'
+  ].join(','),
+  airy: [
+    'highpass=f=28',
+    'equalizer=f=280:t=q:w=1.1:g=-1',
+    'highshelf=f=9000:g=2',
+    'acompressor=threshold=-18dB:ratio=1.6:attack=30:release=250:makeup=1.2'
+  ].join(','),
+  'deep-bass': [
+    'highpass=f=28',
+    'equalizer=f=65:t=q:w=0.8:g=2',
+    'equalizer=f=280:t=q:w=1:g=-1',
+    'acompressor=threshold=-18dB:ratio=1.8:attack=30:release=220:makeup=1.2'
+  ].join(','),
+  smooth: [
+    'highpass=f=28',
+    'equalizer=f=3500:t=q:w=1:g=-1.8',
+    'highshelf=f=8500:g=-1',
+    'acompressor=threshold=-18dB:ratio=2:attack=30:release=280:makeup=1.2'
+  ].join(','),
+  presence: [
+    'highpass=f=28',
+    'equalizer=f=280:t=q:w=1.1:g=-1',
+    'equalizer=f=2400:t=q:w=0.9:g=1.3',
+    'acompressor=threshold=-18dB:ratio=1.8:attack=30:release=250:makeup=1.2'
+  ].join(','),
+  dynamic: 'highpass=f=20'
+};
+function toneChain(preset: MasteringPreset): string {
+  if (!isMasteringPreset(preset)) throw new ProviderError(400, 'Unknown mastering preset.');
+  return toneChains[preset];
+}
 const target = 'I=-14:TP=-1:LRA=11';
 
-export function measureArgs(input: string): string[] {
+export function measureArgs(input: string, preset: MasteringPreset = 'balanced'): string[] {
   return [
     '-hide_banner',
     '-nostdin',
     '-i',
     input,
     '-af',
-    toneChain + ',loudnorm=' + target + ':print_format=json',
+    toneChain(preset) + ',loudnorm=' + target + ':print_format=json',
     '-f',
     'null',
     '-'
   ];
 }
 
-export function masterArgs(input: string, output: string, measured: Loudness): string[] {
+export function masterArgs(
+  input: string,
+  output: string,
+  measured: Loudness,
+  preset: MasteringPreset = 'balanced'
+): string[] {
   const loudnorm =
     'loudnorm=' +
     target +
@@ -58,7 +121,7 @@ export function masterArgs(input: string, output: string, measured: Loudness): s
     '-i',
     input,
     '-af',
-    toneChain + ',' + loudnorm,
+    toneChain(preset) + ',' + loudnorm,
     '-ar',
     '44100',
     '-c:a',
@@ -105,9 +168,13 @@ async function run(args: string[]): Promise<string> {
 }
 
 /** Two-pass master to -14 LUFS / -1 dBTP; writes a new 24-bit WAV and leaves the input untouched. */
-export async function masterFile(input: string, output: string) {
-  const measured = parseLoudnorm(await run(measureArgs(input)));
-  const final = parseLoudnorm(await run(masterArgs(input, output, measured)));
+export async function masterFile(
+  input: string,
+  output: string,
+  preset: MasteringPreset = 'balanced'
+) {
+  const measured = parseLoudnorm(await run(measureArgs(input, preset)));
+  const final = parseLoudnorm(await run(masterArgs(input, output, measured, preset)));
   return {
     input_lufs: Number(measured.input_i),
     output_lufs: Number(final.output_i),
