@@ -1,0 +1,36 @@
+{
+  // VBM Studio: Access-checked Worker -> one studio Container; data mirrored to R2. See infra/cloudflare/README.md
+  "$schema": "https://unpkg.com/wrangler@4/config-schema.json",
+  "name": "vbm-studio",
+  "main": "src/worker.ts",
+  "compatibility_date": "2026-11-01",
+  "workers_dev": true,
+  "preview_urls": false,
+  "observability": { "enabled": true },
+  "vars": {
+    // Cloudflare Access application protecting the workers.dev URL (not secrets).
+    "ACCESS_TEAM_DOMAIN": "gbaskin.cloudflareaccess.com",
+    "ACCESS_AUD": "7e7d18140e88e5ac6c842d6a7a88679122e167226e90d87244eb3b6293d46f97", // gitleaks:allow (public: it is in every Access login redirect)
+    "OWNER_EMAILS": "gregory.baskin@gmail.com",
+    // The studio as seen inside the container.
+    "ORIGIN_URL": "http://localhost:3002",
+    // Vocal Fix runs in the same container on 3001, built with base path /vocal-fix.
+    "VOCAL_FIX_BASE": "/vocal-fix",
+    "VOCAL_FIX_ORIGIN_URL": "http://localhost:3001"
+  },
+  // Secrets: EDGE_SECRET (required) and optional provider keys (REPLICATE_API_TOKEN, FAL_KEY, ...).
+  "containers": [
+    {
+      "class_name": "StudioContainer",
+      "image": "../studio-container/Dockerfile",
+      "image_build_context": "../../..",
+      "instance_type": "standard-1",
+      "max_instances": 1
+    }
+  ],
+  "durable_objects": {
+    "bindings": [{ "name": "CONTAINER", "class_name": "StudioContainer" }]
+  },
+  "migrations": [{ "tag": "v1", "new_sqlite_classes": ["StudioContainer"] }],
+  "r2_buckets": [{ "binding": "DATA", "bucket_name": "vbm-studio-data" }]
+}

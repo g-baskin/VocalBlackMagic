@@ -55,6 +55,12 @@ export const PATCH: RequestHandler = async ({ request, params, fetch }) => {
 export const DELETE: RequestHandler = async ({ request, params, fetch }) => {
   const blocked = guard(request, false);
   if (blocked) return blocked;
+  // Do not report a local-only deletion as durable while cloud deletion is paused.
+  if (process.env.VBM_OWNER_MODE === '1')
+    return Response.json(
+      { detail: 'Song deletion is temporarily disabled while library storage is being repaired.' },
+      { status: 503, headers: noStore }
+    );
   try {
     await studioContext(fetch).library.remove(params.id);
     return new Response(null, { status: 204 });

@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { apiPath } from '../../../../lib/base';
   import { page } from '$app/state';
   import { resolve } from '$app/paths';
   import ArcanePanel from '@vbm/ui/ArcanePanel.svelte';
@@ -43,7 +44,7 @@
 
   const id = $derived(page.params.id ?? '');
   const audioUrl = (area: string, file: string) =>
-    `/api/sessions/${encodeURIComponent(id)}/audio/${area}/${encodeURIComponent(file)}`;
+    apiPath(`/api/sessions/${encodeURIComponent(id)}/audio/${area}/${encodeURIComponent(file)}`);
 
   let manifest = $state<Manifest | null>(null);
   let loadError = $state('');
@@ -70,7 +71,7 @@
   async function load() {
     loadError = '';
     try {
-      const res = await fetch(`/api/sessions/${encodeURIComponent(id)}`);
+      const res = await fetch(apiPath(`/api/sessions/${encodeURIComponent(id)}`));
       if (!res.ok)
         throw new Error((await res.json().catch(() => null))?.detail ?? `HTTP ${res.status}`);
       const m = (await res.json()) as Manifest;
@@ -137,10 +138,10 @@
   });
 
   const STAGES = [
-    { id: 'sift', label: 'Sift phrases' },
+    { id: 'sift', label: 'Find phrases' },
     { id: 'cut', label: 'Cut & join' },
-    { id: 'profile', label: 'Read the voice' },
-    { id: 'seal', label: 'Seal gold' }
+    { id: 'profile', label: 'Analyse the voice' },
+    { id: 'seal', label: 'Save Gold Vocal' }
   ];
 
   async function reassemble() {
@@ -162,7 +163,7 @@
     const included = gold.phrases.filter((p) => chosen[p.id]).map((p) => p.id);
     const excluded = gold.phrases.filter((p) => !chosen[p.id]).map((p) => p.id);
     try {
-      const res = await fetch(`/api/sessions/${encodeURIComponent(id)}/gold`, {
+      const res = await fetch(apiPath(`/api/sessions/${encodeURIComponent(id)}/gold`), {
         method: 'POST',
         headers: { 'content-type': 'application/json' },
         body: JSON.stringify({ included, excluded })
@@ -196,14 +197,14 @@
   };
 </script>
 
-<svelte:head><title>Gold Vocal · Vocal Fix · Vocal Black Magic</title></svelte:head>
+<svelte:head><title>Gold Vocal · Vocal Fix · VBM Studio</title></svelte:head>
 
 <div class="page">
   <header class="intro">
     <p class="eyebrow">Gold vocal · phrase board</p>
-    <h1>The Golden Phrases</h1>
+    <h1>Gold Vocal phrases</h1>
     <p>
-      Each rune below is a real phrase cut from one of your repaired takes. Choose which ones form
+      Each card below is a real phrase cut from one of your repaired takes. Choose which ones form
       the Gold Vocal; nothing is averaged or blended between takes.
     </p>
     <a class="back" href={resolve('/session/[id]', { id })}>← Back to the session</a>
@@ -212,13 +213,13 @@
   {#if loadError}
     <OracleStatus tone="danger">{loadError}</OracleStatus>
   {:else if !manifest}
-    <SigilLoader label="Opening the session" />
+    <SigilLoader label="Loading session…" />
   {:else if !gold}
     <OracleStatus tone="warning">
-      This session has no Gold Vocal yet. Repair all five takes and forge it from the session page.
+      This session has no Gold Vocal yet. Repair all five takes and build it from the session page.
     </OracleStatus>
   {:else}
-    <ArcanePanel title="The Gold Vocal" eyebrow="i · result" glow="ember">
+    <ArcanePanel title="The Gold Vocal" eyebrow="1 · result" glow="ember">
       <div class="result">
         <div class="result-main">
           <GrimoirePlayer
@@ -237,7 +238,7 @@
           />
         </div>
         <div class="result-side">
-          <VoiceSigil buffer={goldBuffer} size={200} label="Gold vocal sigil" />
+          <VoiceSigil buffer={goldBuffer} size={200} label="Gold Vocal fingerprint" />
           {#if manifest.profile}
             <dl class="profile">
               {#each Object.entries(manifest.profile) as [k, v] (k)}
@@ -252,7 +253,7 @@
       </div>
     </ArcanePanel>
 
-    <ArcanePanel title="Phrase board" eyebrow="ii · {gold.phrases.length} phrases" glow="violet">
+    <ArcanePanel title="Phrase board" eyebrow="2 · {gold.phrases.length} phrases" glow="violet">
       {#snippet actions()}
         <RuneButton onclick={reassemble} busy={running} disabled={!dirty}>Re-assemble</RuneButton>
       {/snippet}
@@ -307,7 +308,7 @@
   }
   .eyebrow {
     font-family: var(--vbm-font-mono);
-    letter-spacing: 0.3em;
+    letter-spacing: 0.04em;
     text-transform: uppercase;
     font-size: 0.72rem;
     color: var(--vbm-ember) !important;
@@ -338,7 +339,7 @@
     margin: 0.5rem 0 0;
     font-family: var(--vbm-font-mono);
     font-size: 0.7rem;
-    letter-spacing: 0.2em;
+    letter-spacing: 0.04em;
     text-transform: uppercase;
     color: var(--vbm-muted);
   }
@@ -351,7 +352,7 @@
   .profile dt {
     font-family: var(--vbm-font-mono);
     font-size: 0.65rem;
-    letter-spacing: 0.2em;
+    letter-spacing: 0.04em;
     text-transform: uppercase;
     color: var(--vbm-ember);
   }
@@ -377,14 +378,7 @@
     min-width: 0;
     background: linear-gradient(160deg, var(--vbm-obsidian-3), var(--vbm-obsidian));
     box-shadow: inset 0 0 0 1px var(--vbm-line-bright);
-    clip-path: polygon(
-      12px 0,
-      100% 0,
-      100% calc(100% - 12px),
-      calc(100% - 12px) 100%,
-      0 100%,
-      0 12px
-    );
+    border-radius: var(--vbm-radius-sm);
     transition: opacity 0.2s;
   }
   .rune.off {
@@ -409,7 +403,7 @@
     font-size: 0.8rem;
     color: var(--vbm-void);
     background: linear-gradient(135deg, var(--vbm-gold), var(--vbm-ember));
-    clip-path: polygon(50% 0, 100% 50%, 50% 100%, 0 50%);
+    border-radius: 50%;
   }
   .meta {
     margin: 0;

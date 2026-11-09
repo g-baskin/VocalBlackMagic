@@ -7,8 +7,9 @@
   import SigilLoader from '@vbm/ui/SigilLoader.svelte';
   import OracleStatus from '@vbm/ui/OracleStatus.svelte';
   import RitualProgress from '@vbm/ui/RitualProgress.svelte';
-  import Spectrogram from '@vbm/ui/Spectrogram.svelte';
-  import PitchTrace from '@vbm/ui/PitchTrace.svelte';
+  import AnalysisDeck from '../../../lib/client/AnalysisDeck.svelte';
+  import MasteringDesk from '../../../lib/client/MasteringDesk.svelte';
+  import type { MasteringPreset } from '../../../lib/mastering';
   import ArcaneSelect from '@vbm/ui/ArcaneSelect.svelte';
   import ArcaneTextarea from '@vbm/ui/ArcaneTextarea.svelte';
   import RegionSelect from '@vbm/ui/RegionSelect.svelte';
@@ -22,6 +23,8 @@
 
   type Voice = { id: string; performer: string; created_at: string };
   const vocalFixUrl = import.meta.env.VITE_VOCAL_FIX_URL || 'http://localhost:5173';
+  const openInVocalFix = (songId: string) =>
+    vocalFixUrl.replace(/\/$/, '') + '?studioSong=' + encodeURIComponent(songId);
 
   let song = $state<SongMeta | null>(null);
   let parent = $state<SongMeta | null>(null);
@@ -33,6 +36,8 @@
   let reimagineLyrics = $state('');
   let ritual = $state<{ name: string; job: StudioJob | null; error: string | null } | null>(null);
   let mastering = $state(false);
+  let masteringPreset = $state<MasteringPreset>('balanced');
+  let masterError = $state<string | null>(null);
   let edits = $state<StudioEditInfo[] | null>(null);
   let editsError = $state<string | null>(null);
   let extendBefore = $state('0');
@@ -76,6 +81,9 @@
     song = null;
     buffer = null;
     ritual = null;
+    masterError = null;
+    masteringPreset = 'balanced';
+    children = [];
     edits = null;
     editsError = null;
     regionStart = 0;
@@ -121,27 +129,27 @@
         () => alive
       );
       if (ritual && done && done.status !== 'completed')
-        ritual.error = done.detail ?? 'The ritual failed.';
+        ritual.error = done.detail ?? 'The job failed.';
       if (song) await load(song.id);
     } catch (e) {
-      if (ritual) ritual.error = e instanceof Error ? e.message : 'The ritual failed.';
+      if (ritual) ritual.error = e instanceof Error ? e.message : 'The job failed.';
     }
   }
 
   async function master() {
-    if (!song) return;
+    if (!song?.audio || busy) return;
+    const sourceId = song.id;
     mastering = true;
-    ritual = { name: 'Studio Master', job: null, error: null };
+    masterError = null;
     try {
-      await api('/api/studio/songs/' + song.id + '/master', { method: 'POST', body: '{}' });
-      await load(song.id);
-      ritual = null;
+      const reply = await api<{ song: SongMeta }>('/api/studio/songs/' + sourceId + '/master', {
+        method: 'POST',
+        body: JSON.stringify({ preset: masteringPreset })
+      });
+      if (alive && id === sourceId) children = [reply.song, ...children];
     } catch (e) {
-      ritual = {
-        name: 'Studio Master',
-        job: null,
-        error: e instanceof Error ? e.message : 'Mastering failed.'
-      };
+      if (alive && id === sourceId)
+        masterError = e instanceof Error ? e.message : 'Mastering failed. Try again.';
     } finally {
       mastering = false;
     }
@@ -199,68 +207,96 @@
     void startRitual('Restyle', 'edit', { action: 'cover', prompt: restyleStyle, strength });
   }
 
-  const masterChild = $derived(children.find((c) => c.kind === 'master'));
+  const masterChild = $derived(
+    children.find(
+      (c) => c.kind === 'master' && (c.params.mastering_preset ?? 'balanced') === masteringPreset
+    )
+  );
   const ext = (s: SongMeta) => s.audio?.file.split('.').pop() ?? 'mp3';
 </script>
 
-<svelte:head><title>Song · The Studio · Vocal Black Magic</title></svelte:head>
+<svelte:head><title>Song · VBM Studio</title></svelte:head>
 
 <div class="page">
   {#if error}
     <OracleStatus tone="danger">{error}</OracleStatus>
   {:else if !song}
-    <SigilLoader label="Opening the grimoire…" />
+    <SigilLoader label="Loading song…" />
   {:else}
     <header class="page-title">
       <h1>{song.title}</h1>
       <p>{song.prompt}</p>
-      <p class="tags">{song.kind} · {song.engine} · {new Date(song.created_at).toLocaleString()}</p>
+      <p class="tags">
+        {song.kind === 'upload' ? 'Uploaded ' + (song.upload?.type ?? 'audio') : song.kind} · {song.engine}
+        · {new Date(song.created_at).toLocaleString()}
+      </p>
     </header>
 
     {#if song.audio}
-      <ArcanePanel eyebrow="The vessel" title="Listen" glow="violet">
+      <section class="listening-panel" aria-label="Song player">
         <AbPlayer
+          title={song.title}
           a={audioUrl(song.id)}
           b={song.kind === 'master' && parent?.audio ? audioUrl(parent.id) : null}
-          labelA="Master"
+          labelA={song.kind === 'master' ? 'Master' : 'This song'}
           labelB="Original"
           {buffer}
           downloadHref={audioUrl(song.id) + '?download=1'}
           downloadName={song.title + '.' + ext(song)}
+          downloadBName={parent ? parent.title + '.' + ext(parent) : undefined}
+          vocalFixHref={openInVocalFix(song.id)}
+          vocalFixBHref={parent ? openInVocalFix(parent.id) : undefined}
           cover={song.cover ? coverUrl(song.id, String(song.cover.bytes)) : null}
         />
         {#if song.master}
-          <p class="note">
-            Mastered from {song.master.input_lufs?.toFixed(1)} to {song.master.output_lufs?.toFixed(
-              1
-            )} LUFS, true peak
-            {song.master.output_true_peak?.toFixed(1)} dBTP. The original is untouched.
-          </p>
+          <div class="master-report" aria-label="Mastering results">
+            <div>
+              <span>Loudness</span><strong
+                >{song.master.output_lufs?.toFixed(1) ?? 'Unavailable'}<small> LUFS</small></strong
+              >
+            </div>
+            <div>
+              <span>True peak</span><strong
+                >{song.master.output_true_peak?.toFixed(1) ?? 'Unavailable'}<small>
+                  dBTP</small
+                ></strong
+              >
+            </div>
+            <p>Original preserved. Compare both versions to choose your preferred sound.</p>
+          </div>
         {/if}
-      </ArcanePanel>
+      </section>
+    {/if}
+
+    {#if song.audio}
+      <MasteringDesk
+        bind:selected={masteringPreset}
+        disabled={busy}
+        rendering={mastering}
+        error={masterError}
+        masterHref={masterChild ? resolve('/library/[id]', { id: masterChild.id }) : null}
+        onrender={master}
+      />
     {/if}
 
     {#if song.stems?.length}
-      <ArcanePanel eyebrow="Dismembered" title="Stem mixer" glow="teal">
+      <ArcanePanel eyebrow="Stems" title="Stem mixer" glow="teal">
         <StemMixer {song} />
       </ArcanePanel>
     {/if}
 
     <div class="split">
       {#if song.audio}
-        <ArcanePanel eyebrow="Seen" title="Spectrogram & pitch" glow="teal">
-          <Spectrogram {buffer} height={170} />
-          <PitchTrace {buffer} height={120} />
-        </ArcanePanel>
+        <AnalysisDeck {buffer} />
       {/if}
       {#if song.lyrics}
-        <ArcanePanel eyebrow="Spoken" title="Lyrics">
+        <ArcanePanel eyebrow="Words" title="Lyrics">
           <pre class="lyrics">{song.lyrics}</pre>
         </ArcanePanel>
       {/if}
     </div>
 
-    <ArcanePanel eyebrow="Lineage" title="Bloodline" glow="ember">
+    <ArcanePanel eyebrow="Lineage" title="Versions" glow="ember">
       <ul class="lineage">
         {#if parent}<li>
             Born of <a href={resolve('/library/[id]', { id: parent.id })}>{parent.title}</a>
@@ -278,18 +314,16 @@
     </ArcanePanel>
 
     {#if song.audio}
-      <ArcanePanel eyebrow="Transmutation" title="Alter the song" glow="ember">
-        <p class="note">
-          Each alteration makes a new song in the bloodline; this one is untouched.
-        </p>
+      <ArcanePanel eyebrow="Edit" title="Alter the song" glow="ember">
+        <p class="note">Each edit makes a new version; this one is untouched.</p>
         {#if editsError}
           <OracleStatus tone="danger">{editsError}</OracleStatus>
         {:else if !edits}
-          <SigilLoader size={32} label="Asking which rituals are possible…" />
+          <SigilLoader size={32} label="Checking which edits are available…" />
         {:else}
           <div class="alter">
             <section class="wide">
-              <h3>ᚱ Replace section</h3>
+              <h3>Replace section</h3>
               {#if editInfo('repaint')?.available}
                 <p>
                   Select a range; only that part is sung again. {runnerLabel(editInfo('repaint'))}
@@ -321,7 +355,7 @@
               {/if}
             </section>
             <section>
-              <h3>ᛖ Extend</h3>
+              <h3>Extend</h3>
               {#if editInfo('extend')?.available}
                 <p>
                   Add music before and/or after (240 s in total at most). {runnerLabel(
@@ -347,7 +381,7 @@
               {/if}
             </section>
             <section>
-              <h3>ᛟ Restyle</h3>
+              <h3>Restyle</h3>
               {#if editInfo('cover')?.available}
                 <p>Same structure, a new style. {runnerLabel(editInfo('cover'))}</p>
                 <ArcaneInput label="New style" bind:value={restyleStyle} />
@@ -366,37 +400,27 @@
         {/if}
       </ArcanePanel>
 
-      <ArcanePanel eyebrow="Rituals" title="Derive" glow="violet">
+      <ArcanePanel eyebrow="Tools" title="Remix & export" glow="violet">
         <div class="rituals">
           <section>
-            <h3>ᛞ Split stems</h3>
+            <h3>Split stems</h3>
             <p>Demucs separates vocals, drums, bass and the rest (~$0.03).</p>
             <RuneButton disabled={busy} onclick={() => startRitual('Split stems', 'stems')}
               >Split</RuneButton
             >
           </section>
           <section>
-            <h3>ᛝ Studio Master</h3>
-            <p>Local, free: gentle EQ, compression, −14 LUFS, −1 dBTP. A/B it against this song.</p>
-            {#if masterChild}
-              <RuneButton variant="ghost" href={resolve('/library/[id]', { id: masterChild.id })}
-                >Open master (A/B)</RuneButton
-              >
-            {/if}
-            <RuneButton disabled={busy} busy={mastering} onclick={master}>Master</RuneButton>
-          </section>
-          <section>
-            <h3>ᛜ Cover art</h3>
+            <h3>Cover art</h3>
             <p>
-              {song.cover?.inherited_from ? 'Inherited from its parent. ' : ''}Conjure a new arcane
-              cover with FLUX Schnell (~$0.003).
+              {song.cover?.inherited_from ? 'Inherited from its parent. ' : ''}Generate a new cover
+              with FLUX Schnell (~$0.003).
             </p>
             <RuneButton disabled={busy} busy={conjuring} onclick={reconjure}>
-              {song.cover ? 'Re-conjure cover' : 'Conjure cover'}
+              {song.cover ? 'New cover' : 'Generate cover'}
             </RuneButton>
           </section>
           <section>
-            <h3>ᛉ Reimagine</h3>
+            <h3>Reimagine</h3>
             <p>
               A new song in the style of this one (MiniMax Music-01, ~$0.035). Up to ~380 characters
               of lyrics.
@@ -414,16 +438,16 @@
             >
           </section>
           <section>
-            <h3>ᛗ Sing in my voice</h3>
+            <h3>Sing in my voice</h3>
             {#if voices === null}
               <SigilLoader size={32} label="Listening for voices…" />
             {:else if voices.length === 0}
               <p>
-                No consented voice is ready. Voices are forged, with your own-voice consent, in
-                Vocal Fix's Voice Forge.
+                No consented voice is ready. Voices are created, with your own-voice consent, in
+                Vocal Fix's Voice training.
               </p>
               <!-- eslint-disable-next-line svelte/no-navigation-without-resolve -- not an app route -->
-              <a class="forge" href={vocalFixUrl}>Go to the Voice Forge →</a>
+              <a class="forge" href={vocalFixUrl}>Go to Voice training →</a>
             {:else}
               <ArcaneSelect
                 label="Voice"
@@ -444,7 +468,7 @@
             {#if ritual.job}
               <RitualProgress stages={ritual.job.stages} detail={ritual.job.detail} />
             {:else if !ritual.error}
-              <SigilLoader label="Beginning the ritual…" size={40} />
+              <SigilLoader label="Starting…" size={40} />
             {/if}
             {#if ritual.error}<OracleStatus tone="danger">{ritual.error}</OracleStatus>{/if}
             {#if ritual.job?.status === 'completed'}
@@ -528,9 +552,43 @@
     font-size: 1.1rem;
     margin: 0;
   }
-  .note {
-    font-style: italic;
-    opacity: 0.8;
+  .listening-panel {
+    min-width: 0;
+  }
+  .master-report {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 16px 32px;
+    padding: 20px 24px 0;
+  }
+  .master-report div {
+    display: grid;
+    gap: 4px;
+  }
+  .master-report span,
+  .master-report p {
+    color: var(--vbm-muted);
+    font-size: 0.75rem;
+  }
+  .master-report strong {
+    font-size: 1rem;
+    font-weight: 600;
+    font-variant-numeric: tabular-nums;
+  }
+  .master-report small {
+    margin-left: 4px;
+    color: var(--vbm-muted);
+    font-size: 0.75rem;
+    font-weight: 400;
+  }
+  .master-report p {
+    margin: 0;
+  }
+  @media (max-width: 440px) {
+    .master-report {
+      padding-inline: 16px;
+    }
   }
   .lineage {
     margin: 0;

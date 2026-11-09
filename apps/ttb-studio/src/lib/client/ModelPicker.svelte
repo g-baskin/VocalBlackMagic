@@ -90,7 +90,7 @@
     margin: 0.4rem 0 0;
     font-family: var(--vbm-font-mono);
     font-size: 0.72rem;
-    letter-spacing: 0.22em;
+    letter-spacing: 0.04em;
     text-transform: uppercase;
     color: var(--vbm-teal);
   }

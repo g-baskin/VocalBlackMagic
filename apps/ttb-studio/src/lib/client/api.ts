@@ -15,10 +15,7 @@ export async function api<T>(url: string, init: RequestInit = {}): Promise<T> {
   if (response.status === 204) return undefined as T;
   const body = (await response.json().catch(() => ({}))) as T & { detail?: string };
   if (!response.ok)
-    throw new ApiError(
-      body.detail || 'The ritual failed (' + response.status + ').',
-      response.status
-    );
+    throw new ApiError(body.detail || 'Request failed (' + response.status + ').', response.status);
   return body;
 }
 

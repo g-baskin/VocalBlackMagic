@@ -55,7 +55,8 @@ export const songKinds = [
   'master',
   'extend',
   'repaint',
-  'restyle'
+  'restyle',
+  'upload'
 ] as const;
 export type SongKind = (typeof songKinds)[number];
 export const stemNames = ['vocals', 'drums', 'bass', 'other'] as const;
@@ -94,6 +95,55 @@ export interface SongMeta {
   runner?: StudioRunnerRecord;
   /** Cover image; inherited_from names the song it was copied from. */
   cover?: StoredAudio & { inherited_from?: string };
+  /** Set for songs the user uploaded (kind 'upload'); originals are kept untouched. */
+  upload?: UploadRecord;
+}
+
+/** What the user said they were uploading. */
+export const uploadTypes = [
+  'song',
+  'beat',
+  'acapella',
+  'recording',
+  'video',
+  'stems',
+  'midi'
+] as const;
+export type UploadType = (typeof uploadTypes)[number];
+
+/** Self-attested rights statement; not consent to clone anyone's voice. */
+export interface RightsAttestation {
+  statement: string;
+  attested_at: string;
+}
+
+export interface UploadOriginal extends StoredAudio {
+  /** Sniffed container format (never the client's file name). */
+  format: string;
+  sha256: string;
+  /** Stem bus this file was mixed into (stems uploads only). */
+  stem?: StemName;
+}
+
+export interface UploadRecord {
+  type: UploadType;
+  originals: UploadOriginal[];
+  /** Original MIDI file for midi uploads (the audio is a browser-rendered preview). */
+  midi?: StoredAudio & { sha256: string };
+  duration_seconds: number;
+  had_video: boolean;
+  rights: RightsAttestation;
+}
+
+/** A reusable lyric sheet imported from a file or pasted text. */
+export interface LyricSheet {
+  id: string;
+  title: string;
+  text: string;
+  /** txt, md, lrc, srt, vtt, docx, pdf or paste. */
+  source: string;
+  created_at: string;
+  rights: RightsAttestation;
 }
 
 export type StudioJobKind = 'create' | 'reimagine' | 'stems' | 'voice' | 'edit';

@@ -34,41 +34,35 @@
     position: relative;
   }
   label {
-    font-family: var(--vbm-font-mono);
-    font-size: 0.72rem;
-    letter-spacing: 0.22em;
-    text-transform: uppercase;
+    font-size: 0.875rem;
+    font-weight: 600;
     color: var(--vbm-muted);
   }
   .frame {
-    padding: 1px;
-    background: linear-gradient(90deg, var(--vbm-line-bright), var(--vbm-line));
-    clip-path: polygon(
-      10px 0,
-      100% 0,
-      100% calc(100% - 10px),
-      calc(100% - 10px) 100%,
-      0 100%,
-      0 10px
-    );
+    background: var(--vbm-surface-2);
+    border: 1px solid var(--vbm-border-strong);
+    border-radius: var(--vbm-radius-sm);
+    transition:
+      border-color 0.15s,
+      box-shadow 0.15s;
   }
   .frame:focus-within {
-    background: linear-gradient(90deg, var(--vbm-teal), var(--vbm-violet));
-    padding: 2px;
+    border-color: var(--vbm-accent);
+    box-shadow: 0 0 0 3px rgb(255 79 139 / 22%);
   }
   input {
     width: 100%;
+    min-height: var(--vbm-tap);
     border: 0;
     padding: 0.7rem 0.9rem;
-    background: var(--vbm-void);
+    background: transparent;
     color: var(--vbm-text);
     font: inherit;
-    font-size: 1.05rem;
-    clip-path: inherit;
+    font-size: 1rem;
+    border-radius: inherit;
   }
   input::placeholder {
     color: var(--vbm-faint);
-    font-style: italic;
   }
   input:focus {
     outline: none;

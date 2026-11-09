@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { apiPath } from '../../../../lib/base';
   import { page } from '$app/state';
   import { resolve } from '$app/paths';
   import ArcanePanel from '@vbm/ui/ArcanePanel.svelte';
@@ -49,7 +50,7 @@
 
   $effect(() => {
     if (!id) return;
-    fetch(`/api/sessions/${encodeURIComponent(id)}`)
+    fetch(apiPath(`/api/sessions/${encodeURIComponent(id)}`))
       .then(async (res) => {
         if (!res.ok)
           throw new Error((await res.json().catch(() => null))?.detail ?? `HTTP ${res.status}`);
@@ -66,7 +67,7 @@
     if (!file) return;
     const controller = new AbortController();
     decodeAudioFromUrl(
-      `/api/sessions/${encodeURIComponent(id)}/audio/derived/${encodeURIComponent(file)}`,
+      apiPath(`/api/sessions/${encodeURIComponent(id)}/audio/derived/${encodeURIComponent(file)}`),
       controller.signal
     )
       .then((b) => (goldBuffer = b))
@@ -79,14 +80,18 @@
   const pollGaveUp = (j: Job): Job =>
     ++pollFailures < 8
       ? { ...j }
-      : { ...j, status: 'failed', error: 'Lost contact with the forge. Reload to check on it.' };
+      : {
+          ...j,
+          status: 'failed',
+          error: 'Lost contact with voice training. Reload to check on it.'
+        };
   $effect(() => {
     const j = job;
     if (!j || j.status === 'completed' || j.status === 'failed' || j.status === 'cancelled') return;
     const timer = setTimeout(async () => {
       try {
         const res = await fetch(
-          `/api/sessions/${encodeURIComponent(id)}/jobs/${encodeURIComponent(j.id)}`
+          apiPath(`/api/sessions/${encodeURIComponent(id)}/jobs/${encodeURIComponent(j.id)}`)
         );
         if (res.ok) {
           pollFailures = 0;
@@ -108,7 +113,7 @@
     submitting = true;
     error = '';
     try {
-      const res = await fetch(`/api/sessions/${encodeURIComponent(id)}/forge`, {
+      const res = await fetch(apiPath(`/api/sessions/${encodeURIComponent(id)}/forge`), {
         method: 'POST',
         headers: { 'content-type': 'application/json' },
         body: JSON.stringify({ attested_name: name, own_voice: true, statement: STATEMENT })
@@ -117,29 +122,29 @@
       if (!res.ok) throw new Error(body?.detail ?? `HTTP ${res.status}`);
       job = body.job as Job;
     } catch (err) {
-      error = err instanceof Error ? err.message : 'The forge refused.';
+      error = err instanceof Error ? err.message : 'Voice training could not start.';
     } finally {
       submitting = false;
     }
   }
 </script>
 
-<svelte:head><title>Voice Forge · Vocal Fix · Vocal Black Magic</title></svelte:head>
+<svelte:head><title>Voice training · Vocal Fix · VBM Studio</title></svelte:head>
 
 <div class="page">
   <header class="intro">
-    <p class="eyebrow">Voice forge · consent ritual</p>
-    <h1>Bind Your Voice</h1>
+    <p class="eyebrow">Voice training · consent</p>
+    <h1>Train your voice</h1>
     <a class="back" href={resolve('/session/[id]', { id })}>← Back to the session</a>
   </header>
 
   {#if loadError}
     <OracleStatus tone="danger">{loadError}</OracleStatus>
   {:else if !manifest}
-    <SigilLoader label="Opening the session" />
+    <SigilLoader label="Loading session…" />
   {:else}
     <div class="grid">
-      <ArcanePanel title="What will happen" eyebrow="i · plainly" glow="teal">
+      <ArcanePanel title="What will happen" eyebrow="1 · in plain words" glow="teal">
         <ol class="plain">
           <li>
             The phrases in your <strong>Gold Vocal</strong> are packed into a training dataset.
@@ -148,38 +153,38 @@
             That dataset is sent to a hosted trainer (Replicate) to train a voice model. This is a
             paid run.
           </li>
-          <li>The trained model is stored privately and listed in your Codex of voices.</li>
+          <li>The trained model is stored privately and listed in My voices.</li>
           <li>Only you can use it, in the Studio, to sing new songs in your own voice.</li>
           <li>You can revoke it at any time; revoking deletes the model files.</li>
         </ol>
         <p class="note">
-          Only forge a voice that is yours. Five uploads are not permission to recreate anyone else.
+          Only train a voice that is yours. Five uploads are not permission to recreate anyone else.
         </p>
       </ArcanePanel>
 
-      <ArcanePanel title="The oath" eyebrow="ii · sign" glow="ember">
+      <ArcanePanel title="Consent" eyebrow="2 · sign" glow="ember">
         {#if !ready}
           <OracleStatus tone="warning"
-            >Forge the Gold Vocal first; there is nothing to train from yet.</OracleStatus
+            >Build the Gold Vocal first; there is nothing to train from yet.</OracleStatus
           >
         {:else if done}
           <div class="done">
-            <VoiceSigil buffer={goldBuffer} size={200} label="Your forged voice" />
-            <OracleStatus tone="success">Your voice is forged and sealed in the Codex.</OracleStatus
+            <VoiceSigil buffer={goldBuffer} size={200} label="Your trained voice" />
+            <OracleStatus tone="success">Your voice is trained and saved in My voices.</OracleStatus
             >
             <div class="row">
               <RuneButton href={studioUrl}>Use it in the Studio</RuneButton>
-              <RuneButton variant="ghost" href={resolve('/voices')}>Open the Codex</RuneButton>
+              <RuneButton variant="ghost" href={resolve('/voices')}>Open My voices</RuneButton>
             </div>
           </div>
         {:else}
           {#if manifest.voices.length}
             <OracleStatus tone="neutral">
-              This session already has {manifest.voices.length} forged voice{manifest.voices
+              This session already has {manifest.voices.length} trained voice{manifest.voices
                 .length === 1
                 ? ''
                 : 's'}.
-              <a href={resolve('/voices')}>See the Codex</a>. Signing again trains (and pays for) a
+              <a href={resolve('/voices')}>See My voices</a>. Signing again trains (and pays for) a
               new one.
             </OracleStatus>
           {/if}
@@ -202,7 +207,7 @@
               hint="Required. Recorded with the time in the audit trail."
             />
             <RuneButton type="submit" disabled={!canSign} busy={submitting}
-              >Seal the oath & forge</RuneButton
+              >Sign & train voice</RuneButton
             >
           </form>
           {#if error}<OracleStatus tone="danger">{error}</OracleStatus>{/if}
@@ -237,7 +242,7 @@
   }
   .eyebrow {
     font-family: var(--vbm-font-mono);
-    letter-spacing: 0.3em;
+    letter-spacing: 0.04em;
     text-transform: uppercase;
     font-size: 0.72rem;
     color: var(--vbm-ember);

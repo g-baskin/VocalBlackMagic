@@ -8,6 +8,7 @@ import type { CreateDeps } from './create';
 import { SongLibrary } from './library';
 import { ffmpegPath, makeInstrumental, makeReference, masterFile } from './master';
 import { usableVoices } from './voices';
+import { masteringPresets } from '../../mastering';
 
 // Real ffmpeg for mastering and reference excerpts; providers are faked.
 type Call = { url: string; body: string };
@@ -129,6 +130,42 @@ const replicateCreate = (url: string) =>
     : new Response('unexpected ' + url, { status: 500 });
 
 describe('studio master (real ffmpeg)', () => {
+  test('every preset creates a distinct playable child with provenance, without touching the source', async () => {
+    const { fetch, calls } = fakeFetch(() => new Response('no network', { status: 500 }));
+    const ctx = deps(fetch);
+    const { masterSong } = await import('./derive');
+    const { meta: parent, dir } = await addSong(ctx, quiet);
+    const before = await sha(path.join(dir, 'audio.wav'));
+    const metaBefore = await readFile(path.join(dir, 'meta.json'), 'utf8');
+    const hashes = new Set<string>();
+    for (const preset of masteringPresets) {
+      const child = await masterSong(ctx, parent.id, preset.id);
+      const stored = await ctx.library.get(child.id);
+      expect(stored).toMatchObject({
+        parent_id: parent.id,
+        kind: 'master',
+        est_cost_usd: 0,
+        params: {
+          mastering_preset: preset.id,
+          mastering_version: 1,
+          target_lufs: -14,
+          true_peak_db: -1
+        }
+      });
+      expect(stored.title).toBe('Parent - ' + preset.name + ' Master');
+      expect(Number.isFinite(stored.master?.output_lufs)).toBe(true);
+      expect(Math.abs((stored.master?.output_lufs ?? 0) + 14)).toBeLessThan(1.5);
+      expect(stored.master?.output_true_peak).toBeLessThanOrEqual(-0.5);
+      const audio = await ctx.library.audioFile(child.id, 'main');
+      expect(Math.abs((await durationOf(audio.file)) - 34)).toBeLessThan(0.5);
+      hashes.add(await sha(audio.file));
+    }
+    expect(hashes.size).toBe(masteringPresets.length);
+    expect(await sha(path.join(dir, 'audio.wav'))).toBe(before);
+    expect(await readFile(path.join(dir, 'meta.json'), 'utf8')).toBe(metaBefore);
+    expect(calls).toEqual([]);
+  }, 120_000);
+
   test('masters a quiet file to about -14 LUFS / -1 dBTP and leaves the input untouched', async () => {
     const before = await sha(quiet);
     const out = path.join(root, 'master.wav');

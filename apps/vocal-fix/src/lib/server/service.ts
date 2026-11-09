@@ -121,7 +121,7 @@ export class VocalFixService {
       throw new VocalFixError(
         mode === 'fix'
           ? 'Fix a take needs exactly one recording.'
-          : 'Forge a Gold Vocal needs exactly five recordings.',
+          : 'Building a Gold Vocal needs exactly five recordings.',
         422
       );
     for (const f of input.files) {
@@ -530,7 +530,7 @@ export class VocalFixService {
   async gold(id: string, body: Record<string, unknown>): Promise<GoldResult> {
     const m = await this.store.read(id);
     if (m.mode !== 'forge')
-      throw new VocalFixError('Gold Vocal needs a Forge session with five takes.', 409);
+      throw new VocalFixError('Gold Vocal needs a Gold Vocal session with five takes.', 409);
     const sources = m.recordings.map((r) => {
       const v = this.latestRepair(m, r.id);
       if (!v)
@@ -632,7 +632,7 @@ export class VocalFixService {
     const m = await this.store.read(id);
     const consent = validateConsent(body as unknown as ConsentInput, m.performer);
     const gold = m.gold as { version: string; segments: GoldSegment[] } | undefined;
-    if (!gold?.segments?.length) throw new VocalFixError('Forge the Gold Vocal first.', 409);
+    if (!gold?.segments?.length) throw new VocalFixError('Build the Gold Vocal first.', 409);
     const client = this.replicate();
     const epochs =
       typeof body.epochs === 'number' &&
@@ -673,10 +673,10 @@ export class VocalFixService {
     });
     await this.registry.write(voice);
     const stages = [
-      { id: 'dataset', label: 'Bind dataset' },
-      { id: 'upload', label: 'Send to the forge' },
+      { id: 'dataset', label: 'Build dataset' },
+      { id: 'upload', label: 'Upload for training' },
       { id: 'train', label: 'Train RVC voice' },
-      { id: 'seal', label: 'Seal in registry' }
+      { id: 'seal', label: 'Save to My voices' }
     ];
     const job = await this.jobs.start(
       this.store.sessionDir(id),

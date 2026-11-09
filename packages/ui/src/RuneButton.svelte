@@ -35,96 +35,77 @@
 
 <style>
   .rune {
-    --c: var(--vbm-violet);
     position: relative;
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    gap: 0.55rem;
-    min-height: 2.75rem;
-    padding: 0.6rem 1.5rem;
+    gap: 0.5rem;
+    min-height: var(--vbm-tap);
+    padding: 0.6rem 1.35rem;
     border: 0;
-    font-family: var(--vbm-font-display);
-    font-size: 0.82rem;
+    border-radius: var(--vbm-radius-pill);
+    font-family: var(--vbm-font-sans);
+    font-size: 0.95rem;
     font-weight: 700;
-    letter-spacing: 0.22em;
-    text-transform: uppercase;
+    line-height: 1.2;
     text-decoration: none;
     cursor: pointer;
-    clip-path: polygon(
-      12px 0,
-      calc(100% - 12px) 0,
-      100% 50%,
-      calc(100% - 12px) 100%,
-      12px 100%,
-      0 50%
-    );
     transition:
-      filter 0.2s,
-      transform 0.15s;
+      filter 0.15s,
+      transform 0.15s,
+      background-color 0.15s,
+      box-shadow 0.15s;
   }
   .summon {
-    color: var(--vbm-void);
-    background:
-      linear-gradient(100deg, transparent 30%, rgb(255 255 255 / 35%) 50%, transparent 70%) -200%
-        0 / 200% 100% no-repeat,
-      linear-gradient(90deg, var(--vbm-violet), #d38cff 50%, var(--vbm-ember));
+    color: #1a0b12;
+    background: var(--vbm-gradient);
+    box-shadow: var(--vbm-shadow-accent);
   }
   .summon:hover:not(:disabled) {
-    background-position:
-      200% 0,
-      0 0;
-    transition: background-position 0.8s;
-    filter: drop-shadow(0 0 10px rgb(167 116 255 / 70%));
+    filter: brightness(1.08);
   }
   .ghost {
     color: var(--vbm-text);
-    background: linear-gradient(var(--vbm-obsidian-2), var(--vbm-obsidian-2)) padding-box;
-    box-shadow: inset 0 0 0 1px var(--vbm-line-bright);
+    background: var(--vbm-surface-2);
+    box-shadow: inset 0 0 0 1px var(--vbm-border-strong);
   }
   .ghost:hover:not(:disabled) {
-    color: var(--vbm-teal);
-    box-shadow: inset 0 0 0 1px var(--vbm-teal);
+    background: var(--vbm-surface-3);
   }
   .danger {
     color: #fff;
-    background: linear-gradient(90deg, #8c1d2c, #c2410c);
+    background: #c9304a;
   }
   .danger:hover:not(:disabled) {
-    filter: drop-shadow(0 0 10px rgb(255 90 110 / 60%)) brightness(1.15);
+    filter: brightness(1.1);
   }
   .rune:active:not(:disabled) {
     transform: scale(0.97);
   }
   .rune:focus-visible {
-    outline: none;
-    box-shadow:
-      inset 0 0 0 2px var(--vbm-teal),
-      inset 0 0 0 4px var(--vbm-void);
-  }
-  .rune:focus-visible .label {
-    text-decoration: underline;
-    text-underline-offset: 4px;
+    outline: 2px solid var(--vbm-blue);
+    outline-offset: 3px;
   }
   .rune:disabled {
     cursor: not-allowed;
     opacity: 0.5;
+    box-shadow: none;
   }
   .rune[aria-busy='true'] {
     opacity: 0.85;
     cursor: progress;
   }
   .spinner {
-    width: 0.9rem;
-    height: 0.9rem;
+    width: 1rem;
+    height: 1rem;
+    border-radius: 50%;
     border: 2px solid currentColor;
     border-right-color: transparent;
-    transform: rotate(45deg);
-    animation: spin 0.9s linear infinite;
+    animation: spin 0.8s linear infinite;
   }
   @keyframes spin {
     to {
-      transform: rotate(405deg);
+      transform: rotate(360deg);
     }
   }
   @media (prefers-reduced-motion: reduce) {

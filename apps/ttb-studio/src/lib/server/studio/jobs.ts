@@ -83,28 +83,28 @@ const jobFile = (ctx: JobContext, id: string) => {
 
 const stageLabels: Record<StudioJobKind, [string, string][]> = {
   create: [
-    ['summon', 'Summoning the song'],
-    ['bind', 'Binding audio to the library']
+    ['summon', 'Generating the song'],
+    ['bind', 'Saving audio to the library']
   ],
   reimagine: [
-    ['upload', 'Offering the reference'],
+    ['upload', 'Uploading the reference'],
     ['summon', 'Reimagining'],
-    ['bind', 'Binding audio to the library']
+    ['bind', 'Saving audio to the library']
   ],
   stems: [
-    ['upload', 'Offering the song'],
+    ['upload', 'Uploading the song'],
     ['summon', 'Splitting into stems'],
-    ['bind', 'Binding stems to the library']
+    ['bind', 'Saving stems to the library']
   ],
   edit: [
-    ['upload', 'Offering the song'],
+    ['upload', 'Uploading the song'],
     ['summon', 'Reworking the song'],
-    ['bind', 'Binding audio to the library']
+    ['bind', 'Saving audio to the library']
   ],
   voice: [
-    ['upload', 'Offering the song'],
+    ['upload', 'Uploading the song'],
     ['summon', 'Singing in the chosen voice'],
-    ['bind', 'Binding audio to the library']
+    ['bind', 'Saving audio to the library']
   ]
 };
 
@@ -176,7 +176,7 @@ export async function assertJobCapacity(
   if (active >= limit)
     throw new ProviderError(
       429,
-      'Already ' + active + ' rituals in progress. Wait for one to finish before starting another.'
+      'Already ' + active + ' jobs in progress. Wait for one to finish before starting another.'
     );
 }
 

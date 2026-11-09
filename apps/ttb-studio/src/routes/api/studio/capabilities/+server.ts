@@ -7,9 +7,9 @@ import { ffmpegPath } from '../../../../lib/server/studio/master';
 import { modelInfos } from '../../../../lib/server/studio/runners/capabilities';
 import { usableVoices } from '../../../../lib/server/studio/voices';
 
-export const GET: RequestHandler = async ({ fetch }) => {
+export const GET: RequestHandler = async ({ fetch, request }) => {
   const ctx = studioContext(fetch);
-  const allowed = generationAllowed();
+  const allowed = generationAllowed(request);
   return Response.json(
     {
       allowed,

@@ -1,6 +1,35 @@
+import { createHash, timingSafeEqual } from 'node:crypto';
+
+/** Edge secrets shorter than this are ignored, so owner mode cannot run on a guessable secret. */
+export const MIN_EDGE_SECRET_LENGTH = 32;
+
+/**
+ * Owner mode: the production build runs for one owner behind the VBM Studio edge Worker
+ * (infra/cloudflare), which admits the owner after a Cloudflare Access login and adds the
+ * shared edge secret. hooks.server.ts then refuses every API request without that secret.
+ */
+export function ownerMode(): boolean {
+  return (
+    process.env.VBM_OWNER_MODE === '1' &&
+    (process.env.VBM_EDGE_SECRET?.trim().length ?? 0) >= MIN_EDGE_SECRET_LENGTH
+  );
+}
+
+export function isOwnerEdgeRequest(request: Request): boolean {
+  if (!ownerMode()) return false;
+  const supplied = request.headers.get('x-vbm-edge-auth') ?? '';
+  if (!supplied) return false;
+  const a = createHash('sha256').update(supplied).digest();
+  const b = createHash('sha256')
+    .update(process.env.VBM_EDGE_SECRET?.trim() ?? '')
+    .digest();
+  return timingSafeEqual(a, b);
+}
+
 export function processingAllowed(): boolean {
-  // No user identity, tenant scoping or spending caps yet: processing stays development-only.
-  return process.env.NODE_ENV === 'development';
+  // No multi-user identity, tenant scoping or spending caps yet: processing stays
+  // development-only, except in owner mode, where hooks.server.ts requires the edge secret.
+  return process.env.NODE_ENV === 'development' || ownerMode();
 }
 
 export function disabledResponse(): Response | null {
@@ -90,7 +119,14 @@ export function isLocalHost(host: string | null): boolean {
 }
 
 export function hostGuard(request: Request): Response | null {
-  return isLocalHost(request.headers.get('host'))
+  // An owner-mode request carries the edge secret, which a rebinding page cannot supply.
+  return isLocalHost(request.headers.get('host')) || isOwnerEdgeRequest(request)
     ? null
     : jsonError('Vocal Fix only answers on localhost.', 403);
+}
+
+/** Owner mode: every API request must come through the authenticated edge Worker. */
+export function ownerGuard(request: Request): Response | null {
+  if (!ownerMode() || isOwnerEdgeRequest(request)) return null;
+  return jsonError('Sign in through VBM Studio to use Vocal Fix.', 403);
 }

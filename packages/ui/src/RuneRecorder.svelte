@@ -146,13 +146,13 @@
     ctx.clearRect(0, 0, size, size);
     const c = size / 2;
     const base = size * 0.3;
-    ctx.strokeStyle = 'rgba(167,116,255,0.3)';
+    ctx.strokeStyle = 'rgba(255,79,139,0.3)';
     ctx.beginPath();
     ctx.arc(c, c, base, 0, Math.PI * 2);
     ctx.stroke();
     ctx.save();
-    ctx.strokeStyle = '#3ff0d2';
-    ctx.shadowColor = '#3ff0d2';
+    ctx.strokeStyle = '#4f8bff';
+    ctx.shadowColor = '#4f8bff';
     ctx.shadowBlur = 10;
     ctx.lineWidth = 1.6;
     ctx.beginPath();
@@ -202,7 +202,7 @@
         <span class="hz vbm-mono">{hz > 0 ? `${hz.toFixed(1)} Hz` : 'unvoiced'}</span>
       {:else}
         <span class="dormant vbm-mono"
-          >{phase === 'requesting' ? 'opening the mirror…' : 'mirror dormant'}</span
+          >{phase === 'requesting' ? 'Opening microphone…' : 'Ready to record'}</span
         >
       {/if}
     </div>
@@ -236,7 +236,7 @@
     justify-self: start;
     font-family: var(--vbm-font-mono);
     font-size: 0.72rem;
-    letter-spacing: 0.22em;
+    letter-spacing: 0.04em;
     text-transform: uppercase;
     color: var(--vbm-muted);
   }
@@ -245,16 +245,16 @@
     width: min(100%, 220px);
     aspect-ratio: 1;
     border-radius: 50%;
-    background: radial-gradient(circle, rgb(63 240 210 / 8%), transparent 65%), var(--vbm-void);
+    background: radial-gradient(circle, rgb(79 139 255 / 8%), transparent 65%), var(--vbm-void);
     box-shadow:
       inset 0 0 0 1px var(--vbm-line-bright),
-      inset 0 0 40px rgb(91 43 196 / 35%);
+      inset 0 0 40px rgb(255 79 139 / 35%);
   }
   .mirror.live {
     box-shadow:
       inset 0 0 0 1px var(--vbm-teal),
-      0 0 24px rgb(63 240 210 / 25%),
-      inset 0 0 40px rgb(91 43 196 / 45%);
+      0 0 24px rgb(79 139 255 / 25%),
+      inset 0 0 40px rgb(255 79 139 / 45%);
   }
   canvas {
     width: 100%;
@@ -273,7 +273,6 @@
     font-family: var(--vbm-font-display);
     font-size: 2rem;
     color: var(--vbm-text);
-    text-shadow: var(--vbm-glow-violet);
   }
   .hz {
     font-size: 0.7rem;
@@ -281,7 +280,7 @@
   }
   .dormant {
     font-size: 0.65rem;
-    letter-spacing: 0.25em;
+    letter-spacing: 0.04em;
     text-transform: uppercase;
     color: var(--vbm-faint);
   }
@@ -305,7 +304,7 @@
     width: 0.6rem;
     height: 0.6rem;
     background: var(--vbm-blood);
-    clip-path: polygon(50% 0, 100% 50%, 50% 100%, 0 50%);
+    border-radius: 50%;
     animation: blink 1s steps(2) infinite;
   }
   @keyframes blink {

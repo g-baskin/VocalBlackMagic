@@ -23,7 +23,7 @@
   let allowed = $state(false);
   let capsError = $state<string | null>(null);
   let picked = $state<string[]>([]);
-  let prompt = $state('A candlelit gothic ballad about a lighthouse keeper who talks to ghosts');
+  let prompt = $state('A warm acoustic ballad about a lighthouse keeper watching the sunrise');
   let lyrics = $state('');
   let title = $state('');
   let instrumental = $state(false);
@@ -118,7 +118,7 @@
       history.replaceState(history.state, '', '?id=' + encodeURIComponent(res.seance.id));
       await follow(res.seance.id, res.seance);
     } catch (e) {
-      error = e instanceof Error ? e.message : 'The séance failed.';
+      error = e instanceof Error ? e.message : 'The comparison could not start.';
     } finally {
       busy = false;
     }
@@ -137,7 +137,7 @@
         // A dev-server restart or a dropped connection should not end the séance: retry a few times.
         misses += 1;
         if (misses >= 4) {
-          error = e instanceof Error ? e.message : 'Lost the séance.';
+          error = e instanceof Error ? e.message : 'Lost contact with the comparison.';
           return;
         }
         await sleep(2000 * misses);
@@ -255,7 +255,7 @@
       ).seance;
       await loadBoard();
     } catch (e) {
-      error = e instanceof Error ? e.message : 'The reveal failed.';
+      error = e instanceof Error ? e.message : 'Could not reveal the models.';
     } finally {
       busy = false;
     }
@@ -273,13 +273,13 @@
   }
 </script>
 
-<svelte:head><title>The Séance | TTB Studio</title></svelte:head>
+<svelte:head><title>Compare · VBM Studio</title></svelte:head>
 
 <div class="seance">
   <header class="intro">
-    <h1>The Séance</h1>
+    <h1>Compare models</h1>
     <p>
-      Summon one take from each of 2 to 4 models on the same prompt and lyrics. You hear them as A
+      Create one take from each of 2 to 4 models on the same prompt and lyrics. You hear them as A
       to D in a shuffled order, rank them blind, and only then learn who made what.
     </p>
   </header>
@@ -287,7 +287,7 @@
   {#if error}<p class="error" role="alert">{error}</p>{/if}
 
   {#if !seance}
-    <ArcanePanel title="Call the spirits" eyebrow="Blind comparison">
+    <ArcanePanel title="Pick models" eyebrow="Blind comparison">
       {#if capsError}<p class="error">{capsError}</p>{/if}
       {#if !allowed && !capsError}
         <p class="note">Generation is disabled outside development.</p>
@@ -336,12 +336,12 @@
       {/if}
       <div class="actions">
         <RuneButton onclick={summon} {busy} disabled={busy || picked.length < 2 || !prompt.trim()}>
-          Summon {picked.length || ''} spirits
+          Create {picked.length || ''} takes
         </RuneButton>
       </div>
     </ArcanePanel>
   {:else}
-    <ArcanePanel title={seance.revealed ? 'Revealed' : 'Listen blind'} eyebrow="Séance">
+    <ArcanePanel title={seance.revealed ? 'Revealed' : 'Listen blind'} eyebrow="Compare">
       <p class="prompt">“{seance.prompt}”</p>
       <div class="takes">
         {#each seance.entries as e (e.label)}
@@ -419,27 +419,27 @@
             </li>
           {/each}
         </ol>
-        <RuneButton onclick={reveal} {busy} disabled={busy}>Reveal the spirits</RuneButton>
+        <RuneButton onclick={reveal} {busy} disabled={busy}>Reveal the models</RuneButton>
       {:else if pending}
-        <p class="note">The spirits are still arriving. Ranking opens when every take is in.</p>
+        <p class="note">Takes are still generating. Ranking opens when every take is in.</p>
       {:else if !seance.revealed && cannotCompare(seance.entries)}
         <p class="note">
           Only {finished.length} of {seance.entries.length} takes arrived, so there is nothing to rank.
-          Hold another séance with the models that answered.
+          Start another comparison with the models that answered.
         </p>
       {/if}
       {#if seance.revealed || cannotCompare(seance.entries)}
-        <RuneButton variant="ghost" onclick={again}>Hold another séance</RuneButton>
+        <RuneButton variant="ghost" onclick={again}>Start another comparison</RuneButton>
       {/if}
     </ArcanePanel>
   {/if}
 
-  <ArcanePanel title="Leaderboard" eyebrow="Every revealed séance">
+  <ArcanePanel title="Leaderboard" eyebrow="Every revealed comparison">
     {#if board.length}
       <table>
         <thead>
           <tr
-            ><th>Model</th><th>Runner</th><th>Wins</th><th>Séances</th><th>Win rate</th><th
+            ><th>Model</th><th>Runner</th><th>Wins</th><th>Rounds</th><th>Win rate</th><th
               >Mean rank</th
             ></tr
           >
@@ -455,7 +455,7 @@
         </tbody>
       </table>
     {:else}
-      <p class="note">No séance has been revealed yet.</p>
+      <p class="note">No comparison has been revealed yet.</p>
     {/if}
   </ArcanePanel>
 </div>
@@ -469,21 +469,21 @@
   }
   .intro h1 {
     font-family: var(--vbm-font-display);
-    letter-spacing: 0.15em;
+    letter-spacing: 0.04em;
     text-align: center;
     margin: 0;
   }
   .intro p {
     text-align: center;
-    color: var(--vbm-muted, #b9b0d0);
+    color: var(--vbm-muted, #a8a8b6);
     max-width: 60ch;
     margin: 0.5rem auto 0;
   }
   .error {
-    color: var(--vbm-crimson, #ff6b8a);
+    color: var(--vbm-crimson, #ff5a6e);
   }
   .note {
-    color: var(--vbm-muted, #b9b0d0);
+    color: var(--vbm-muted, #a8a8b6);
     font-size: 0.9rem;
   }
   .models {
@@ -491,12 +491,12 @@
     padding: 0;
     margin: 0 0 1rem;
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    grid-template-columns: repeat(auto-fill, minmax(min(100%, 220px), 1fr));
     gap: 0.5rem;
   }
   .models legend {
     font-family: var(--vbm-font-display);
-    letter-spacing: 0.1em;
+    letter-spacing: 0.04em;
     margin-bottom: 0.5rem;
   }
   .count {
@@ -521,7 +521,7 @@
   .model .why {
     grid-column: 2;
     font-size: 0.75rem;
-    color: var(--vbm-muted, #b9b0d0);
+    color: var(--vbm-muted, #a8a8b6);
   }
   .actions {
     margin-top: 1rem;
@@ -583,14 +583,12 @@
     from {
       opacity: 0;
       filter: blur(8px);
-      letter-spacing: 0.6em;
-      text-shadow: 0 0 24px var(--vbm-violet);
+      letter-spacing: 0.04em;
     }
     to {
       opacity: 1;
       filter: blur(0);
       letter-spacing: 0.08em;
-      text-shadow: 0 0 0 transparent;
     }
   }
   @media (prefers-reduced-motion: reduce) {

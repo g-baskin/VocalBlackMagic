@@ -16,19 +16,31 @@
   let draft = $state('');
 
   const kindGlyph: Record<string, string> = {
-    original: 'ᛟ',
-    reimagine: 'ᛉ',
-    stems: 'ᛞ',
-    voice: 'ᛗ',
-    master: 'ᛝ'
+    original: '♪',
+    reimagine: '↻',
+    stems: '≡',
+    voice: '🎤',
+    master: '◎',
+    upload: '⇪'
   };
+  const kindLabel: Record<string, string> = {
+    original: 'Original',
+    reimagine: 'Remix',
+    stems: 'Stems',
+    voice: 'Voice',
+    master: 'Master'
+  };
+  function labelFor(song: SongMeta): string {
+    if (song.kind === 'upload') return song.upload ? 'Uploaded ' + song.upload.type : 'Uploaded';
+    return kindLabel[song.kind] ?? song.kind;
+  }
   const shown = $derived((songs ?? []).filter((s) => filter === 'all' || s.favourite));
 
   async function load() {
     try {
       songs = (await api<{ songs: SongMeta[] }>('/api/studio/songs')).songs;
     } catch (e) {
-      error = e instanceof Error ? e.message : 'The library is sealed.';
+      error = e instanceof Error ? e.message : 'The library could not be loaded.';
     }
   }
   onMount(load);
@@ -52,7 +64,7 @@
     editing = null;
   }
   async function remove(song: SongMeta) {
-    if (!confirm('Banish "' + song.title + '" forever? Its audio files will be deleted.')) return;
+    if (!confirm('Delete "' + song.title + '" forever? Its audio files will be deleted.')) return;
     try {
       await api('/api/studio/songs/' + song.id, { method: 'DELETE' });
       songs = (songs ?? []).filter((s) => s.id !== song.id);
@@ -64,12 +76,12 @@
     new Date(iso).toLocaleString(undefined, { dateStyle: 'medium', timeStyle: 'short' });
 </script>
 
-<svelte:head><title>Library · The Studio · Vocal Black Magic</title></svelte:head>
+<svelte:head><title>Library · VBM Studio</title></svelte:head>
 
 <div class="page">
   <header class="page-title">
-    <h1>The Library</h1>
-    <p>Every song you have summoned, and everything derived from it.</p>
+    <h1>Library</h1>
+    <p>Every song you have created, and everything made from it.</p>
   </header>
 
   <div class="filters" role="radiogroup" aria-label="Filter songs">
@@ -93,15 +105,15 @@
     <SigilLoader label="Opening the library…" />
   {:else if songs && shown.length === 0}
     <OracleStatus tone="neutral">
-      {filter === 'favourites' ? 'No favourites yet.' : 'The library is empty.'}
-      <a href={resolve('/')}>Summon a song</a>.
+      {filter === 'favourites' ? 'No favourites yet.' : 'Your library is empty.'}
+      <a href={resolve('/')}>Create a song</a>.
     </OracleStatus>
   {:else}
     <ul class="grid">
       {#each shown as song (song.id)}
         <li>
           <ArcanePanel
-            eyebrow={kindGlyph[song.kind] + ' ' + song.kind}
+            eyebrow={(kindGlyph[song.kind] ?? '♪') + ' ' + labelFor(song)}
             glow={song.kind === 'master' ? 'ember' : song.kind === 'stems' ? 'teal' : 'violet'}
           >
             {#snippet actions()}
@@ -132,7 +144,7 @@
                 }}
               >
                 <input aria-label="New title" bind:value={draft} maxlength={120} />
-                <RuneButton type="submit">Bind</RuneButton>
+                <RuneButton type="submit">Save</RuneButton>
                 <RuneButton variant="ghost" onclick={() => (editing = null)}>Cancel</RuneButton>
               </form>
             {:else}
@@ -159,7 +171,7 @@
                   draft = song.title;
                 }}>Rename</RuneButton
               >
-              <RuneButton variant="danger" onclick={() => remove(song)}>Banish</RuneButton>
+              <RuneButton variant="danger" onclick={() => remove(song)}>Delete</RuneButton>
             </div>
           </ArcanePanel>
         </li>
@@ -182,7 +194,7 @@
     border-radius: 999px;
     padding: 0.35rem 1rem;
     font-family: var(--vbm-font-display);
-    letter-spacing: 0.1em;
+    letter-spacing: 0.04em;
     cursor: pointer;
   }
   .filters button.on {

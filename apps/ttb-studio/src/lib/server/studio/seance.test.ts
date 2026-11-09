@@ -298,8 +298,8 @@ describe('ids', () => {
   test('traversal-shaped ids are not found and touch nothing', async () => {
     const f = fakeDeps();
     for (const id of ['../../etc/passwd', '..', 'a/b', '%2e%2e', ''])
-      await expect(getSeance(f.deps, id)).rejects.toThrow('Séance not found.');
-    await expect(rankSeance(f.deps, '../x', ['A', 'B'])).rejects.toThrow('Séance not found.');
+      await expect(getSeance(f.deps, id)).rejects.toThrow('Comparison not found.');
+    await expect(rankSeance(f.deps, '../x', ['A', 'B'])).rejects.toThrow('Comparison not found.');
     expect(await readdir(root)).toEqual([]);
   });
 });

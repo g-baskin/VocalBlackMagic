@@ -5,9 +5,9 @@
 .page {
   width: min(1180px, 100%);
   margin: 0 auto;
-  padding: 0 1rem 4rem;
+  padding: 0 0 3rem;
   display: grid;
-  gap: 1.5rem;
+  gap: 1.25rem;
 }
 .page-title {
   text-align: center;
@@ -15,21 +15,15 @@
 }
 .page-title h1 {
   margin: 0;
-  font-size: clamp(2rem, 6vw, 3.6rem);
-  letter-spacing: 0.18em;
+  font-size: clamp(1.75rem, 6vw, 2.75rem);
+  font-weight: 800;
+  letter-spacing: -0.03em;
 }
 .page-title p {
   margin: 0.4rem auto 0;
   max-width: 40rem;
-  opacity: 0.78;
-  font-style: italic;
+  color: var(--vbm-muted);
 }
 .page > * {
   min-width: 0;
-}
-@media (max-width: 600px) {
-  .page-title h1 {
-    font-size: 1.9rem;
-    letter-spacing: 0.08em;
-  }
 }

@@ -54,7 +54,7 @@ export const presets: Record<PresetId, Preset> = {
   ethereal: {
     id: 'ethereal',
     name: 'Ethereal Air',
-    description: 'Lifted air band and a faint ghostly tail for a floating vocal.',
+    description: 'Lifted air band and a soft airy tail for a floating vocal.',
     highpass_hz: 120,
     denoise_nr: 12,
     deess: 0.6,

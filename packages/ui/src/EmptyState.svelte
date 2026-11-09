@@ -1,10 +1,18 @@
 <script lang="ts">
-  import Sigil from './Sigil.svelte';
-  let { message = 'awaiting sound' }: { message?: string } = $props();
+  let { message = 'No audio yet' }: { message?: string } = $props();
 </script>
 
 <div class="empty">
-  <Sigil size={44} dim />
+  <svg width="28" height="28" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+    <path
+      d="M9 18V5l12-2v13M9 18a3 3 0 1 1-6 0 3 3 0 0 1 6 0Zm12-2a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z"
+      fill="none"
+      stroke="currentColor"
+      stroke-width="1.8"
+      stroke-linecap="round"
+      stroke-linejoin="round"
+    />
+  </svg>
   <span>{message}</span>
 </div>
 
@@ -15,12 +23,10 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    gap: 0.8rem;
+    gap: 0.6rem;
     color: var(--vbm-faint);
-    font-family: var(--vbm-font-mono);
-    font-size: 0.75rem;
-    letter-spacing: 0.3em;
-    text-transform: uppercase;
+    font-size: 0.9rem;
+    font-weight: 500;
     pointer-events: none;
   }
 </style>

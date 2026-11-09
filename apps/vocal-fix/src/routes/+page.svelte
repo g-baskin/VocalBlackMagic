@@ -1,4 +1,6 @@
 <script lang="ts">
+  import { onMount } from 'svelte';
+  import { page } from '$app/state';
   import { goto } from '$app/navigation';
   import { resolve } from '$app/paths';
   import ArcaneInput from '@vbm/ui/ArcaneInput.svelte';
@@ -10,6 +12,8 @@
   import RuneRecorder from '@vbm/ui/RuneRecorder.svelte';
   import RuneToggle from '@vbm/ui/RuneToggle.svelte';
   import { api, type SessionView } from '../lib/client';
+  import { loadStudioSong } from '../lib/client/studio-import';
+  import type { StudioImportSource } from '../lib/studio-import';
 
   type Mode = 'fix' | 'forge';
   let mode = $state<Mode>('fix');
@@ -21,12 +25,51 @@
   let error = $state('');
   let stage = $state<'upload' | 'probe' | 'diagnose' | null>(null);
 
+  let importSource = $state<StudioImportSource | null>(null);
+  let importedFile = $state<File | null>(null);
+  let importBusy = $state(false);
+  let importError = $state('');
+  let importController: AbortController | null = null;
+  const importId = $derived(page.url.searchParams.get('studioSong'));
+
+  async function importSong() {
+    if (!importId || importBusy || importedFile) return;
+    importBusy = true;
+    importError = '';
+    importController = new AbortController();
+    try {
+      const signal = AbortSignal.any([importController.signal, AbortSignal.timeout(60_000)]);
+      const result = await loadStudioSong(importId, signal);
+      if (signal.aborted) return;
+      importSource = result.source;
+      importedFile = result.file;
+      // Do not overwrite a recording the person added while the download was in flight.
+      dropped = [...dropped, result.file];
+    } catch (e) {
+      if (!importController?.signal.aborted)
+        importError =
+          e instanceof Error && e.name === 'TimeoutError'
+            ? 'The song took too long to load. Try again.'
+            : e instanceof Error
+              ? e.message
+              : 'The song could not be loaded.';
+    } finally {
+      importBusy = false;
+    }
+  }
+  onMount(() => {
+    if (importId) void importSong();
+    return () => importController?.abort();
+  });
+
   const need = $derived(mode === 'fix' ? 1 : 5);
   const files = $derived([...dropped, ...recorded]);
-  const ready = $derived(files.length === need && performer.trim().length >= 2 && rights && !busy);
+  const ready = $derived(
+    files.length === need && performer.trim().length >= 2 && rights && !busy && !importBusy
+  );
   const problem = $derived(
     files.length > need
-      ? 'Too many recordings: this rite takes exactly ' + need + '.'
+      ? 'Too many recordings: this mode takes exactly ' + need + '.'
       : files.length < need
         ? need -
           files.length +
@@ -43,10 +86,10 @@
         id,
         label:
           id === 'upload'
-            ? 'Offer the recordings'
+            ? 'Upload the recordings'
             : id === 'probe'
               ? 'Probe and decode'
-              : 'Read the omens',
+              : 'Diagnose',
         state: failed
           ? ('failed' as const)
           : i < at
@@ -85,18 +128,41 @@
   }
 </script>
 
-<svelte:head><title>Vocal Fix · Vocal Black Magic</title></svelte:head>
+<svelte:head><title>Vocal Fix · VBM Studio</title></svelte:head>
 
 <section class="hero">
-  <p class="eyebrow vbm-mono">Vocal Fix · local ritual</p>
-  <h1>Mend the take. Forge the voice.</h1>
+  <p class="eyebrow vbm-mono">Vocal Fix · part of VBM Studio</p>
+  <h1>Fix your take. Build your voice.</h1>
   <p class="lede">
     Your recordings stay untouched. Every repair is a new, versioned derivative you can audition,
     compare and discard.
   </p>
 </section>
 
-<div class="portals" role="radiogroup" aria-label="Choose a rite">
+{#if importId}
+  <section class="studio-source" aria-label="Song from VBM Studio">
+    <p class="eyebrow">From VBM Studio</p>
+    <h2>{importSource?.title ?? 'Open your Studio song'}</h2>
+    {#if importBusy}
+      <p role="status">Loading a copy of your audio...</p>
+    {:else if importError}
+      <OracleStatus tone="danger">{importError}</OracleStatus>
+      <RuneButton variant="ghost" onclick={importSong}>Retry song import</RuneButton>
+    {:else if importSource}
+      <p role="status">
+        {importedFile && files.includes(importedFile)
+          ? 'Your song is ready below.'
+          : 'The imported recording was removed.'} The Studio original is unchanged.
+      </p>
+    {/if}
+    <p class="import-note">
+      This is the full song, including instruments, not an isolated vocal. Review the recording and
+      confirm your rights before starting diagnosis. Importing does not train or clone a voice.
+    </p>
+  </section>
+{/if}
+
+<div class="portals" role="radiogroup" aria-label="Choose a mode">
   <button
     type="button"
     role="radio"
@@ -105,7 +171,7 @@
     class:chosen={mode === 'fix'}
     onclick={() => pick('fix')}
   >
-    <span class="glyph" aria-hidden="true">☽</span>
+    <span class="glyph" aria-hidden="true">🎙️</span>
     <span class="portal-title">Fix a take</span>
     <span class="portal-sub"
       >One recording. Diagnose clipping, room noise and level, then repair it.</span
@@ -119,17 +185,18 @@
     class:chosen={mode === 'forge'}
     onclick={() => pick('forge')}
   >
-    <span class="glyph" aria-hidden="true">✶</span>
-    <span class="portal-title">Forge a Gold Vocal</span>
+    <span class="glyph" aria-hidden="true">★</span>
+    <span class="portal-title">Build a Gold Vocal</span>
     <span class="portal-sub"
-      >Exactly five takes of your own voice. Best phrases are chosen and bound into one reference.</span
+      >Exactly five takes of your own voice. Best phrases are chosen and combined into one
+      reference.</span
     >
   </button>
 </div>
 
 <div class="grid">
   <ArcanePanel
-    eyebrow="I · Offering"
+    eyebrow="Step 1 · Upload"
     title={mode === 'fix' ? 'Your take' : 'Your five takes'}
     glow="violet"
   >
@@ -139,17 +206,17 @@
       multiple={mode === 'forge'}
       max={need}
       hint="WAV, MP3, FLAC, M4A, OGG. Up to 10 minutes and 100 MB each."
-      disabled={busy}
+      disabled={busy || importBusy}
       bind:files={dropped}
     />
-    <div class="or vbm-mono">or record in the circle</div>
+    <div class="or vbm-mono">or record right here</div>
     <RuneRecorder bind:files={recorded} maxSeconds={600} label="Record a take" />
     <p class="count vbm-mono" aria-live="polite">
       {files.length} / {need} recordings{problem ? ' · ' + problem : ''}
     </p>
   </ArcanePanel>
 
-  <ArcanePanel eyebrow="II · Oath" title="Who is singing" glow="teal">
+  <ArcanePanel eyebrow="Step 2 · Consent" title="Who is singing" glow="teal">
     <ArcaneInput label="Performer’s full name" bind:value={performer} maxlength={120} />
     <RuneToggle
       label="I am the performer or have their permission, and I hold the rights to process these recordings."
@@ -158,7 +225,7 @@
     />
     <div class="actions">
       <RuneButton variant="summon" disabled={!ready} {busy} onclick={begin}>
-        {mode === 'fix' ? 'Begin the diagnosis' : 'Begin the forging'}
+        {mode === 'fix' ? 'Start diagnosis' : 'Build Gold Vocal'}
       </RuneButton>
     </div>
     {#if stage}
@@ -171,12 +238,34 @@
 </div>
 
 <style>
+  .studio-source {
+    margin-bottom: 1.5rem;
+    padding: 1.25rem;
+    background: #1b222c;
+    border: 1px solid #647488;
+    border-left: 3px solid #69d9ed;
+    border-radius: 16px;
+    overflow-wrap: anywhere;
+  }
+  .studio-source h2 {
+    margin: 0.3rem 0 0.75rem;
+  }
+  .studio-source .eyebrow {
+    color: #69d9ed;
+    margin-top: 0;
+  }
+  .import-note {
+    color: var(--vbm-muted);
+    font-size: 0.875rem;
+    margin-bottom: 0;
+    max-width: 75ch;
+  }
   .hero {
     margin: 1rem 0 2rem;
   }
   .eyebrow {
     color: var(--vbm-teal);
-    letter-spacing: 0.2em;
+    letter-spacing: 0.04em;
     text-transform: uppercase;
     font-size: 0.75rem;
   }
@@ -192,7 +281,7 @@
   }
   .portals {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 260px), 1fr));
     gap: 1rem;
     margin-bottom: 1.5rem;
   }
@@ -211,14 +300,7 @@
         transparent 70%
       ),
       var(--vbm-obsidian);
-    clip-path: polygon(
-      0 0,
-      calc(100% - 14px) 0,
-      100% 14px,
-      100% 100%,
-      14px 100%,
-      0 calc(100% - 14px)
-    );
+    border-radius: var(--vbm-radius-sm);
     transition:
       border-color 0.2s,
       box-shadow 0.2s;
@@ -240,26 +322,26 @@
     outline: 2px solid var(--vbm-focus);
   }
   .portal.chosen {
-    border-color: var(--vbm-gold);
-    box-shadow: var(--vbm-glow-violet);
+    border-color: var(--vbm-accent);
+    box-shadow: var(--vbm-shadow-accent);
   }
   .portal.ember.chosen {
     box-shadow: var(--vbm-glow-ember);
   }
   .glyph {
-    font-size: 2rem;
-    color: var(--vbm-gold);
+    font-size: 1.75rem;
+    color: var(--vbm-accent-2);
   }
   .portal-title {
-    font-family: var(--vbm-font-display);
-    font-size: 1.5rem;
+    font-weight: 700;
+    font-size: 1.25rem;
   }
   .portal-sub {
     color: var(--vbm-muted);
   }
   .grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 320px), 1fr));
     gap: 1.25rem;
     align-items: start;
   }
@@ -268,7 +350,7 @@
     color: var(--vbm-faint);
     margin: 0.9rem 0;
     font-size: 0.75rem;
-    letter-spacing: 0.15em;
+    letter-spacing: 0.04em;
     text-transform: uppercase;
   }
   .count {

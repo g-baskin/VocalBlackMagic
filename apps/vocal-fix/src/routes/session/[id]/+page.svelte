@@ -136,7 +136,7 @@
     deleting = true;
     try {
       await api('/api/sessions/' + id, { method: 'DELETE' });
-      location.href = '/';
+      location.href = resolve('/');
     } catch (e) {
       error = e instanceof Error ? e.message : String(e);
       deleting = false;
@@ -156,19 +156,19 @@
   const after = (v: VersionView | null) => v?.diagnosis ?? null;
 </script>
 
-<svelte:head><title>Session · Vocal Fix · Vocal Black Magic</title></svelte:head>
+<svelte:head><title>Session · Vocal Fix · VBM Studio</title></svelte:head>
 
 {#if error}
   <OracleStatus tone="danger">{error}</OracleStatus>
 {/if}
 
 {#if !session}
-  {#if !error}<SigilLoader label="Opening the session" />{/if}
+  {#if !error}<SigilLoader label="Loading session…" />{/if}
 {:else}
   <header class="head">
     <div>
       <p class="eyebrow vbm-mono">
-        {session.mode === 'fix' ? 'Fix a take' : 'Forge a Gold Vocal'} · {session.performer}
+        {session.mode === 'fix' ? 'Fix a take' : 'Build a Gold Vocal'} · {session.performer}
       </p>
       <h1>Diagnosis</h1>
     </div>
@@ -180,7 +180,7 @@
           disabled={!allRepaired}>Gold Vocal board</RuneButton
         >
         <RuneButton variant="ghost" href="./{session.id}/forge" disabled={!session.gold}
-          >Voice Forge</RuneButton
+          >Voice training</RuneButton
         >
       {/if}
       <RuneButton variant="danger" busy={deleting} onclick={destroy}>Delete session</RuneButton>
@@ -205,7 +205,7 @@
   {/if}
 
   {#if take}
-    <ArcanePanel eyebrow={take.original_name} title="What the take reveals" glow="violet">
+    <ArcanePanel eyebrow={take.original_name} title="Diagnosis" glow="violet">
       <p class="probe vbm-mono">
         {take.probe.codec} · {take.probe.sample_rate} Hz · {take.probe.channels} ch · {take.probe.duration_seconds.toFixed(
           1
@@ -243,7 +243,7 @@
       </div>
     </ArcanePanel>
 
-    <ArcanePanel eyebrow="The ritual" title="Repair" glow="ember">
+    <ArcanePanel eyebrow="Processing" title="Repair" glow="ember">
       <div class="repair-grid">
         <ArcaneSelect
           label="Polish preset"
@@ -347,7 +347,7 @@
   }
   .eyebrow {
     color: var(--vbm-teal);
-    letter-spacing: 0.16em;
+    letter-spacing: 0.04em;
     text-transform: uppercase;
     font-size: 0.75rem;
   }
@@ -358,7 +358,7 @@
   }
   h3 {
     font-size: 0.72rem;
-    letter-spacing: 0.15em;
+    letter-spacing: 0.04em;
     text-transform: uppercase;
     color: var(--vbm-muted);
     margin: 1rem 0 0.4rem;
@@ -420,12 +420,12 @@
   }
   .pair {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 280px), 1fr));
     gap: 1rem;
   }
   .repair-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 240px), 1fr));
     gap: 1rem;
   }
   .deltas {

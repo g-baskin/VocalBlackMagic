@@ -5,9 +5,9 @@
 
   let {
     markdown,
-    title = 'The Arcana',
+    title = 'How it works',
     eyebrow = 'Design diagrams',
-    lede = 'How the circle is drawn: every app, ritual and vessel of Vocal Black Magic, mapped.'
+    lede = 'How VBM Studio fits together: every app, processing step and data store, mapped.'
   }: {
     /** A markdown document containing ```mermaid blocks (docs/DESIGN.md). */
     markdown: string;
@@ -83,7 +83,7 @@
     color: var(--vbm-ember);
     font-family: var(--vbm-font-mono);
     font-size: 0.75rem;
-    letter-spacing: 0.3em;
+    letter-spacing: 0.04em;
     text-transform: uppercase;
   }
   h1 {
@@ -117,7 +117,7 @@
     text-decoration: none;
     font-family: var(--vbm-font-display);
     font-size: 0.8rem;
-    letter-spacing: 0.12em;
+    letter-spacing: 0.04em;
     text-transform: uppercase;
     border-bottom: 1px solid transparent;
   }

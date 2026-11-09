@@ -104,13 +104,11 @@
     {ondrop}
   >
     <svg class="circle" viewBox="0 0 100 100" aria-hidden="true" focusable="false">
-      <circle cx="50" cy="50" r="44" />
-      <circle cx="50" cy="50" r="34" class="dash" />
-      <polygon points="50,18 78,66 22,66" />
-      <path d="M50 38 V58 M42 50 L50 58 L58 50" />
+      <circle cx="50" cy="50" r="44" class="dash" />
+      <path d="M50 30 V62 M38 50 L50 62 L62 50 M34 70 H66" />
     </svg>
     <span class="cta" id="{inputId}-cta">
-      {over ? 'Release to offer' : 'Drop files into the circle, or choose'}
+      {over ? 'Release to upload' : 'Drop files here, or tap to choose'}
     </span>
     {#if hint}<span class="hint" id="{inputId}-hint">{hint}</span>{/if}
   </label>
@@ -118,7 +116,7 @@
     <ul class="runes" aria-label="Chosen files">
       {#each files as file, i (`${file.name}-${file.size}-${file.lastModified}-${i}`)}
         <li>
-          <span class="glyph" aria-hidden="true">ᛉ</span>
+          <span class="glyph" aria-hidden="true">♪</span>
           <span class="name" title={file.name}>{file.name}</span>
           <span class="size">{size(file.size)}</span>
           <button
@@ -145,7 +143,7 @@
   .label {
     font-family: var(--vbm-font-mono);
     font-size: 0.72rem;
-    letter-spacing: 0.22em;
+    letter-spacing: 0.04em;
     text-transform: uppercase;
     color: var(--vbm-muted);
   }
@@ -157,9 +155,9 @@
     text-align: center;
     cursor: pointer;
     background:
-      radial-gradient(circle at 50% 40%, rgb(91 43 196 / 22%), transparent 60%), var(--vbm-void);
+      radial-gradient(circle at 50% 40%, rgb(255 79 139 / 22%), transparent 60%), var(--vbm-void);
     box-shadow: inset 0 0 0 1px var(--vbm-line-bright);
-    clip-path: var(--vbm-clip);
+    border-radius: var(--vbm-radius-sm);
     transition:
       box-shadow 0.2s,
       background 0.2s;
@@ -185,7 +183,6 @@
     fill: none;
     stroke: var(--vbm-violet);
     stroke-width: 1.5;
-    filter: drop-shadow(0 0 6px rgb(167 116 255 / 55%));
   }
   .dash {
     stroke: var(--vbm-ember);
@@ -198,7 +195,7 @@
   }
   .cta {
     font-family: var(--vbm-font-display);
-    letter-spacing: 0.12em;
+    letter-spacing: 0.04em;
     font-size: 0.85rem;
     color: var(--vbm-text);
   }
@@ -220,12 +217,11 @@
     align-items: center;
     gap: 0.6rem;
     padding: 0.4rem 0.4rem 0.4rem 0.7rem;
-    background: linear-gradient(90deg, rgb(63 240 210 / 10%), transparent 80%);
+    background: linear-gradient(90deg, rgb(79 139 255 / 10%), transparent 80%);
     border-left: 2px solid var(--vbm-teal);
   }
   .glyph {
     color: var(--vbm-teal);
-    text-shadow: var(--vbm-glow-teal);
   }
   .name {
     overflow: hidden;
@@ -244,7 +240,7 @@
     cursor: pointer;
     color: var(--vbm-blood);
     background: var(--vbm-obsidian-3);
-    clip-path: polygon(50% 0, 100% 50%, 50% 100%, 0 50%);
+    border-radius: 50%;
   }
   li button:hover {
     background: rgb(255 90 110 / 25%);

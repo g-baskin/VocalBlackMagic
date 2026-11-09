@@ -8,7 +8,7 @@
 
 <header class="brandbar">
   <div class="brandname">
-    <span class="accent">VBM</span><span>Vocal Black Magic</span><span class="slash">/</span><strong
+    <span class="accent">VBM</span><span>VBM Studio</span><span class="slash">/</span><strong
       >{product}</strong
     >
   </div>
@@ -21,31 +21,31 @@
     justify-content: space-between;
     align-items: center;
     gap: 1rem;
-    padding: 1rem clamp(1.2rem, 5vw, 4.5rem);
+    padding: 1rem clamp(1rem, 5vw, 4.5rem);
     border-bottom: 1px solid var(--border);
-    font-size: 0.88rem;
+    font-size: 0.9rem;
   }
   .brandname {
     display: flex;
     align-items: center;
-    gap: 0.65rem;
+    gap: 0.6rem;
     flex-wrap: wrap;
   }
   .accent {
-    background: var(--text);
-    color: var(--bg);
-    padding: 0.28rem 0.35rem;
+    background: var(--vbm-gradient);
+    color: #1a0b12;
+    padding: 0.2rem 0.45rem;
+    border-radius: 6px;
     font-weight: 800;
-    letter-spacing: 0.1em;
-    font-size: 0.74rem;
+    font-size: 0.75rem;
   }
   .slash {
     color: var(--muted);
   }
   a {
-    color: var(--accent);
+    color: var(--vbm-blue-text);
     text-decoration: none;
-    font-weight: 700;
+    font-weight: 600;
   }
   a:hover {
     text-decoration: underline;

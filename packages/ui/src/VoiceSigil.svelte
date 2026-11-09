@@ -11,7 +11,7 @@
   let {
     buffer,
     size = 240,
-    label = 'Voice sigil'
+    label = 'Voice fingerprint'
   }: { buffer: AudioBuffer | null; size?: number; label?: string } = $props();
 
   const NOTES = ['C', 'C♯', 'D', 'D♯', 'E', 'F', 'F♯', 'G', 'G♯', 'A', 'A♯', 'B'];
@@ -72,12 +72,12 @@
     ctx.textBaseline = 'middle';
     for (let i = 0; i < 12; i++) {
       const a = spoke(i);
-      ctx.strokeStyle = 'rgba(167,116,255,0.18)';
+      ctx.strokeStyle = 'rgba(255,79,139,0.18)';
       ctx.beginPath();
       ctx.moveTo(c, c);
       ctx.lineTo(c + Math.cos(a) * rMax, c + Math.sin(a) * rMax);
       ctx.stroke();
-      ctx.fillStyle = p.voiced && i === p.top ? '#3ff0d2' : '#a99fc2';
+      ctx.fillStyle = p.voiced && i === p.top ? '#4f8bff' : '#a8a8b6';
       const lr = size * 0.47;
       ctx.fillText(NOTES[i], c + Math.cos(a) * lr, c + Math.sin(a) * lr);
     }
@@ -92,9 +92,9 @@
         ctx.lineTo(c + Math.cos(a) * r, c + Math.sin(a) * r);
       }
       ctx.closePath();
-      ctx.fillStyle = 'rgba(167,116,255,0.22)';
-      ctx.strokeStyle = '#a774ff';
-      ctx.shadowColor = '#a774ff';
+      ctx.fillStyle = 'rgba(255,79,139,0.22)';
+      ctx.strokeStyle = '#ff4f8b';
+      ctx.shadowColor = '#ff4f8b';
       ctx.shadowBlur = 10;
       ctx.lineWidth = 1.6;
       ctx.fill();
@@ -104,7 +104,7 @@
     // spectral centroid glyph: brighter voices get a wider inner hexagram
     const t = p.centroid > 0 ? Math.min(1, Math.log2(p.centroid / 100) / Math.log2(80)) : 0;
     const gr = size * (0.04 + 0.1 * Math.max(0, t));
-    ctx.strokeStyle = '#3ff0d2';
+    ctx.strokeStyle = '#4f8bff';
     ctx.lineWidth = 1.2;
     for (const off of [0, Math.PI]) {
       ctx.beginPath();
@@ -155,7 +155,7 @@
     position: relative;
     max-width: 100%;
     border-radius: 50%;
-    background: radial-gradient(circle, rgb(91 43 196 / 20%), transparent 70%);
+    background: radial-gradient(circle, rgb(255 79 139 / 20%), transparent 70%);
   }
   canvas {
     display: block;
@@ -166,7 +166,7 @@
     gap: 1rem;
     font-family: var(--vbm-font-mono);
     font-size: 0.72rem;
-    letter-spacing: 0.15em;
+    letter-spacing: 0.04em;
     color: var(--vbm-muted);
   }
 </style>
