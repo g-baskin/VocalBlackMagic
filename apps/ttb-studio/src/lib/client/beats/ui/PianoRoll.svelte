@@ -105,7 +105,7 @@
   function down(e: PointerEvent) {
     if (e.button !== 0 && e.button !== 2) return;
     e.preventDefault();
-    grid.focus();
+    grid.focus({ preventScroll: true });
     grid.setPointerCapture(e.pointerId);
     const p = point(e);
     if (e.button === 2 || tool === 'erase') {

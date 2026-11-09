@@ -1,5 +1,7 @@
 <script lang="ts">
-  import { onDestroy, onMount } from 'svelte';
+  import { onDestroy, onMount, untrack } from 'svelte';
+  import { goto } from '$app/navigation';
+  import { resolve } from '$app/paths';
   import {
     barTicks,
     beatLimits,
@@ -11,6 +13,7 @@
     patternTicks,
     ppq,
     stepTicks,
+    type BeatNote,
     type BeatProject,
     type BeatProjectSummary,
     type InstrumentKind,
@@ -20,10 +23,23 @@
   import { api } from '../../lib/client/api';
   import { BeatEngine } from '../../lib/client/beats/engine';
   import type { BeatVoice } from '../../lib/client/beats/instruments';
+  import { exportMidi, importMidi } from '../../lib/client/beats/midi-file';
+  import { Recorder } from '../../lib/client/beats/record';
+  import type { PlayMode } from '../../lib/client/beats/schedule';
   import { renderBeat, saveFile } from '../../lib/client/beats/render';
+  import {
+    beatTitle,
+    createPrefillKey,
+    loopedForSend,
+    minSendSeconds,
+    uploadBeat,
+    type CreatePrefill
+  } from '../../lib/client/beats/send';
   import { Transport } from '../../lib/client/beats/transport';
   import ChannelRack from '../../lib/client/beats/ui/ChannelRack.svelte';
   import ChannelSettings from '../../lib/client/beats/ui/ChannelSettings.svelte';
+  import Mixer from '../../lib/client/beats/ui/Mixer.svelte';
+  import Playlist from '../../lib/client/beats/ui/Playlist.svelte';
   import PianoRoll from '../../lib/client/beats/ui/PianoRoll.svelte';
   import TransportBar from '../../lib/client/beats/ui/TransportBar.svelte';
   import { History } from '../../lib/client/sampler/history';
@@ -45,6 +61,14 @@
   let playing = $state(false);
   let playTick = $state<number | null>(null);
   let metronome = $state(false);
+  let mode = $state<PlayMode>('pattern');
+  let recording = $state(false);
+  let recQuantise = $state(1);
+  let showPlaylist = $state(true);
+  let showMixer = $state(false);
+  let levels = $state<Record<string, number>>({});
+  let masterLevel = $state(0);
+  let meterFrame = 0;
   let octave = $state(5);
   let showRack = $state(true);
   let showRoll = $state(true);
@@ -139,6 +163,36 @@
     if (transport) transport.metronome = metronome;
   });
   $effect(() => {
+    // Switching Pattern/Song while playing restarts in the new mode.
+    const next = mode;
+    untrack(() => {
+      if (transport?.playing && transport.mode !== next) {
+        closeTake();
+        transport.play(next, patternId);
+      }
+    });
+  });
+  $effect(() => {
+    // Meters run only while the mixer is open and the audio has started.
+    if (!showMixer) return;
+    const tick = () => {
+      if (engine) {
+        const next: Record<string, number> = {};
+        for (const c of latest?.channels ?? []) next[c.id] = engine.mixer.level(c.id);
+        levels = next;
+        masterLevel = engine.mixer.masterLevel();
+      }
+      meterFrame = requestAnimationFrame(tick);
+    };
+    meterFrame = requestAnimationFrame(tick);
+    return () => {
+      cancelAnimationFrame(meterFrame);
+      meterFrame = 0;
+      levels = {};
+      masterLevel = 0;
+    };
+  });
+  $effect(() => {
     // Decode sampler sounds as they are chosen.
     void project.channels.map((c) => (c.instrument.kind === 'sampler' ? c.instrument.sound_id : 0));
     if (engine) void loadSounds();
@@ -168,11 +222,16 @@
     const e = ensureEngine();
     await e.resume();
     await loadSounds();
-    transport!.play('pattern', patternId);
+    if (mode === 'song' && !project.playlist.clips.length) {
+      error = 'The playlist is empty. Place a pattern on it, or switch to Pattern mode.';
+      return;
+    }
+    transport!.play(mode, patternId);
     playing = true;
     follow();
   }
   function stop() {
+    closeTake();
     transport?.stop();
     playing = false;
     playTick = null;
@@ -187,6 +246,54 @@
     };
     frame = requestAnimationFrame(tick);
   }
+
+  /* ---- Recording live notes into the current pattern ---- */
+  let recorder: Recorder | null = null;
+  let takeStarted = false;
+  // eslint-disable-next-line svelte/prefer-svelte-reactivity
+  const recTargets = new Map<string, { channel: string; pattern: string }>();
+  const recTick = () => transport?.position()?.loop ?? 0;
+  function recordOn(id: string, key: number, velocity: number) {
+    if (!recording || !playing || mode !== 'pattern' || !channelId) return;
+    recorder ??= new Recorder(patternTicks(pattern), recQuantise);
+    recorder.noteOn(id, key, velocity, recTick());
+    recTargets.set(id, { channel: channelId, pattern: pattern.id });
+  }
+  function recordOff(id: string) {
+    const target = recTargets.get(id);
+    recTargets.delete(id);
+    const note = recorder?.noteOff(id, recTick());
+    if (note && target) commit(note, target);
+  }
+  function commit(note: BeatNote, target: { channel: string; pattern: string }) {
+    const p = project.patterns.find((x) => x.id === target.pattern);
+    if (!p || !project.channels.some((c) => c.id === target.channel)) return;
+    if (note.start >= patternTicks(p)) return;
+    // One undo step per take.
+    if (!takeStarted) {
+      remember();
+      takeStarted = true;
+    }
+    p.notes[target.channel] = [...(p.notes[target.channel] ?? []), note];
+  }
+  function closeTake() {
+    if (recorder) {
+      for (const { id, note } of recorder.flush(recTick())) {
+        const target = recTargets.get(id);
+        if (target) commit(note, target);
+      }
+    }
+    recorder = null;
+    recTargets.clear();
+    takeStarted = false;
+  }
+  $effect(() => {
+    // A new pattern, grid or arming starts a fresh take.
+    void patternId;
+    void recQuantise;
+    void recording;
+    untrack(closeTake);
+  });
 
   /* ---- Live notes from the keyboard and MIDI ---- */
   // Plain collections: held voices are never rendered.
@@ -203,10 +310,12 @@
     if (!down.has(id) || !channelId) return;
     const voice = e.noteOn(channelId, key, velocity);
     if (voice) held.set(id, voice);
+    recordOn(id, key, velocity);
     lit = channelId;
   }
   function liveOff(id: string) {
     down.delete(id);
+    recordOff(id);
     const voice = held.get(id);
     if (voice && engine) engine.noteOff(voice);
     held.delete(id);
@@ -480,11 +589,124 @@
     try {
       const e = ensureEngine();
       await loadSounds();
-      const blob = await renderBeat(current(), 'pattern', patternId, e.buffers);
-      saveFile(blob, project.name + ' - ' + pattern.name + '.wav');
-      say('Exported ' + pattern.name + ' as WAV.');
+      const blob = await renderBeat(current(), mode, patternId, e.buffers);
+      const what = mode === 'song' ? 'Song' : pattern.name;
+      saveFile(blob, project.name + ' - ' + what + '.wav');
+      say('Exported ' + what + ' as WAV.');
     } catch (e) {
       fail(e, 'Export failed.');
+    } finally {
+      busy = false;
+    }
+  }
+
+  async function sendToCreate() {
+    const what = mode === 'song' ? '' : pattern.name + ', looped';
+    const title = beatTitle(project.name, what);
+    if (
+      !confirm(
+        'Add "' +
+          title +
+          '" to your Library and open Create with it as the music reference?\n\n' +
+          'By continuing you confirm: I made this or have the rights to use it ' +
+          "(sampler sounds sliced from library songs keep those songs' licences)."
+      )
+    )
+      return;
+    busy = true;
+    try {
+      if (dirty) {
+        // Leaving the page would lose unsaved edits, so save first.
+        await save();
+        if (dirty) return;
+      }
+      const e = ensureEngine();
+      await loadSounds();
+      // One pattern is a bar or two: loop it so song models get enough music to work with.
+      const looped = mode === 'pattern' ? loopedForSend(current(), patternId) : null;
+      status = looped
+        ? 'Rendering ' +
+          pattern.name +
+          ' ×' +
+          looped.repeats +
+          ' (at least ' +
+          minSendSeconds +
+          ' s)…'
+        : 'Rendering the song…';
+      const wav = looped
+        ? await renderBeat(looped.project, 'song', patternId, e.buffers)
+        : await renderBeat(current(), mode, patternId, e.buffers);
+      status = 'Adding it to your Library…';
+      const song = await uploadBeat(wav, title);
+      const prefill: CreatePrefill = {
+        title: project.name.slice(0, 80),
+        prompt: project.bpm + ' BPM',
+        reference: song.id
+      };
+      sessionStorage.setItem(createPrefillKey, JSON.stringify(prefill));
+      stop();
+      await goto(resolve('/'));
+    } catch (e) {
+      fail(e, 'Could not send the beat to Create.');
+    } finally {
+      busy = false;
+    }
+  }
+
+  async function exportMidiFile() {
+    busy = true;
+    try {
+      const bytes = await exportMidi(current(), mode, patternId);
+      const what = mode === 'song' ? 'Song' : pattern.name;
+      saveFile(new Blob([bytes], { type: 'audio/midi' }), project.name + ' - ' + what + '.mid');
+      say('Exported ' + what + ' as MIDI.');
+    } catch (e) {
+      fail(e, 'MIDI export failed.');
+    } finally {
+      busy = false;
+    }
+  }
+
+  const maxMidiBytes = 4 * 1024 * 1024;
+  async function importMidiFile(file: File) {
+    if (file.size > maxMidiBytes) {
+      error = 'That file is over 4 MB, too large for a MIDI file this studio can open.';
+      return;
+    }
+    if (dirty && !confirm('Open ' + file.name + ' as a new project? Unsaved changes will be lost.'))
+      return;
+    busy = true;
+    try {
+      const out = await importMidi(await file.arrayBuffer(), {
+        id: crypto.randomUUID(),
+        name: file.name.replace(/\.midi?$/i, ''),
+        now: new Date().toISOString()
+      });
+      stop();
+      project = out.project;
+      stored = false;
+      savedJson = '';
+      history.clear();
+      historyVersion += 1;
+      patternId = out.project.patterns[0].id;
+      channelId = out.project.channels[0]?.id ?? '';
+      mode = out.project.patterns.length > 1 ? 'song' : 'pattern';
+      if (mode === 'song') showPlaylist = true;
+      say(
+        'Imported ' +
+          out.notes.toLocaleString('en') +
+          ' notes into ' +
+          out.project.channels.length +
+          ' channels and ' +
+          out.project.patterns.length +
+          (out.project.patterns.length === 1 ? ' pattern' : ' patterns') +
+          (out.dropped
+            ? '. ' + out.dropped + ' notes did not fit the project limits and were left out'
+            : '') +
+          '. Save to keep it.'
+      );
+    } catch (e) {
+      fail(e, 'Could not import that MIDI file.');
     } finally {
       busy = false;
     }
@@ -535,6 +757,9 @@
     bind:swing={project.swing}
     bind:masterDb={project.master_db}
     bind:metronome
+    bind:mode
+    bind:recording
+    bind:recQuantise
     bpm={project.bpm}
     {playing}
     {position}
@@ -558,6 +783,9 @@
     ondelete={deleteProject}
     onexport={exportWav}
     onmidi={toggleMidi}
+    onexportmidi={exportMidiFile}
+    onimportmidi={importMidiFile}
+    onsend={sendToCreate}
   />
 
   {#if error}<p class="msg error" role="alert">
@@ -571,6 +799,14 @@
     >
     <button class:on={showRoll} aria-pressed={showRoll} onclick={() => (showRoll = !showRoll)}
       >Piano roll</button
+    >
+    <button
+      class:on={showPlaylist}
+      aria-pressed={showPlaylist}
+      onclick={() => (showPlaylist = !showPlaylist)}>Playlist</button
+    >
+    <button class:on={showMixer} aria-pressed={showMixer} onclick={() => (showMixer = !showMixer)}
+      >Mixer</button
     >
     <span class="hint">
       {#if channel}Keys A–; and MIDI play <strong style:color={channel.colour}
@@ -589,7 +825,7 @@
         bind:patternId
         patterns={project.patterns.map((p) => ({ id: p.id, name: p.name }))}
         selectedId={channelId}
-        playStep={playing ? playStep : null}
+        playStep={playing && mode === 'pattern' ? playStep : null}
         canAddChannel={project.channels.length < beatLimits.channels}
         canAddPattern={project.patterns.length < beatLimits.patterns}
         onbegin={remember}
@@ -627,12 +863,34 @@
         colour={channel.colour}
         rootKey={channel.root_key}
         channelName={channel.name + ' · ' + pattern.name}
-        playTick={playing ? playTick : null}
+        playTick={playing && mode === 'pattern' ? playTick : null}
         resetKey={channelId + '/' + pattern.id + '/' + project.id}
         onbegin={remember}
         onaudition={audition}
       />
     </div>
+  {/if}
+
+  {#if showPlaylist}
+    <Playlist
+      bind:clips={project.playlist.clips}
+      bind:patternId
+      patterns={project.patterns}
+      playTick={playing && mode === 'song' ? playTick : null}
+      onbegin={remember}
+    />
+  {/if}
+
+  {#if showMixer}
+    <Mixer
+      bind:channels={project.channels}
+      bind:masterDb={project.master_db}
+      {levels}
+      {masterLevel}
+      selectedId={channelId}
+      onselect={(id) => (channelId = id)}
+      onbegin={remember}
+    />
   {/if}
 
   <details class="help">
@@ -660,6 +918,18 @@
       <li>
         MIDI plays the selected channel; CC 7 sets its volume and CC 10 its pan. Chrome, Edge and
         Firefox only.
+      </li>
+      <li>
+        Record: arm ●, play in Pattern mode, and keys or MIDI are written into the current pattern
+        (one undo step per take).
+      </li>
+      <li>
+        Playlist: click to place the current pattern, drag to move, right-click to erase. Song mode
+        plays it from bar 1.
+      </li>
+      <li>
+        Import .mid opens a MIDI file as a new project: drums on channel 10 become drum channels,
+        and long songs are split into 16-bar patterns.
       </li>
     </ul>
   </details>
